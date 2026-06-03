@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PS99Gems — Dice</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── DICE ROLL CINEMATIC ── */
+    #dice-cin {
+      position:fixed; inset:0; z-index:9999;
+      background:rgba(2,1,10,0.97); backdrop-filter:blur(14px) saturate(160%);
+      display:none; flex-direction:column; align-items:center; justify-content:center; gap:20px;
+    }
+    #dice-cin.open { display:flex; animation:cinOpen 0.35s ease forwards; }
+    @keyframes cinOpen { from{opacity:0} to{opacity:1} }
+    .dc-logo { font-size:1.2rem; font-weight:900; color:#fff; letter-spacing:.1em; }
+    .dc-logo span { color:#7c4de8; }
+    .dc-players { display:flex; align-items:center; gap:32px; }
+    .dc-player { display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; transition:all .5s; }
+    .dc-player.winner .dc-circle { border-color:#fbbf24; box-shadow:0 0 28px rgba(251,191,36,.5); }
+    .dc-player.loser { opacity:.3; filter:grayscale(.6); }
+    .dc-circle {
+      width:64px; height:64px; border-radius:50%;
+      border:3px solid rgba(124,77,232,.5);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.3rem; font-weight:900; color:#fff;
+      background:linear-gradient(135deg,#3b2a7a,#1e1645); transition:all .4s;
+    }
+    .dc-circle.opp { background:rgba(30,24,60,.8); border-color:rgba(255,255,255,.15); }
+    .dc-name { font-size:.82rem; font-weight:800; color:#fff; }
+    .dc-pct  { font-size:.75rem; color:var(--text-muted); }
+    .dc-vs { font-size:1rem; font-weight:900; color:rgba(255,255,255,.25); }
+
+    /* Big dice display */
+    .dc-dice-row { display:flex; align-items:center; gap:40px; }
+    .dc-die {
+      width:90px; height:90px; border-radius:18px;
+      background:linear-gradient(135deg,#1a1535,#0f0d22);
+      border:3px solid rgba(124,77,232,.35);
+      display:flex; align-items:center; justify-content:center;
+      font-size:3rem; font-weight:900; color:#fff;
+      box-shadow:0 0 30px rgba(124,77,232,.15);
+      transition:all .3s;
+    }
+    .dc-die.rolling { animation:diceRoll .1s linear infinite; border-color:rgba(251,191,36,.6); }
+    .dc-die.win-die  { border-color:#fbbf24; box-shadow:0 0 30px rgba(251,191,36,.4); }
+    .dc-die.lose-die { border-color:#ef4444; opacity:.6; }
+    @keyframes diceRoll { 0%{transform:rotate(-5deg) scale(1.05)} 50%{transform:rotate(5deg) scale(.95)} 100%{transform:rotate(-5deg) scale(1.05)} }
+    .dc-vs-die { font-size:.9rem; font-weight:900; color:rgba(255,255,255,.3); }
+
+    .dc-items-bar { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+    .dc-item-bubble {
+      width:40px; height:40px; border-radius:50%;
+      background:rgba(0,0,0,.5); border:2px solid rgba(255,255,255,.1);
+      overflow:hidden; display:flex; align-items:center; justify-content:center;
+    }
+    .dc-item-bubble img { width:100%; height:100%; object-fit:contain; }
+
+    .dc-result { font-size:2rem; font-weight:900; opacity:0; transform:scale(.5); transition:all .5s cubic-bezier(.34,1.56,.64,1); }
+    .dc-result.show { opacity:1; transform:scale(1); }
+    .dc-result.win  { color:var(--green); text-shadow:0 0 40px rgba(34,197,94,.7); }
+    .dc-result.lose { color:var(--red);   text-shadow:0 0 40px rgba(239,68,68,.7); }
+    .dc-continue {
+      opacity:0; pointer-events:none;
+      padding:16px 64px; background:linear-gradient(135deg,#7c4de8,#8b5cf6);
+      border:2px solid rgba(255,255,255,0.3); border-radius:14px;
+      color:#fff; font-size:1.1rem; font-weight:900; letter-spacing:0.08em;
+      cursor:pointer; transition:all .25s;
+      box-shadow:0 0 30px rgba(124,77,232,0.6);
+      animation:none;
+    }
+    .dc-continue.show { opacity:1; pointer-events:all; animation:continuePulse 1.4s ease-in-out infinite; }
+    .dc-continue.show:hover { transform:translateY(-3px); box-shadow:0 0 60px rgba(124,77,232,0.95); animation:none; }
+    @keyframes continuePulse {
+      0%,100%{box-shadow:0 0 30px rgba(124,77,232,0.6);transform:scale(1)}
+      50%{box-shadow:0 0 55px rgba(124,77,232,1);transform:scale(1.04)}
+    }
+    .dc-click-hint {
+      font-size:.65rem; color:rgba(255,255,255,0.3); letter-spacing:.08em;
+      opacity:0; transition:opacity .3s; margin-top:6px;
+    }
+    .dc-click-hint.show { opacity:1; }
+    .dc-seed { font-size:.6rem; color:var(--text-muted); font-family:monospace; }
+
+    /* ═══════════════════════════════════
+       DICE PAGE FULL REVAMP
+    ═══════════════════════════════════ */
+
+    /* Gold accent theme for dice */
+    :root {
+      --gold-bright: #f59e0b;
+      --gold-glow:   rgba(245,158,11,.35);
+      --gold-dim:    rgba(245,158,11,.12);
+    }
+
+    /* Topbar upgrade */
+    .topbar { background: rgba(8,6,22,.95) !important; }
+    .topbar::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+      background: linear-gradient(90deg,transparent,rgba(245,158,11,.6) 30%,rgba(245,158,11,.8) 50%,rgba(245,158,11,.6) 70%,transparent);
+      animation: goldLine 2.5s ease-in-out infinite;
+    }
+    @keyframes goldLine { 0%,100%{opacity:.5} 50%{opacity:1} }
+    .topbar-title { position:relative; }
+
+    /* Stats bar — gold theme */
+    .lobby-stats-bar {
+      background: linear-gradient(135deg,rgba(245,158,11,.1),rgba(251,191,36,.04)) !important;
+      border: 1px solid rgba(245,158,11,.22) !important;
+    }
+    .lobby-stat-val {
+      background: linear-gradient(135deg,#fff,#fde68a);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+
+    /* Create button — gold */
+    #dc-create-btn {
+      background: linear-gradient(135deg,#f59e0b,#d97706) !important;
+      color: #1c0f00 !important;
+      box-shadow: 0 0 20px rgba(245,158,11,.45) !important;
+      font-weight: 900 !important;
+    }
+    #dc-create-btn:hover {
+      background: linear-gradient(135deg,#fbbf24,#f59e0b) !important;
+      box-shadow: 0 0 36px rgba(245,158,11,.7) !important;
+      transform: translateY(-1px) !important;
+    }
+
+    /* ── MATCH ROWS ── */
+    .dc-match-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px;
+      background: linear-gradient(135deg,rgba(18,12,36,.98),rgba(13,9,26,.98));
+      border: 1px solid rgba(255,255,255,.07);
+      border-left: 3px solid rgba(245,158,11,.45);
+      border-radius: 14px; margin-bottom: 9px;
+      transition: all .22s cubic-bezier(.34,1.56,.64,1);
+      position: relative; overflow: hidden; cursor: default;
+    }
+    .dc-match-row::before {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(135deg,rgba(245,158,11,.04) 0%,transparent 60%);
+      opacity:0; transition:opacity .22s; pointer-events:none;
+    }
+    .dc-match-row:hover { border-left-color:#f59e0b; border-color:rgba(245,158,11,.45); box-shadow:0 8px 32px rgba(0,0,0,.65),0 0 24px rgba(245,158,11,.18); transform:translateY(-2px); }
+    .dc-match-row:hover::before { opacity:1; }
+
+    /* Mini dice faces */
+    .dc-mini-dice { display:flex; align-items:center; gap:5px; flex-shrink:0; }
+    .dc-die-face {
+      width:38px; height:38px; border-radius:9px;
+      background:linear-gradient(135deg,rgba(0,0,0,.5),rgba(20,15,40,.6));
+      border: 2px solid rgba(245,158,11,.25);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.25rem; font-weight:900; color:rgba(255,255,255,.2);
+      transition: all .2s; letter-spacing:0;
+    }
+    .dc-match-row:hover .dc-die-face {
+      border-color: rgba(245,158,11,.7);
+      color: #fbbf24;
+      box-shadow: 0 0 14px rgba(245,158,11,.4);
+      text-shadow: 0 0 12px rgba(245,158,11,.8);
+    }
+    .dc-mini-vs { font-size:.6rem; font-weight:900; color:rgba(255,255,255,.15); }
+
+    /* Player avatar */
+    .dc-row-av {
+      width:40px; height:40px; border-radius:50%;
+      background:linear-gradient(135deg,#f59e0b,#b45309);
+      display:flex; align-items:center; justify-content:center;
+      font-size:.9rem; font-weight:900; color:#451a03;
+      border:2px solid rgba(245,158,11,.5);
+      box-shadow: 0 0 14px rgba(245,158,11,.3);
+      flex-shrink:0;
+    }
+
+    /* Bet amount */
+    .dc-row-amount {
+      font-size: 1.05rem; font-weight:900; color:#fff;
+      display:flex; align-items:center; gap:4px;
+    }
+    .dc-row-amount-sym { color:#f59e0b; font-weight:900; }
+    .dc-row-range { font-size:.62rem; color:var(--text-muted); margin-top:2px; }
+
+    /* Win potential */
+    .dc-row-potential {
+      text-align:center; flex-shrink:0;
+    }
+    .dc-row-pot-lbl { font-size:.56rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:3px; }
+    .dc-row-pot-val {
+      font-size:.9rem; font-weight:900; color:#22c55e;
+      text-shadow:0 0 10px rgba(34,197,94,.35);
+      animation: potPulse 2.4s ease-in-out infinite;
+    }
+    @keyframes potPulse {
+      0%,100% { text-shadow:0 0 10px rgba(34,197,94,.35); }
+      50%      { text-shadow:0 0 18px rgba(34,197,94,.75),0 0 32px rgba(34,197,94,.3); }
+    }
+
+    /* Dice action buttons */
+    .dc-btn-join {
+      padding:9px 22px; border:none; border-radius:10px;
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      color:#fff; font-size:.78rem; font-weight:900;
+      cursor:pointer; transition:all .18s;
+      box-shadow:0 0 16px rgba(34,197,94,.4);
+      letter-spacing:.03em; white-space:nowrap;
+    }
+    .dc-btn-join:hover { box-shadow:0 0 28px rgba(34,197,94,.7); transform:scale(1.07) translateY(-1px); }
+    .dc-btn-view {
+      padding:9px 14px; border:1px solid rgba(255,255,255,.13);
+      border-radius:10px; background:rgba(255,255,255,.05);
+      color:var(--text-muted); font-size:.78rem; font-weight:700;
+      cursor:pointer; transition:all .18s;
+    }
+    .dc-btn-view:hover { background:rgba(255,255,255,.11); color:#fff; border-color:rgba(255,255,255,.25); }
+
+    /* Cinematic upgrades */
+    #dice-cin { background:rgba(3,1,14,0.97) !important; }
+    .dc-die {
+      width:100px !important; height:100px !important;
+      border-radius:22px !important;
+      font-size:3.5rem !important;
+      background:linear-gradient(145deg,#18103a,#0e0922) !important;
+      box-shadow: 0 0 30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07) !important;
+    }
+    .dc-die.rolling { animation:diceRoll .08s linear infinite !important; border-color:rgba(245,158,11,.7) !important; box-shadow:0 0 40px rgba(245,158,11,.3) !important; }
+    .dc-die.win-die  { border-color:#fbbf24 !important; box-shadow:0 0 50px rgba(251,191,36,.6),inset 0 0 30px rgba(251,191,36,.1) !important; color:#fbbf24 !important; text-shadow:0 0 30px rgba(251,191,36,.9) !important; }
+    .dc-die.lose-die { border-color:rgba(239,68,68,.5) !important; opacity:.5 !important; }
+    .dc-circle {
+      width:72px !important; height:72px !important;
+      font-size:1.5rem !important;
+      background:linear-gradient(135deg,#2a1a5a,#1a1040) !important;
+      border: 3px solid rgba(139,92,246,.4) !important;
+      box-shadow: 0 0 20px rgba(139,92,246,.2) !important;
+    }
+    .dc-player.winner .dc-circle { border-color:#fbbf24 !important; box-shadow:0 0 36px rgba(251,191,36,.6) !important; }
+    .dc-result { font-size:2.2rem !important; }
+    .dc-result.win  { color:#22c55e !important; text-shadow:0 0 50px rgba(34,197,94,.9),0 0 100px rgba(34,197,94,.4) !important; }
+    .dc-result.lose { color:#ef4444 !important; text-shadow:0 0 50px rgba(239,68,68,.9),0 0 100px rgba(239,68,68,.4) !important; }
+    .dc-logo span { color:#f59e0b !important; }
+
+    /* Match row entry animation */
+    @keyframes rowSlideIn {
+      from { opacity:0; transform:translateX(-10px); }
+      to   { opacity:1; transform:none; }
+    }
+
+    /* Gem denomination picker */
+    .gem-denom-wrap { display:flex; flex-direction:column; gap:0; border:1px solid rgba(245,158,11,.2); border-radius:12px; overflow:hidden; margin-bottom:10px; }
+    .gem-denom-row { display:flex; align-items:center; gap:8px; padding:9px 13px; background:rgba(245,158,11,.04); border-bottom:1px solid rgba(245,158,11,.1); }
+    .gem-denom-row:last-child { border-bottom:none; }
+    .gem-denom-icon { width:28px; height:28px; border-radius:7px; background:rgba(124,77,232,.2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .gem-denom-name { flex:1; font-size:.78rem; font-weight:800; color:#fff; }
+    .gem-denom-val { font-size:.62rem; color:var(--text-muted); }
+    .gem-qty-btn { width:24px; height:24px; border-radius:7px; border:none; cursor:pointer; font-size:1rem; font-weight:900; display:flex; align-items:center; justify-content:center; line-height:1; transition:all .15s; flex-shrink:0; }
+    .gem-qty-btn.minus { background:rgba(239,68,68,.2); color:#f87171; }
+    .gem-qty-btn.minus:hover { background:rgba(239,68,68,.38); transform:scale(1.12); }
+    .gem-qty-btn.plus  { background:rgba(34,197,94,.2);  color:#4ade80; }
+    .gem-qty-btn.plus:hover  { background:rgba(34,197,94,.38);  transform:scale(1.12); }
+    .gem-qty-count { min-width:28px; text-align:center; font-size:.88rem; font-weight:900; color:#fff; }
+    .gem-qty-sub { font-size:.62rem; font-weight:800; color:#fbbf24; min-width:52px; text-align:right; }
+    /* Gem pills in match rows */
+    .dc-gem-pill { display:inline-flex; align-items:center; gap:2px; padding:2px 7px; border-radius:20px; background:rgba(124,77,232,.16); border:1px solid rgba(124,77,232,.32); font-size:.56rem; font-weight:900; color:#a67dff; white-space:nowrap; }
+    /* New match row — player + items stacked */
+    .dc-row-player-block { display:flex; flex-direction:column; gap:5px; min-width:0; }
+    .dc-row-player-top { display:flex; align-items:center; gap:9px; }
+    .dc-row-items-bar { display:flex; gap:4px; align-items:center; flex-wrap:wrap; margin-left:2px; }
+
+    /* Stats bar gold gradient values */
+    .lobby-stat-val {
+      background:linear-gradient(135deg,#fff,#fde68a 60%) !important;
+      -webkit-background-clip:text !important; -webkit-text-fill-color:transparent !important;
+      background-clip:text !important;
+    }
+
+    /* Ambient glow behind match list */
+    #dice-match-list::before {
+      content:''; position:fixed;
+      width:400px; height:200px; border-radius:50%;
+      background:radial-gradient(ellipse,rgba(245,158,11,.05) 0%,transparent 70%);
+      pointer-events:none; z-index:0;
+      top:50%; left:50%; transform:translate(-50%,-50%);
+      animation:diceAmbient 5s ease-in-out infinite;
+    }
+    @keyframes diceAmbient {
+      0%,100%{opacity:.5} 50%{opacity:1}
+    }
+
+    /* Empty state */
+    .dc-empty {
+      text-align:center; padding:40px 20px;
+      display:flex; flex-direction:column; align-items:center; gap:14px;
+    }
+    .dc-empty-icon {
+      width:64px; height:64px; border-radius:18px;
+      background:rgba(245,158,11,.1); border:1.5px solid rgba(245,158,11,.25);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .dc-empty-title { font-size:.92rem; font-weight:900; color:#fff; }
+    .dc-empty-sub { font-size:.74rem; color:var(--text-muted); max-width:240px; line-height:1.55; }
+  </style>
+</head>
+<body class="sidebar-layout">
+
+<!-- DICE CINEMATIC -->
+<div id="dice-cin">
+  <div class="dc-logo">PS99<span>GEMS</span> — Dice</div>
+  <div class="dc-players">
+    <div class="dc-player" id="dc-you-col">
+      <div class="dc-circle" id="dc-you-av">Y</div>
+      <div class="dc-name" id="dc-you-name">You</div>
+      <div class="dc-pct" id="dc-you-bet">—</div>
+    </div>
+    <div class="dc-vs">VS</div>
+    <div class="dc-player" id="dc-opp-col">
+      <div class="dc-circle opp" id="dc-opp-av">?</div>
+      <div class="dc-name" id="dc-opp-name">???</div>
+      <div class="dc-pct" id="dc-opp-bet">—</div>
+    </div>
+  </div>
+
+  <div class="dc-items-bar" id="dc-items-bar"></div>
+
+  <div class="dc-dice-row">
+    <div class="dc-die" id="dc-die-you">?</div>
+    <div class="dc-vs-die">VS</div>
+    <div class="dc-die" id="dc-die-opp">?</div>
+  </div>
+
+  <div class="dc-seed" id="dc-seed">#loading...</div>
+  <div class="dc-result" id="dc-result"></div>
+  <button class="dc-continue" id="dc-continue" onclick="closeDiceCin()">CONTINUE</button>
+  <div class="dc-click-hint" id="dc-click-hint">Click anywhere to close</div>
+</div>
+
+<!-- CREATE DICE MODAL -->
+<div class="join-overlay" id="dice-create-modal" style="z-index:9900;display:none;">
+  <div class="join-box" style="width:min(460px,94vw);max-height:90vh;overflow-y:auto;">
+    <div class="join-title">Create Dice Match <button class="join-close" onclick="closeDiceCreate()">&times;</button></div>
+
+    <!-- Pet inventory items -->
+    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:7px;">Pet Items to Wager</div>
+    <div id="dc-create-inv" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:7px;max-height:160px;overflow-y:auto;margin-bottom:6px;"></div>
+    <div style="font-size:.62rem;color:var(--text-muted);margin-bottom:12px;" id="dc-create-hint">No items deposited — add gems below.</div>
+
+    <!-- Gem denominations -->
+    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:7px;">Gem Denominations</div>
+    <div class="gem-denom-wrap">
+      <div class="gem-denom-row">
+        <div class="gem-denom-icon"><svg viewBox="0 0 20 20" fill="none" width="15" height="15"><polygon points="10,2 18,7 15,18 5,18 2,7" fill="#7c4de8"/><polygon points="10,6 14,10 10,14 6,10" fill="white" opacity=".9"/></svg></div>
+        <div class="gem-denom-name">100M Gems</div>
+        <div class="gem-denom-val">₿100,000,000 each</div>
+        <button class="gem-qty-btn minus" onclick="dcGemChange('h',-1)">−</button>
+        <span class="gem-qty-count" id="dc-gem-h-count">0</span>
+        <button class="gem-qty-btn plus"  onclick="dcGemChange('h', 1)">+</button>
+        <span class="gem-qty-sub" id="dc-gem-h-total">₿0</span>
+      </div>
+      <div class="gem-denom-row">
+        <div class="gem-denom-icon" style="background:rgba(6,182,212,.18);"><svg viewBox="0 0 20 20" fill="none" width="15" height="15"><polygon points="10,2 18,7 15,18 5,18 2,7" fill="#06b6d4"/><polygon points="10,6 14,10 10,14 6,10" fill="white" opacity=".9"/></svg></div>
+        <div class="gem-denom-name">10M Gems</div>
+        <div class="gem-denom-val">₿10,000,000 each</div>
+        <button class="gem-qty-btn minus" onclick="dcGemChange('t',-1)">−</button>
+        <span class="gem-qty-count" id="dc-gem-t-count">0</span>
+        <button class="gem-qty-btn plus"  onclick="dcGemChange('t', 1)">+</button>
+        <span class="gem-qty-sub" id="dc-gem-t-total">₿0</span>
+      </div>
+      <div class="gem-denom-row">
+        <div class="gem-denom-icon" style="background:rgba(34,197,94,.15);"><svg viewBox="0 0 20 20" fill="none" width="15" height="15"><polygon points="10,2 18,7 15,18 5,18 2,7" fill="#22c55e"/><polygon points="10,6 14,10 10,14 6,10" fill="white" opacity=".9"/></svg></div>
+        <div class="gem-denom-name">1M Gems</div>
+        <div class="gem-denom-val">₿1,000,000 each</div>
+        <button class="gem-qty-btn minus" onclick="dcGemChange('o',-1)">−</button>
+        <span class="gem-qty-count" id="dc-gem-o-count">0</span>
+        <button class="gem-qty-btn plus"  onclick="dcGemChange('o', 1)">+</button>
+        <span class="gem-qty-sub" id="dc-gem-o-total">₿0</span>
+      </div>
+    </div>
+
+    <!-- Extra raw amount -->
+    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:7px;">Or add extra (₿)</div>
+    <div class="join-input-wrap" style="margin-bottom:6px;">
+      <span style="font-weight:900;color:#f59e0b;font-size:1rem;">₿</span>
+      <input type="number" id="dc-create-amt" value="0" min="0" style="flex:1;background:none;border:none;outline:none;color:var(--text);font-size:1rem;font-weight:700;" oninput="dcUpdateCreateTotal()">
+    </div>
+    <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;">
+      <button onclick="dcSetBet(1000000)"   style="flex:1;padding:5px;background:rgba(124,77,232,.12);border:1px solid var(--border-p);border-radius:7px;color:var(--purple-b);font-size:.7rem;font-weight:700;cursor:pointer;">1M</button>
+      <button onclick="dcSetBet(5000000)"   style="flex:1;padding:5px;background:rgba(124,77,232,.12);border:1px solid var(--border-p);border-radius:7px;color:var(--purple-b);font-size:.7rem;font-weight:700;cursor:pointer;">5M</button>
+      <button onclick="dcSetBet(25000000)"  style="flex:1;padding:5px;background:rgba(124,77,232,.12);border:1px solid var(--border-p);border-radius:7px;color:var(--purple-b);font-size:.7rem;font-weight:700;cursor:pointer;">25M</button>
+      <button onclick="dcSetBet(100000000)" style="flex:1;padding:5px;background:rgba(124,77,232,.12);border:1px solid var(--border-p);border-radius:7px;color:var(--purple-b);font-size:.7rem;font-weight:700;cursor:pointer;">100M</button>
+      <button onclick="document.getElementById('dc-create-amt').value=getBalance();dcUpdateCreateTotal()" style="flex:1;padding:5px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:7px;color:#fbbf24;font-size:.7rem;font-weight:700;cursor:pointer;">MAX</button>
+    </div>
+
+    <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span style="font-size:.68rem;color:var(--text-muted);font-weight:700;">Total Wager</span>
+      <span style="font-size:.95rem;font-weight:900;color:#fbbf24;" id="dc-create-total">₿0</span>
+    </div>
+    <button class="join-confirm" onclick="confirmDiceCreate()">Create Match</button>
+  </div>
+</div>
+
+<!-- JOIN DICE VIEW MODAL (redesigned) -->
+<div class="join-overlay" id="dice-join-modal" style="z-index:9900;display:none;">
+  <div style="background:linear-gradient(160deg,#130f2e,#0d0b1e);border:1px solid rgba(124,77,232,.4);border-radius:20px;width:min(440px,94vw);overflow:hidden;box-shadow:0 0 60px rgba(124,77,232,.25);">
+
+    <div style="padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:1rem;font-weight:900;color:#fff;">Join Dice Match</div>
+        <div style="font-size:.68rem;color:var(--text-muted);margin-top:2px;" id="dj-creator-info">vs Player</div>
+      </div>
+      <button onclick="closeDiceJoin()" style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:var(--text-muted);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
+    </div>
+
+    <!-- Range info row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid rgba(255,255,255,.06);">
+      <div style="padding:12px 16px;border-right:1px solid rgba(255,255,255,.06);text-align:center;">
+        <div style="font-size:.58rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Creator Bet</div>
+        <div style="font-size:.92rem;font-weight:900;color:#fbbf24;" id="dj-creator-bet">₿0</div>
+      </div>
+      <div style="padding:12px 16px;text-align:center;">
+        <div style="font-size:.58rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Acceptable Range</div>
+        <div style="font-size:.78rem;font-weight:800;color:#94a3b8;" id="dj-range">—</div>
+      </div>
+    </div>
+
+    <div style="padding:16px 20px;">
+      <!-- Wager input -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:8px;">Your Wager</div>
+        <div style="background:rgba(0,0,0,.35);border:1.5px solid rgba(124,77,232,.45);border-radius:11px;padding:11px 14px;display:flex;align-items:center;gap:9px;" id="dj-wager-wrap">
+          <span style="font-weight:900;font-size:1rem;color:#f59e0b;">₿</span>
+          <input type="number" id="dj-wager-input" style="flex:1;background:none;border:none;outline:none;color:#fff;font-size:1rem;font-weight:800;font-family:inherit;" oninput="djUpdateUI()">
+          <span style="font-size:.68rem;color:var(--text-muted);">bal: <span id="dj-bal-show" style="color:#a67dff;">₿0</span></span>
+        </div>
+        <div style="display:flex;gap:5px;margin-top:7px;">
+          <button onclick="djSetPct(.95)"  style="flex:1;padding:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:var(--text-muted);font-size:.7rem;font-weight:700;cursor:pointer;">-5%</button>
+          <button onclick="djSetPct(1)"    style="flex:1;padding:5px;background:rgba(124,77,232,.15);border:1px solid rgba(124,77,232,.35);border-radius:7px;color:#a67dff;font-size:.7rem;font-weight:800;cursor:pointer;">Match</button>
+          <button onclick="djSetPct(1.05)" style="flex:1;padding:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:var(--text-muted);font-size:.7rem;font-weight:700;cursor:pointer;">+5%</button>
+          <button onclick="djSetMax()"    style="flex:1;padding:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:var(--text-muted);font-size:.7rem;font-weight:700;cursor:pointer;">MAX</button>
+        </div>
+      </div>
+
+      <!-- Win Chance Display (prominent) -->
+      <div id="dj-odds-row" style="background:linear-gradient(135deg,rgba(0,0,0,.55),rgba(124,77,232,.09));border:1px solid rgba(124,77,232,.28);border-radius:14px;padding:14px 16px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);">Your Win Chance</div>
+          <div id="dj-odds-tag" style="font-size:.62rem;font-weight:800;padding:3px 10px;border-radius:20px;display:none;transition:all .25s;"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="flex:1;">
+            <div id="dj-odds-bar-wrap" style="height:10px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden;">
+              <div id="dj-odds-bar" style="height:100%;border-radius:5px;width:50%;background:#94a3b8;transition:width .4s cubic-bezier(.34,1.56,.64,1),background .3s,box-shadow .3s;"></div>
+            </div>
+          </div>
+          <div id="dj-odds-pct" style="font-size:1.45rem;font-weight:900;color:#94a3b8;min-width:68px;text-align:right;transition:color .3s;letter-spacing:-.02em;">49.5%</div>
+        </div>
+      </div>
+
+      <div id="dj-err" style="font-size:.72rem;text-align:center;min-height:18px;margin-bottom:8px;font-weight:700;color:#ef4444;"></div>
+
+      <button class="join-confirm" id="dj-join-btn" onclick="confirmDiceJoin()" style="font-size:.88rem;letter-spacing:.03em;">
+        Join &amp; Roll ₿—
+      </button>
+      <div style="font-size:.6rem;color:var(--text-muted);text-align:center;margin-top:8px;">Amount deducted immediately. Roll 1–10, highest wins.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OVER-BET WARNING ═══ -->
+<div id="overbid-overlay" style="position:fixed;inset:0;z-index:9950;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;">
+  <div style="background:linear-gradient(160deg,#1a1535,#0f0d22);border:2px solid rgba(239,68,68,0.55);border-radius:22px;padding:34px 30px;width:370px;max-width:95vw;box-shadow:0 0 80px rgba(239,68,68,0.15),0 30px 80px rgba(0,0,0,.8);text-align:center;">
+    <div style="font-size:2.4rem;margin-bottom:10px;">⚠️</div>
+    <div style="font-size:1.1rem;font-weight:900;color:#fff;margin-bottom:10px;letter-spacing:-.01em;">You're Over-Betting!</div>
+    <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.65;margin-bottom:24px;" id="overbid-msg"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="overbidCancel()" style="flex:1;padding:13px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--text-muted);font-size:0.88rem;font-weight:700;cursor:pointer;">Cancel</button>
+      <button onclick="overbidConfirm()" style="flex:1;padding:13px;background:linear-gradient(135deg,#ef4444,#b91c1c);border:none;border-radius:10px;color:#fff;font-size:0.88rem;font-weight:800;cursor:pointer;box-shadow:0 0 22px rgba(239,68,68,0.4);">Yes, Join Anyway</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="particle-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:99998;width:100%;height:100%;"></canvas>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a href="coinflip.html" class="logo-text">PS99 Gamble</a>
+  </div>
+  <div class="sidebar-balance">
+    <div class="bal-label">Your Balance</div>
+    <div class="bal-amount"><span style="font-weight:900;margin-right:2px;">₿</span><span data-bal>—</span></div>
+  </div>
+  <button class="btn-free" onclick="claimFree()">+ Free Balance</button>
+  <button class="btn-free" style="background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 0 16px rgba(16,185,129,0.35);margin-top:-4px;" onclick="openDepositModal()">Deposit</button>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Games</div>
+    <a href="home.html" class="nav-item">Home</a>
+    <a href="coinflip.html" class="nav-item">Coin Flip</a>
+    <a href="jackpot.html" class="nav-item">Jackpot</a>
+    <a href="dice.html" class="nav-item active">Dice</a>
+    <a href="leaderboard.html" class="nav-item">Leaderboard</a>
+    <a href="values.html" class="nav-item">Values</a>
+  </nav>
+  <div class="sidebar-footer">PS99 Fan Site — Entertainment Only</div>
+</aside>
+
+<div class="main">
+  <div class="topbar" style="position:relative;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#b45309);display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px rgba(245,158,11,.5);flex-shrink:0;">
+        <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><rect x="2" y="2" width="16" height="16" rx="3" stroke="#451a03" stroke-width="1.5"/><circle cx="6.5" cy="6.5" r="1.3" fill="#451a03"/><circle cx="13.5" cy="13.5" r="1.3" fill="#451a03"/><circle cx="13.5" cy="6.5" r="1.3" fill="#451a03"/><circle cx="6.5" cy="13.5" r="1.3" fill="#451a03"/><circle cx="10" cy="10" r="1.3" fill="#451a03"/></svg>
+      </div>
+      <div>
+        <div class="topbar-title">Dice</div>
+        <div style="font-size:.6rem;color:var(--text-muted);margin-top:1px;">Roll 1–10 · Highest wins</div>
+      </div>
+    </div>
+    <div class="topbar-right" style="gap:14px;">
+      <div style="display:flex;gap:16px;align-items:center;">
+        <div style="text-align:center;">
+          <div style="font-size:.82rem;font-weight:900;color:#fbbf24;" id="dc-live-rooms">5</div>
+          <div style="font-size:.56rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;">Rooms</div>
+        </div>
+        <div style="width:1px;height:24px;background:rgba(255,255,255,.08);"></div>
+        <div style="text-align:center;">
+          <div style="font-size:.82rem;font-weight:900;color:#22c55e;" id="dc-live-val">₿109M</div>
+          <div style="font-size:.56rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;">Value</div>
+        </div>
+      </div>
+      <div class="online-badge"><div class="online-dot"></div><span id="online-count">847</span> online</div>
+    </div>
+  </div>
+
+  <div class="content" style="padding:0;display:flex;gap:0;height:100%;overflow:hidden;">
+    <div class="chat-panel" style="border-left:none;border-right:1px solid var(--border);">
+      <div class="chat-header">
+        <div class="chat-title"><div class="chat-online-dot"></div>Live Chat</div>
+        <div class="chat-count" id="chat-count">0 online</div>
+      </div>
+      <div class="chat-msgs" id="chat-msgs"></div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" placeholder="Say something..." maxlength="120">
+        <button class="chat-send" id="chat-send">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="10" x2="17" y2="10"/><polyline points="12,5 17,10 12,15"/></svg>
+        </button>
+      </div>
+    </div>
+    <div style="flex:1;min-width:0;display:flex;padding:14px;gap:12px;overflow:hidden;">
+      <div class="card" style="flex:1;margin:0;min-width:0;overflow-y:auto;">
+
+        <!-- Lobby stats bar -->
+        <div id="dice-stats-bar" class="lobby-stats-bar"></div>
+        <div class="lobby-actions-bar">
+          <button class="lobby-create-btn active" id="dc-create-btn" onclick="openDiceCreate()">+ Create</button>
+          <button class="lobby-hist-btn" id="dc-hist-btn" onclick="diceTabSwitch('history')">History</button>
+          <div class="lobby-spacer"></div>
+          <button class="lobby-sort-btn">Highest to Lowest <span style="font-size:.65rem;">▾</span></button>
+        </div>
+
+        <!-- Active matches list -->
+        <div id="dice-match-list"></div>
+        <!-- History -->
+        <div id="dice-hist-panel" style="display:none;padding:4px 0;"></div>
+
+        <!-- How Dice Works -->
+        <div style="border-top:1px solid rgba(255,255,255,.06);margin-top:12px;padding-top:14px;">
+          <div style="font-size:.62rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;">How Dice Works</div>
+          <div style="display:flex;gap:6px;">
+            <div style="flex:1;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22);border-radius:12px;padding:12px 8px;text-align:center;">
+              <div style="width:30px;height:30px;margin:0 auto 7px;background:rgba(245,158,11,.18);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <svg viewBox="0 0 20 20" fill="none" stroke="#f59e0b" stroke-width="1.8" width="16" height="16"><rect x="2" y="2" width="16" height="16" rx="3"/><circle cx="10" cy="10" r="1.2" fill="#f59e0b"/></svg>
+              </div>
+              <div style="font-size:.7rem;font-weight:900;color:#fde68a;margin-bottom:3px;">Create</div>
+              <div style="font-size:.6rem;color:var(--text-muted);line-height:1.45;">Set a wager and open your match</div>
+            </div>
+            <div style="flex:1;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.22);border-radius:12px;padding:12px 8px;text-align:center;">
+              <div style="width:30px;height:30px;margin:0 auto 7px;background:rgba(59,130,246,.18);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <svg viewBox="0 0 20 20" fill="none" stroke="#60a5fa" stroke-width="1.8" width="16" height="16"><path d="M3 10h14M10 3l7 7-7 7"/></svg>
+              </div>
+              <div style="font-size:.7rem;font-weight:900;color:#93c5fd;margin-bottom:3px;">Join</div>
+              <div style="font-size:.6rem;color:var(--text-muted);line-height:1.45;">Match a player's bet to compete</div>
+            </div>
+            <div style="flex:1;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22);border-radius:12px;padding:12px 8px;text-align:center;">
+              <div style="width:30px;height:30px;margin:0 auto 7px;background:rgba(34,197,94,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <svg viewBox="0 0 20 20" fill="none" stroke="#22c55e" stroke-width="1.8" width="16" height="16"><path d="M6 9H4.5a2.5 2.5 0 0 0 0 5H6M18 9h-1.5a2.5 2.5 0 0 1 0 5H14M18 2H6v6a4 4 0 0 0 8 0V2"/></svg>
+              </div>
+              <div style="font-size:.7rem;font-weight:900;color:#86efac;margin-bottom:3px;">Win</div>
+              <div style="font-size:.6rem;color:var(--text-muted);line-height:1.45;">Higher roll takes 98.5% of the pot</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /card -->
+
+      <!-- RIGHT PANEL (fixed 264px, second flex item) -->
+      <div style="width:264px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto;">
+
+        <div class="card" style="margin:0;flex-shrink:0;">
+          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Recent Rolls</span>
+            <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 7px #22c55e;display:inline-block;animation:blink 2s infinite;"></span>
+          </div>
+          <div id="dc-recent-rolls" style="display:flex;flex-direction:column;gap:0;"></div>
+        </div>
+
+        <div class="card" style="margin:0;flex-shrink:0;">
+          <div class="card-title">Top Dice Players</div>
+          <div id="dc-top-players" style="display:flex;flex-direction:column;gap:5px;"></div>
+        </div>
+
+        <div class="card" style="margin:0;flex-shrink:0;">
+          <div class="card-title">Wagered Pets</div>
+          <div id="dc-wager-pets" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
+        </div>
+
+        <div class="card" style="margin:0;flex-shrink:0;background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(0,0,0,.3));border:1px solid rgba(245,158,11,.18);">
+          <div class="card-title" style="color:#fbbf24;">Your Session</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:4px;">
+            <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:9px 10px;text-align:center;">
+              <div style="font-size:.95rem;font-weight:900;color:#22c55e;" id="dc-sess-won">₿0</div>
+              <div style="font-size:.55rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;">Won</div>
+            </div>
+            <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:9px 10px;text-align:center;">
+              <div style="font-size:.95rem;font-weight:900;color:#f87171;" id="dc-sess-lost">₿0</div>
+              <div style="font-size:.55rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;">Lost</div>
+            </div>
+            <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:9px 10px;text-align:center;">
+              <div style="font-size:.95rem;font-weight:900;color:#fbbf24;" id="dc-sess-rolls">0</div>
+              <div style="font-size:.55rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;">Rolls</div>
+            </div>
+            <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:9px 10px;text-align:center;">
+              <div style="font-size:.95rem;font-weight:900;color:#a67dff;" id="dc-sess-wr">—</div>
+              <div style="font-size:.55rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;">Win Rate</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="live-feed">
+    <div class="feed-label">LIVE</div>
+    <div class="feed-ticker" id="feed-ticker"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+  refreshBal();
+
+  // Ensure modals are hidden until explicitly opened
+  ['dice-create-modal','dice-join-modal','dice-cin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.display = ''; el.classList.remove('open'); }
+  });
+
+  // Local pet picker (CV is loaded from app.js)
+  function randomOpponentPet() {
+    if (typeof CV === 'undefined' || !CV.length) return null;
+    const pool = CV.filter(p => p.img && (p.tier === 'Titanic' || p.tier === 'Huge'));
+    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : CV[Math.floor(Math.random()*CV.length)];
+  }
+
+  const DICE_BOT_NAMES = ['xR4Zy','NovaPro','GemLord','TitanicX','Sk1yRdr','HugeGang','PurpleKing','CrystalFly'];
+  const DICE_MATCHES = [
+    { player:'GemLord',   amount:4000000 },
+    { player:'TitanicX',  amount:20000000 },
+    { player:'NovaPro',   amount:8000000 },
+    { player:'Sk1yRdr',   amount:75000000 },
+    { player:'LegacyPS',  amount:1500000 },
+  ];
+
+  // ── Lobby stats ──
+  function updateDiceStats() {
+    const total = DICE_MATCHES.reduce((s,g)=>s+g.amount,0);
+    const el = document.getElementById('dice-stats-bar');
+    if (el) el.innerHTML = `
+      <div class="lobby-stat"><div class="lobby-stat-val">${DICE_MATCHES.length}</div><div class="lobby-stat-lbl">Open Rooms</div></div>
+      <div class="lobby-stat"><div class="lobby-stat-val">₿${fmtPSG(total)}</div><div class="lobby-stat-lbl">Total Value</div></div>
+      <div class="lobby-stat"><div class="lobby-stat-val">${DICE_MATCHES.length*2}</div><div class="lobby-stat-lbl">Players</div></div>`;
+    // Update topbar live stats
+    const lr = document.getElementById('dc-live-rooms');
+    const lv = document.getElementById('dc-live-val');
+    if (lr) lr.textContent = DICE_MATCHES.length;
+    if (lv) lv.textContent = '₿' + fmtPSG(total);
+  }
+
+  // ── Item bubbles ──
+  function buildItemBubbles(pets, max) {
+    max = max || 4;
+    const show = pets.slice(0, max), extra = pets.length - show.length;
+    let h = '<div class="item-bubbles">';
+    show.forEach(p => {
+      const src = p && p.img ? `https://assetdelivery.roblox.com/v1/asset/?id=${p.img}` : '';
+      h += `<div class="item-bubble"><img src="${src}" alt="" loading="lazy" onerror="this.style.opacity='.25'"></div>`;
+    });
+    if (extra > 0) h += `<div class="item-bubble item-bubble-count">+${extra}</div>`;
+    h += '</div>';
+    return h;
+  }
+
+  // ── Build match list (revamped) ──
+  const DICE_FACE_NUMS = ['⚀','⚁','⚂','⚃','⚄','⚅']; // dice Unicode faces
+  function randDiceFace() { return DICE_FACE_NUMS[Math.floor(Math.random()*6)]; }
+
+  // ── GEM DENOMINATIONS ──
+  const GEM_DENOM_VALS = { h: 100000000, t: 10000000, o: 1000000 };
+  let _dcGems = { h: 0, t: 0, o: 0 };
+
+  function dcGemTotal() {
+    return Object.keys(_dcGems).reduce((s, k) => s + _dcGems[k] * GEM_DENOM_VALS[k], 0);
+  }
+  function dcGemChange(key, delta) {
+    _dcGems[key] = Math.max(0, _dcGems[key] + delta);
+    const inv = getInventory();
+    const itemsTotal = [..._dcCreateSelInv].reduce((s,i) => s+(inv[i]?.value||0), 0);
+    const raw = parseInt(document.getElementById('dc-create-amt')?.value||0)||0;
+    const labels = { h:'100M', t:'10M', o:'1M' };
+    Object.keys(_dcGems).forEach(k => {
+      const el = document.getElementById('dc-gem-'+k+'-count');
+      const tot = document.getElementById('dc-gem-'+k+'-total');
+      if (el) el.textContent = _dcGems[k];
+      if (tot) tot.textContent = _dcGems[k] > 0 ? '₿' + fmtPSG(_dcGems[k] * GEM_DENOM_VALS[k]) : '₿0';
+    });
+    dcUpdateCreateTotal();
+  }
+  function gemBreakdown(amount) {
+    const h = Math.floor(amount / 100e6);
+    const t = Math.floor((amount % 100e6) / 10e6);
+    const o = Math.floor((amount % 10e6) / 1e6);
+    return { h, t, o };
+  }
+
+  let _diceSortAsc = false;
+
+  function buildDiceList() {
+    updateDiceStats();
+    const list = document.getElementById('dice-match-list');
+    list.innerHTML = '';
+
+    // Sort matches highest→lowest (or flipped)
+    DICE_MATCHES.sort((a, b) => _diceSortAsc ? a.amount - b.amount : b.amount - a.amount);
+
+    if (!DICE_MATCHES.length) {
+      list.innerHTML = `<div class="dc-empty">
+        <div class="dc-empty-icon"><svg viewBox="0 0 20 20" fill="none" stroke="#f59e0b" stroke-width="1.8" width="32" height="32"><rect x="2" y="2" width="16" height="16" rx="3"/><circle cx="6.5" cy="6.5" r="1.2" fill="#f59e0b"/><circle cx="13.5" cy="13.5" r="1.2" fill="#f59e0b"/><circle cx="13.5" cy="6.5" r="1.2" fill="#f59e0b"/><circle cx="6.5" cy="13.5" r="1.2" fill="#f59e0b"/><circle cx="10" cy="10" r="1.2" fill="#f59e0b"/></svg></div>
+        <div class="dc-empty-title">No matches open</div>
+        <div class="dc-empty-sub">Create a dice match to start rolling. Highest roll from 1–10 wins!</div>
+        <button onclick="openDiceCreate()" style="padding:10px 24px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:10px;color:#451a03;font-size:.82rem;font-weight:900;cursor:pointer;box-shadow:0 0 18px rgba(245,158,11,.4);">+ Create Match</button>
+      </div>`;
+      return;
+    }
+
+    DICE_MATCHES.forEach((g, idx) => {
+      // Assign pets once and keep them stable across rebuilds
+      if (!g.pets) g.pets = [randomOpponentPet(), randomOpponentPet()].filter(Boolean);
+      const pets = g.pets;
+      const min = Math.floor(g.amount * 0.95), max = Math.ceil(g.amount * 1.05);
+      const potWin = Math.floor(g.amount * 2 * 0.985);
+      const face1 = randDiceFace(), face2 = randDiceFace();
+
+      const row = document.createElement('div');
+      row.className = 'dc-match-row';
+      row.style.animation = `rowSlideIn .32s ease ${idx * 0.07}s both`;
+
+      // Build items bar: pets + gem denomination pills
+      let itemsBarHtml = '';
+      pets.slice(0,2).forEach(p => {
+        itemsBarHtml += `<div style="width:26px;height:26px;border-radius:7px;border:1.5px solid rgba(255,255,255,.12);background:rgba(0,0,0,.4);overflow:hidden;flex-shrink:0;"><img src="https://assetdelivery.roblox.com/v1/asset/?id=${p.img}" loading="lazy" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.opacity='.2'"></div>`;
+      });
+      const gb = gemBreakdown(g.amount);
+      const gemSvg = `<svg viewBox="0 0 12 12" width="9" height="9" fill="none"><polygon points="11,6 8.5,10 3.5,10 1,6 3.5,2 8.5,2" fill="#7c4de8"/><polygon points="6,3.5 8.5,6 6,8.5 3.5,6" fill="white" opacity=".9"/></svg>`;
+      if (gb.h) itemsBarHtml += `<div class="dc-gem-pill">${gemSvg}${gb.h}×100M</div>`;
+      if (gb.t) itemsBarHtml += `<div class="dc-gem-pill" style="background:rgba(6,182,212,.12);border-color:rgba(6,182,212,.3);color:#22d3ee;">${gemSvg}${gb.t}×10M</div>`;
+      if (gb.o) itemsBarHtml += `<div class="dc-gem-pill" style="background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.28);color:#4ade80;">${gemSvg}${gb.o}×1M</div>`;
+
+      row.innerHTML = `
+        <div class="dc-mini-dice">
+          <div class="dc-die-face">${face1}</div>
+          <div class="dc-mini-vs">VS</div>
+          <div class="dc-die-face">${face2}</div>
+        </div>
+
+        <div class="dc-row-player-block">
+          <div class="dc-row-player-top">
+            <div class="dc-row-av">${g.player[0].toUpperCase()}</div>
+            <div>
+              <div style="font-size:.84rem;font-weight:900;color:#fff;white-space:nowrap;">${g.player}</div>
+              <div style="font-size:.58rem;color:var(--text-muted);">Waiting for player</div>
+            </div>
+          </div>
+          <div class="dc-row-items-bar">${itemsBarHtml}</div>
+        </div>
+
+        <div style="flex:1;min-width:0;text-align:right;">
+          <div class="dc-row-amount"><span class="dc-row-amount-sym">₿</span>${fmtPSG(g.amount)}</div>
+          <div class="dc-row-range">₿${fmtPSG(min)} – ₿${fmtPSG(max)}</div>
+        </div>
+        <div class="dc-row-potential">
+          <div class="dc-row-pot-lbl">Win up to</div>
+          <div class="dc-row-pot-val">+₿${fmtPSG(potWin)}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;" class="dc-row-btns"></div>`;
+
+      const btns = row.querySelector('.dc-row-btns');
+      const join = document.createElement('button');
+      join.className = 'dc-btn-join'; join.textContent = 'Join & Roll';
+      join.onclick = () => openDiceJoin(g, pets[0]);
+      const view = document.createElement('button');
+      view.className = 'dc-btn-view'; view.textContent = 'View';
+      view.onclick = () => openDiceJoin(g, pets[0]);
+      btns.appendChild(join); btns.appendChild(view);
+      list.appendChild(row);
+    });
+  }
+  buildDiceList();
+
+  // ── DICE HISTORY ──
+  const DICE_HIST_COLORS = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b'];
+  function genAndRenderDiceHistory() {
+    const el = document.getElementById('dice-hist-panel');
+    if (!el) return;
+    el.innerHTML = '';
+    for (let i = 0; i < 18; i++) {
+      const names = DICE_BOT_NAMES;
+      const p1 = names[Math.floor(Math.random()*names.length)];
+      let p2; do { p2 = names[Math.floor(Math.random()*names.length)]; } while(p2===p1);
+      const d1 = Math.floor(Math.random()*10)+1, d2 = Math.floor(Math.random()*10)+1;
+      const winner = d1 !== d2 ? (d1>d2?p1:p2) : p1;
+      const amt = [2,5,10,25,50][Math.floor(Math.random()*5)]*1e6;
+      const ago = Math.floor(Math.random()*90)+1;
+      const winnerIsP1 = winner === p1;
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.05);';
+      div.innerHTML = `
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <div style="background:${winnerIsP1?'#fbbf24':'rgba(255,255,255,.15)'};color:${winnerIsP1?'#78350f':'#fff'};border-radius:7px;padding:3px 9px;font-size:.8rem;font-weight:900;">${d1}</div>
+          <span style="font-size:.6rem;color:var(--text-muted);">vs</span>
+          <div style="background:${!winnerIsP1?'#fbbf24':'rgba(255,255,255,.15)'};color:${!winnerIsP1?'#78350f':'#fff'};border-radius:7px;padding:3px 9px;font-size:.8rem;font-weight:900;">${d2}</div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:.78rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="color:#fbbf24;">${winner}</span> beat ${winner===p1?p2:p1}</div>
+          <div style="font-size:.64rem;color:var(--text-muted);">${ago}m ago</div>
+        </div>
+        <div style="font-size:.78rem;font-weight:800;color:#22c55e;">+${fmtB(amt)}</div>`;
+      el.appendChild(div);
+    }
+  }
+  function diceTabSwitch(tab) {
+    const isCreate = tab === 'create';
+    document.getElementById('dice-match-list').style.display = isCreate ? '' : 'none';
+    document.getElementById('dice-hist-panel').style.display = isCreate ? 'none' : 'block';
+    document.getElementById('dc-create-btn').classList.toggle('active', isCreate);
+    document.getElementById('dc-hist-btn').classList.toggle('active', !isCreate);
+    if (!isCreate) genAndRenderDiceHistory();
+  }
+
+  // ── VIEW MODAL (simple preview) ──
+  function openDiceView(g, pet) {
+    openDiceJoin(g, pet);
+  }
+
+  // ── CREATE MATCH ──
+  let _dcCreateSelInv = new Set();
+  function dcSetBet(v) { const e=document.getElementById('dc-create-amt'); if(e){e.value=v;} dcUpdateCreateTotal(); }
+  function dcUpdateCreateTotal() {
+    const inv=getInventory();
+    const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(inv[i]?.value||0),0);
+    const raw=parseInt(document.getElementById('dc-create-amt')?.value||0)||0;
+    const gemTotal=dcGemTotal();
+    const total=itemsTotal+raw+gemTotal;
+    const el=document.getElementById('dc-create-total');
+    if(el) el.textContent='₿'+fmtPSG(total);
+  }
+  function openDiceCreate() {
+    _dcCreateSelInv = new Set();
+    _dcGems = { h: 0, t: 0, o: 0 };
+    ['h','t','o'].forEach(k => {
+      const c = document.getElementById('dc-gem-'+k+'-count');
+      const t = document.getElementById('dc-gem-'+k+'-total');
+      if (c) c.textContent = '0';
+      if (t) t.textContent = '₿0';
+    });
+    const inv = getInventory();
+    const grid = document.getElementById('dc-create-inv');
+    const hint = document.getElementById('dc-create-hint');
+    grid.innerHTML = '';
+    if (!inv.length) {
+      hint.textContent = 'No items deposited — enter a balance amount below.';
+    } else {
+      inv.forEach((_, idx) => _dcCreateSelInv.add(idx));
+      hint.textContent = 'All items auto-selected. Click to deselect.';
+      inv.forEach((item, idx) => {
+        const short = (item.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
+        const d = document.createElement('div');
+        d.style.cssText='background:rgba(124,77,232,.14);border:1.5px solid var(--purple);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
+        d.innerHTML=`<div style="width:46px;height:46px;margin:0 auto 4px;"><img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.opacity='.3'"></div><div style="font-size:.56rem;font-weight:700;">${short}</div><div style="font-size:.58rem;color:var(--purple-b);font-weight:800;">₿${fmtPSG(item.value)}</div>`;
+        d.onclick=()=>{
+          if(_dcCreateSelInv.has(idx)){_dcCreateSelInv.delete(idx);d.style.borderColor='var(--border)';d.style.background='var(--bg-card2)';}
+          else{_dcCreateSelInv.add(idx);d.style.borderColor='var(--purple)';d.style.background='rgba(124,77,232,.14)';}
+          dcUpdateCreateTotal();
+        };
+        grid.appendChild(d);
+      });
+    }
+    dcUpdateCreateTotal();
+    const cm = document.getElementById('dice-create-modal');
+    cm.style.display = 'flex'; cm.classList.add('open');
+  }
+  function closeDiceCreate() {
+    const cm = document.getElementById('dice-create-modal');
+    cm.classList.remove('open'); cm.style.display = 'none';
+  }
+  function confirmDiceCreate() {
+    const inv=getInventory();
+    const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(inv[i]?.value||0),0);
+    const rawBet=parseInt(document.getElementById('dc-create-amt')?.value||0)||0;
+    const gemDenomTotal=dcGemTotal();
+    const bet=itemsTotal+rawBet+gemDenomTotal;
+    if(bet<1) return showToast('Enter a bet amount','info');
+    if(!deductBal(bet)) return showToast('Not enough balance!','lose');
+    closeDiceCreate();
+    showToast('Match created! Finding opponent…','info');
+    const botName = DICE_BOT_NAMES[Math.floor(Math.random()*DICE_BOT_NAMES.length)];
+    const botPet = randomOpponentPet();
+    setTimeout(() => runDiceGame('You', bet, botName, bet, botPet, null), 1200);
+  }
+  document.getElementById('dice-create-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeDiceCreate(); });
+
+  // ── JOIN MATCH (redesigned) ──
+  let _djCtx = null;
+  function openDiceJoin(g, pet) {
+    _djCtx = { g, pet };
+    const min = Math.floor(g.amount * .9), max = Math.ceil(g.amount * 1.05);
+    document.getElementById('dj-creator-info').textContent = `vs ${g.player}`;
+    document.getElementById('dj-creator-bet').textContent = '₿' + fmtPSG(g.amount);
+    document.getElementById('dj-range').textContent = `₿${fmtPSG(min)} – ₿${fmtPSG(max)}`;
+    document.getElementById('dj-bal-show').textContent = '₿' + fmtPSG(getBalance());
+    document.getElementById('dj-wager-input').value = Math.min(g.amount, getBalance());
+    document.getElementById('dj-err').textContent = '';
+    djUpdateUI();
+    const jm = document.getElementById('dice-join-modal');
+    jm.style.display = 'flex'; jm.classList.add('open');
+  }
+  function djSetPct(mult) {
+    if (!_djCtx) return;
+    document.getElementById('dj-wager-input').value = Math.min(Math.round(_djCtx.g.amount * mult), getBalance());
+    djUpdateUI();
+  }
+  function djSetMax() {
+    if (!_djCtx) return;
+    document.getElementById('dj-wager-input').value = getBalance();
+    djUpdateUI();
+  }
+  function djUpdateUI() {
+    if (!_djCtx) return;
+    const { g } = _djCtx;
+    const min = Math.floor(g.amount * .95), max = Math.ceil(g.amount * 1.05);
+    const wager = parseInt(document.getElementById('dj-wager-input').value) || 0;
+    const btn = document.getElementById('dj-join-btn');
+    btn.textContent = `Join & Roll ₿${fmtPSG(wager)}`;
+    const wrap = document.getElementById('dj-wager-wrap');
+    const err = document.getElementById('dj-err');
+    document.getElementById('dj-bal-show').textContent = '₿' + fmtPSG(getBalance());
+
+    // ── Live odds display (same asymmetric formula as coinflip) ──
+    const offset = g.amount > 0 ? (wager - g.amount) / g.amount : 0;
+    const oddsAdj = offset < 0
+      ? Math.max(-0.01,  (offset / 0.05) * 0.01)
+      : Math.min( 0.015, (offset / 0.05) * 0.015);
+    const winPct = ((0.495 + oddsAdj) * 100).toFixed(1);
+    const pctEl = document.getElementById('dj-odds-pct');
+    const barEl = document.getElementById('dj-odds-bar');
+    const tagEl = document.getElementById('dj-odds-tag');
+    if (pctEl) {
+      pctEl.textContent = winPct + '%';
+      const barW = Math.max(10, Math.min(90, 50 + oddsAdj * 1000));
+      barEl.style.width = barW + '%';
+      if (oddsAdj > 0.001) {
+        pctEl.style.color = '#22c55e';
+        barEl.style.background = 'linear-gradient(90deg,#16a34a,#22c55e)';
+        barEl.style.boxShadow = '0 0 8px rgba(34,197,94,.5)';
+        tagEl.style.display = 'inline-block';
+        tagEl.textContent = '+' + (oddsAdj * 100).toFixed(1) + '% edge';
+        tagEl.style.background = 'rgba(34,197,94,.15)';
+        tagEl.style.color = '#4ade80';
+        tagEl.style.border = '1px solid rgba(34,197,94,.35)';
+      } else if (oddsAdj < -0.001) {
+        pctEl.style.color = '#f87171';
+        barEl.style.background = 'linear-gradient(90deg,#b91c1c,#ef4444)';
+        barEl.style.boxShadow = 'none';
+        tagEl.style.display = 'inline-block';
+        tagEl.textContent = (oddsAdj * 100).toFixed(1) + '% vs you';
+        tagEl.style.background = 'rgba(239,68,68,.15)';
+        tagEl.style.color = '#f87171';
+        tagEl.style.border = '1px solid rgba(239,68,68,.35)';
+      } else {
+        pctEl.style.color = '#94a3b8';
+        barEl.style.background = '#94a3b8';
+        barEl.style.boxShadow = 'none';
+        tagEl.style.display = 'none';
+      }
+    }
+    if (wager < min) {
+      wrap.style.borderColor = 'rgba(239,68,68,.6)';
+      err.textContent = `Need ₿${fmtPSG(min - wager)} more`;
+    } else if (wager > max) {
+      wrap.style.borderColor = 'rgba(245,158,11,.6)';
+      err.textContent = `₿${fmtPSG(wager - max)} over limit`;
+    } else if (wager > getBalance()) {
+      wrap.style.borderColor = 'rgba(239,68,68,.6)';
+      err.textContent = 'Not enough balance!';
+    } else {
+      wrap.style.borderColor = 'rgba(124,77,232,.45)';
+      err.textContent = '';
+    }
+  }
+  function closeDiceJoin() {
+    const jm = document.getElementById('dice-join-modal');
+    jm.classList.remove('open'); jm.style.display = 'none';
+  }
+  function confirmDiceJoin() {
+    if (!_djCtx) return;
+    const { g, pet } = _djCtx;
+    const min = Math.floor(g.amount * .9), max = Math.ceil(g.amount * 1.05);
+    const total = parseInt(document.getElementById('dj-wager-input').value) || 0;
+    if (total < min) {
+      document.getElementById('dj-err').textContent = `Need at least ₿${fmtPSG(min)}`;
+      return;
+    }
+    if (total > getBalance()) { showToast('Not enough balance!', 'lose'); return; }
+    document.getElementById('dj-err').textContent = '';
+    const proceed = () => {
+      if (!deductBal(total)) return showToast('Not enough balance!', 'lose');
+      closeDiceJoin();
+      runDiceGame('You', total, g.player, g.amount, pet, null);
+    };
+    if (total > max) {
+      showOverbidWarning(total, g.amount, proceed);
+    } else {
+      proceed();
+    }
+  }
+  document.getElementById('dice-join-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeDiceJoin(); });
+
+  // ── DICE CINEMATIC ──
+  function runDiceGame(youName, youBet, oppName, oppBet, oppPet, youPet) {
+    const cin = document.getElementById('dice-cin');
+    document.getElementById('dc-you-av').textContent = youName[0].toUpperCase();
+    document.getElementById('dc-you-name').textContent = youName;
+    document.getElementById('dc-you-bet').textContent = '₿' + fmtPSG(youBet);
+    document.getElementById('dc-opp-av').textContent = oppName[0].toUpperCase();
+    document.getElementById('dc-opp-av').style.background = 'linear-gradient(135deg,#ef4444,#b91c1c)';
+    document.getElementById('dc-opp-name').textContent = oppName;
+    document.getElementById('dc-opp-bet').textContent = '₿' + fmtPSG(oppBet);
+    document.getElementById('dc-you-col').className = 'dc-player';
+    document.getElementById('dc-opp-col').className = 'dc-player';
+    document.getElementById('dc-result').className = 'dc-result';
+    document.getElementById('dc-result').textContent = '';
+    document.getElementById('dc-continue').className = 'dc-continue';
+    document.getElementById('dc-die-you').className = 'dc-die';
+    document.getElementById('dc-die-opp').className = 'dc-die';
+    document.getElementById('dc-die-you').textContent = '?';
+    document.getElementById('dc-die-opp').textContent = '?';
+
+    // Item bubbles — show several random pets from both sides
+    const itemsBar = document.getElementById('dc-items-bar');
+    itemsBar.innerHTML = '';
+    const pool = (typeof CV !== 'undefined') ? CV.filter(p => p.img && (p.tier==='Titanic'||p.tier==='Huge')) : [];
+    function randPet() { return pool.length ? pool[Math.floor(Math.random()*pool.length)] : null; }
+    const showPets = [youPet, oppPet, randPet(), randPet(), randPet(), randPet()].filter(p => p && p.img).slice(0, 6);
+    showPets.forEach(p => {
+      const d = document.createElement('div'); d.className = 'dc-item-bubble';
+      const img = document.createElement('img'); img.src = `https://assetdelivery.roblox.com/v1/asset/?id=${p.img}`;
+      img.onerror=()=>{img.style.opacity='.3';};
+      d.appendChild(img); itemsBar.appendChild(d);
+    });
+
+    const seed = Array.from({length:16},()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
+    document.getElementById('dc-seed').textContent = '#' + seed.substring(0,14) + '...';
+
+    cin.style.display = 'flex'; cin.classList.add('open');
+
+    // Roll animation
+    document.getElementById('dc-die-you').classList.add('rolling');
+    document.getElementById('dc-die-opp').classList.add('rolling');
+
+    let tick = 0;
+    const rollInterval = setInterval(() => {
+      document.getElementById('dc-die-you').textContent = Math.floor(Math.random()*10)+1;
+      document.getElementById('dc-die-opp').textContent = Math.floor(Math.random()*10)+1;
+      tick++;
+    }, 80);
+
+    setTimeout(() => {
+      clearInterval(rollInterval);
+      let youRoll, oppRoll;
+      do { youRoll=Math.floor(Math.random()*10)+1; oppRoll=Math.floor(Math.random()*10)+1; }
+      while (youRoll===oppRoll);
+
+      const won = youRoll > oppRoll;
+      document.getElementById('dc-die-you').textContent = youRoll;
+      document.getElementById('dc-die-opp').textContent = oppRoll;
+      document.getElementById('dc-die-you').classList.remove('rolling');
+      document.getElementById('dc-die-opp').classList.remove('rolling');
+      document.getElementById('dc-die-you').classList.add(won ? 'win-die' : 'lose-die');
+      document.getElementById('dc-die-opp').classList.add(won ? 'lose-die' : 'win-die');
+      document.getElementById('dc-you-col').className = won ? 'dc-player winner' : 'dc-player loser';
+      document.getElementById('dc-opp-col').className = won ? 'dc-player loser' : 'dc-player winner';
+
+      const prize = Math.floor((youBet + oppBet) * 0.985);
+      const res = document.getElementById('dc-result');
+      if (won) {
+        addBal(prize); recordWin(prize - youBet); recordWager(youBet);
+        res.className = 'dc-result win show';
+        res.textContent = '+₿' + fmtPSG(prize) + ' — YOU WIN!';
+        showToast('Rolled ' + youRoll + ' vs ' + oppRoll + ' — Won ₿' + fmtPSG(prize) + '!', 'win');
+        burstParticles(window.innerWidth/2, window.innerHeight/2, true);
+        updateSessionStats(true, prize - youBet);
+      } else {
+        recordLoss(youBet); recordWager(youBet);
+        res.className = 'dc-result lose show';
+        res.textContent = youRoll + ' vs ' + oppRoll + ' — Better luck!';
+        showToast('Rolled ' + youRoll + ' vs ' + oppRoll + ' — Lost ₿' + fmtPSG(youBet), 'lose');
+        updateSessionStats(false, youBet);
+      }
+      setTimeout(() => {
+        document.getElementById('dc-continue').classList.add('show');
+        document.getElementById('dc-click-hint').classList.add('show');
+      }, 300);
+      // Hard auto-close after 8s no matter what — failsafe
+      setTimeout(closeDiceCin, 8000);
+    }, 2400);
+  }
+
+  // Click anywhere on dice cinematic to close after result shown
+  document.getElementById('dice-cin').addEventListener('click', function(e) {
+    if (document.getElementById('dc-continue').classList.contains('show')) {
+      closeDiceCin();
+    }
+  });
+  // ESC key closes cinematic
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('dc-continue').classList.contains('show')) {
+      closeDiceCin();
+    }
+  });
+
+  let _sessWon = 0, _sessLost = 0, _sessRolls = 0;
+  function updateSessionStats(won, amount) {
+    _sessRolls++;
+    if (won) _sessWon += amount; else _sessLost += amount;
+    const wr = document.getElementById('dc-sess-wr');
+    const wins = _sessRolls > 0 ? Math.round((_sessWon > 0 ? 1 : 0) * 100) : 0;
+    // track win count separately
+    if (!window._dcWins) window._dcWins = 0;
+    if (won) window._dcWins++;
+    const wrPct = _sessRolls > 0 ? Math.round((window._dcWins / _sessRolls) * 100) : 0;
+    const wonEl = document.getElementById('dc-sess-won');
+    const lostEl = document.getElementById('dc-sess-lost');
+    const rollsEl = document.getElementById('dc-sess-rolls');
+    if (wonEl) wonEl.textContent = '₿' + fmtPSG(_sessWon);
+    if (lostEl) lostEl.textContent = '₿' + fmtPSG(_sessLost);
+    if (rollsEl) rollsEl.textContent = _sessRolls;
+    if (wr) wr.textContent = wrPct + '%';
+  }
+
+  function closeDiceCin() {
+    const dc = document.getElementById('dice-cin');
+    dc.classList.remove('open'); dc.style.display = 'none';
+    document.getElementById('dc-continue').classList.remove('show');
+    document.getElementById('dc-click-hint').classList.remove('show');
+    const bots = DICE_BOT_NAMES;
+    DICE_MATCHES.push({ player: bots[Math.floor(Math.random()*bots.length)], amount: Math.floor((Math.random()*50+1)*1e6) });
+    if (DICE_MATCHES.length > 8) DICE_MATCHES.shift();
+    buildDiceList();
+    buildDcPets();
+  }
+
+  // Scrolling live feed
+  (function() {
+    const ticker = document.getElementById('feed-ticker');
+    const events = [
+      {t:'TitanicX won ₿480M on Dice', w:true},
+      {t:'GemLord lost ₿120M Dice Match', w:false},
+      {t:'xR4Zy won ₿2B on Jackpot', w:true},
+      {t:'NovaPro won ₿75M Coin Flip', w:true},
+      {t:'Sk1yRdr lost ₿200M Jackpot', w:false},
+      {t:'PurpleKing won ₿340M Dice', w:true},
+      {t:'HugeGang lost ₿90M Dice', w:false},
+      {t:'LegacyPS won ₿55M Dice Match', w:true},
+      {t:'CrystalFly wagered ₿500M Jackpot', w:true},
+      {t:'TitanicX won ₿180M on Dice', w:true},
+    ];
+    // Double items for seamless loop
+    const inner = document.createElement('div');
+    inner.className = 'feed-ticker-inner';
+    [...events, ...events].forEach(e => {
+      const span = document.createElement('span');
+      span.className = e.w ? 'win' : 'lose';
+      span.textContent = e.t;
+      inner.appendChild(span);
+    });
+    ticker.appendChild(inner);
+  })();
+
+  setInterval(() => {
+    const el = document.getElementById('online-count');
+    if (el) el.textContent = (820 + Math.floor(Math.random() * 60)).toLocaleString();
+  }, 7000);
+
+  /* ── DICE ACTIVITY PANELS ── */
+  const _dcNames = ['xR4Zy','NovaPro','GemLord','Sk1yRdr','LegacyPS','HugeGang','TitanicX','PurpleKing','MuRaTwalker22','Levi2legitt'];
+  const _dcColors = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b','#ec4899','#f97316','#a855f7'];
+
+  function buildRecentRolls() {
+    const el = document.getElementById('dc-recent-rolls');
+    if (!el) return;
+    el.innerHTML = '';
+    for (let i = 0; i < 7; i++) {
+      const n1 = _dcNames[Math.floor(Math.random()*_dcNames.length)];
+      let n2; do { n2 = _dcNames[Math.floor(Math.random()*_dcNames.length)]; } while(n2===n1);
+      const d1 = Math.floor(Math.random()*10)+1, d2 = Math.floor(Math.random()*10)+1;
+      const p1won = d1 > d2;
+      const amt = [2,5,10,25,50][Math.floor(Math.random()*5)] * 1e6;
+      const ago = Math.floor(Math.random()*60)+1;
+      const c1 = _dcColors[Math.floor(Math.random()*_dcColors.length)];
+      const c2 = _dcColors[Math.floor(Math.random()*_dcColors.length)];
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);';
+      row.innerHTML = `
+        <div style="display:flex;gap:4px;flex-shrink:0;align-items:center;">
+          <div style="background:${p1won?'#fbbf24':'rgba(255,255,255,.12)'};color:${p1won?'#78350f':'#fff'};border-radius:6px;padding:2px 7px;font-size:.76rem;font-weight:900;">${d1}</div>
+          <span style="font-size:.58rem;color:var(--text-muted);">vs</span>
+          <div style="background:${!p1won?'#fbbf24':'rgba(255,255,255,.12)'};color:${!p1won?'#78350f':'#fff'};border-radius:6px;padding:2px 7px;font-size:.76rem;font-weight:900;">${d2}</div>
+        </div>
+        <div style="flex:1;font-size:.68rem;font-weight:800;color:var(--text-sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p1won?n1:n2} <span style="color:var(--text-muted);font-weight:400">won</span></div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:.68rem;font-weight:900;color:#22c55e;">+${fmtB(amt)}</div>
+          <div style="font-size:.55rem;color:var(--text-muted);">${ago}m ago</div>
+        </div>`;
+      el.appendChild(row);
+    }
+  }
+  buildRecentRolls();
+  setInterval(buildRecentRolls, 10000);
+
+  const _rankMedals = ['🥇','🥈','🥉'];
+  function buildDcTopPlayers() {
+    const el = document.getElementById('dc-top-players');
+    if (!el) return;
+    const sorted = [..._dcNames].map(n => ({
+      name: n,
+      won: Math.floor(Math.random()*500+50) * 1e6,
+      color: _dcColors[Math.floor(Math.random()*_dcColors.length)]
+    })).sort((a,b) => b.won - a.won).slice(0, 5);
+    el.innerHTML = sorted.map((p, i) => `
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;border-radius:6px;">
+        <div style="width:22px;text-align:center;font-size:${i<3?'1rem':'.68rem'};font-weight:900;color:${i<3?'#fbbf24':'var(--text-muted)'};">${i<3?_rankMedals[i]:(i+1)}</div>
+        <div style="width:26px;height:26px;border-radius:50%;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 0 8px ${p.color}55;">${p.name[0]}</div>
+        <div style="flex:1;font-size:.74rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+        <div style="font-size:.7rem;font-weight:900;color:#22c55e;">+${fmtB(p.won)}</div>
+      </div>`).join('');
+  }
+  buildDcTopPlayers();
+
+  function buildDcPets() {
+    const el = document.getElementById('dc-wager-pets');
+    if (!el) return;
+    // Collect pets actually being wagered in current matches
+    const wagered = [];
+    DICE_MATCHES.forEach(g => { if (g.pets) g.pets.forEach(p => { if (p && p.img) wagered.push({ pet: p, player: g.player, amount: g.amount }); }); });
+    // Fallback to random CV if no matches yet
+    let items = wagered;
+    if (!items.length && typeof CV !== 'undefined') {
+      items = CV.filter(p => p.img && (p.tier==='Titanic'||p.tier==='Huge'))
+               .sort(() => Math.random()-.5).slice(0,8)
+               .map(p => ({ pet:p, player:'', amount:0 }));
+    }
+    el.innerHTML = '';
+    items.slice(0, 8).forEach(({ pet: p, player, amount }) => {
+      const d = document.createElement('div');
+      d.style.cssText = 'background:linear-gradient(135deg,rgba(0,0,0,.45),rgba(245,158,11,.04));border:1.5px solid rgba(245,158,11,.18);border-radius:11px;padding:6px 5px 5px;text-align:center;transition:all .22s cubic-bezier(.34,1.56,.64,1);cursor:default;position:relative;';
+      d.onmouseenter = () => { d.style.borderColor='rgba(245,158,11,.55)'; d.style.transform='translateY(-3px)'; d.style.boxShadow='0 6px 20px rgba(0,0,0,.5),0 0 14px rgba(245,158,11,.2)'; };
+      d.onmouseleave = () => { d.style.borderColor='rgba(245,158,11,.18)'; d.style.transform=''; d.style.boxShadow=''; };
+      const img = document.createElement('img');
+      img.src = `https://assetdelivery.roblox.com/v1/asset/?id=${p.img}`;
+      img.style.cssText = 'width:100%;aspect-ratio:1;object-fit:contain;display:block;';
+      img.loading = 'lazy'; img.title = p.name || '';
+      img.onerror = () => { img.style.opacity='.3'; };
+      const nameEl = document.createElement('div');
+      nameEl.style.cssText = 'font-size:.48rem;font-weight:800;color:rgba(255,255,255,.55);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+      nameEl.textContent = (p.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
+      const valEl = document.createElement('div');
+      valEl.style.cssText = 'font-size:.56rem;font-weight:900;color:#fbbf24;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;gap:2px;';
+      valEl.innerHTML = `<svg viewBox="0 0 12 12" width="9" height="9" fill="none"><polygon points="11,6 8.5,10 3.5,10 1,6 3.5,2 8.5,2" fill="#7c4de8"/><polygon points="6,3.5 8.5,6 6,8.5 3.5,6" fill="white" opacity=".9"/></svg>${p.n ? fmtB(p.n) : (amount ? fmtB(amount) : '—')}`;
+      if (player) {
+        const badge = document.createElement('div');
+        badge.style.cssText = 'position:absolute;top:3px;right:3px;width:12px;height:12px;border-radius:50%;background:rgba(245,158,11,.7);display:flex;align-items:center;justify-content:center;font-size:.38rem;font-weight:900;color:#451a03;line-height:1;';
+        badge.textContent = player[0].toUpperCase();
+        d.appendChild(badge);
+      }
+      d.appendChild(img); d.appendChild(nameEl); d.appendChild(valEl);
+      el.appendChild(d);
+    });
+  }
+  setTimeout(buildDcPets, 200);
+
+  // Wire sort button
+  document.querySelector('#dc-create-btn')?.closest('.lobby-actions-bar')
+    ?.querySelector('.lobby-sort-btn')
+    ?.addEventListener('click', function() {
+      _diceSortAsc = !_diceSortAsc;
+      this.innerHTML = (_diceSortAsc ? 'Lowest to Highest <span style="font-size:.65rem;">▴</span>' : 'Highest to Lowest <span style="font-size:.65rem;">▾</span>');
+      buildDiceList();
+    });
+
+  /* ── OVER-BET WARNING ── */
+  let _overbidCallback = null;
+  function showOverbidWarning(myBet, creatorBet, onConfirm) {
+    _overbidCallback = onConfirm;
+    const netGain = creatorBet;
+    document.getElementById('overbid-msg').innerHTML =
+      `You're wagering <span style="color:#ef4444;font-weight:800;">₿${fmtPSG(myBet)}</span> on a game where the creator only bet <span style="color:#fbbf24;font-weight:800;">₿${fmtPSG(creatorBet)}</span>.<br><br>` +
+      `If you win, you gain <span style="color:#4ade80;font-weight:800;">₿${fmtPSG(netGain)}</span>. If you lose, you forfeit your full wager.<br><br>` +
+      `<span style="color:rgba(255,255,255,0.4);font-size:.75rem;">You are risking a lot for a lower value game.</span>`;
+    document.getElementById('overbid-overlay').style.display = 'flex';
+  }
+  function overbidCancel() {
+    document.getElementById('overbid-overlay').style.display = 'none';
+    _overbidCallback = null;
+  }
+  function overbidConfirm() {
+    document.getElementById('overbid-overlay').style.display = 'none';
+    if (_overbidCallback) { _overbidCallback(); _overbidCallback = null; }
+  }
+</script>
+</body>
+</html>
