@@ -11,7 +11,7 @@ const app    = express();
 const server = http.createServer(app);
 const wss    = new WebSocketServer({ server });
 
-const PORT         = process.env.PORT           || 3001;
+const PORT = process.env.PORT || 8080;
 const SECRET       = process.env.WEBHOOK_SECRET || 'changeme123';
 const BOT_USERNAME = process.env.BOT_USERNAME   || 'PS99GemsBOT';
 const START_BAL    = 5_000_000_000;
