@@ -70,7 +70,7 @@ function removeInventoryItem(username, id) {
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
 // Serve site files from the parent folder — THIS is what makes it non-static
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname)));
 
 // ── IN-MEMORY SESSION STATE ──────────────────────────
 const wsClients      = new Map(); // wsId → { ws, username }
