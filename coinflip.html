@@ -1306,6 +1306,18 @@
     shine.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI*2);
     ctx.fillStyle = shine; ctx.fill();
+
+    // 10. Metallic gold rim — always visible, gives coin real depth face-on
+    ctx.beginPath(); ctx.arc(cx, cy, r - 1, 0, Math.PI * 2);
+    const rimG = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+    rimG.addColorStop(0,    'rgba(255,248,180,0.95)');
+    rimG.addColorStop(0.28, 'rgba(220,180,55,0.9)');
+    rimG.addColorStop(0.5,  'rgba(255,255,210,1)');
+    rimG.addColorStop(0.72, 'rgba(175,125,25,0.9)');
+    rimG.addColorStop(1,    'rgba(255,238,130,0.95)');
+    ctx.strokeStyle = rimG;
+    ctx.lineWidth = 5;
+    ctx.stroke();
   }
 
   function renderCoin(canvas, angleDeg, shimmerAngle) {
@@ -1332,8 +1344,8 @@
     ctx.restore();
 
     // Draw thick 3D edge (unscaled, always behind the face)
-    const edgeThick = r * 0.18; // visible thickness
-    const edgeVis = Math.max(0, 1 - Math.abs(scaleX) * 5); // 0 when face-on, 1 when edge-on
+    const edgeThick = r * 0.24;
+    const edgeVis = Math.sqrt(Math.max(0, 1 - scaleX * scaleX)); // sin(angle) — visible at all tilt angles
     if (edgeVis > 0) {
       ctx.save();
       const edgeH = edgeThick * 2 * edgeVis;
@@ -2176,39 +2188,119 @@
     setTimeout(() => f.classList.remove(cls), 120);
   }
 
+  // ── Crown fanfare sound ──
+  function playCrownSound() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      const ac = new AC();
+      const master = ac.createGain();
+      master.gain.value = 0.65;
+      master.connect(ac.destination);
+      // Subtle echo
+      const delay = ac.createDelay(0.28);
+      delay.delayTime.value = 0.22;
+      const eg = ac.createGain(); eg.gain.value = 0.18;
+      master.connect(delay); delay.connect(eg); eg.connect(ac.destination);
+
+      function bell(freq, t, dur, vol) {
+        const osc = ac.createOscillator(), g = ac.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const ct = ac.currentTime + t;
+        g.gain.setValueAtTime(0, ct);
+        g.gain.linearRampToValueAtTime(vol, ct + 0.022);
+        g.gain.exponentialRampToValueAtTime(0.001, ct + dur);
+        osc.connect(g); g.connect(master);
+        osc.start(ct); osc.stop(ct + dur + 0.06);
+      }
+      // E major ascending arpeggio — regal fanfare
+      bell(329.63, 0,    0.80, 0.42); // E4
+      bell(415.30, 0.11, 0.75, 0.36); // G#4
+      bell(493.88, 0.21, 0.75, 0.36); // B4
+      bell(659.25, 0.30, 1.40, 0.55); // E5 — climax
+      bell(830.61, 0.34, 1.10, 0.22); // G#5 shimmer
+      bell(987.77, 0.38, 0.90, 0.15); // B5 shimmer
+      bell(1318.5, 0.43, 0.70, 0.08); // E6 sparkle
+      setTimeout(() => { try { ac.close(); } catch(e) {} }, 3200);
+    } catch(e) {}
+  }
+
+  // ── Hover-shine: renders coin with sweeping golden gradient across the face ──
+  function renderCoinHoverShine(canvas, angleDeg, shimmerAngle, shineProgress) {
+    renderCoin(canvas, angleDeg, shimmerAngle);
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2;
+    const r = Math.min(W, H) / 2 - 5;
+    const norm = ((angleDeg % 360) + 360) % 360;
+    const cosA = Math.cos(norm * Math.PI / 180);
+    const scaleX = Math.max(Math.abs(cosA), 0.008);
+    ctx.save();
+    ctx.translate(cx, cy); ctx.scale(scaleX, 1); ctx.translate(-cx, -cy);
+    ctx.beginPath(); ctx.arc(cx, cy, r - 2, 0, Math.PI * 2); ctx.clip();
+    // Gold shine band sweeping left → right across the face
+    const sweepX = cx - r * 1.4 + shineProgress * r * 3.2;
+    const sg = ctx.createLinearGradient(sweepX - r * 0.65, cy - r, sweepX + r * 0.65, cy + r);
+    sg.addColorStop(0,    'rgba(255,230,80,0)');
+    sg.addColorStop(0.35, 'rgba(255,248,160,0.20)');
+    sg.addColorStop(0.5,  'rgba(255,255,230,0.58)');
+    sg.addColorStop(0.65, 'rgba(255,248,160,0.20)');
+    sg.addColorStop(1,    'rgba(255,230,80,0)');
+    ctx.fillStyle = sg;
+    ctx.fillRect(cx - r * 1.5, cy - r * 1.5, r * 3, r * 3);
+    ctx.restore();
+  }
+
   let cinFlipAF = null;
   function startCinematicFlip(side, won, onDone) {
     const canvas = document.getElementById('cin-coin');
     document.getElementById('cin-coin').classList.add('glowing');
     document.getElementById('cin-glow-ring').classList.add('active');
 
-    const spins = 4 + Math.floor(Math.random() * 3); // integer — no ambiguous landing frames
+    const spins    = 4 + Math.floor(Math.random() * 2);
+    // Pause near face-on (330° = slightly tilted heads face fully visible)
+    const pauseDeg = (spins - 1) * 360 + 330;
     const finalDeg = (side === 'heads' ? 0 : 180) + spins * 360;
-    const duration = 1400;
+
+    const spinDur  = 1700; // ms — fast spin to pause point
+    const pauseDur = 750;  // ms — dramatic hover
+    const landDur  = 1050; // ms — settle to result
+
+    let shimmer = 0, phase = 0, pauseStart = 0, landStart = 0;
     const start = performance.now();
-    let shimmer = 0;
 
-    function ease(t) {
-      // Clean cubic ease-out — no wobble/shake
-      return 1 - Math.pow(1 - t, 3);
-    }
-
-    (function tick(now) {
-      const raw = Math.min((now - start) / duration, 1);
-      const eased = ease(raw);
-      shimmer += 0.04;
-      renderCoin(canvas, eased * finalDeg, shimmer);
-
-      if (raw < 1) {
-        cinFlipAF = requestAnimationFrame(tick);
+    function tick(now) {
+      shimmer += 0.038;
+      if (phase === 0) {
+        // Phase 1: fast spin, ease-out as it approaches pause point
+        const t = Math.min((now - start) / spinDur, 1);
+        const e = 1 - Math.pow(1 - t, 2.8);
+        renderCoin(canvas, e * pauseDeg, shimmer);
+        if (t >= 1) { phase = 1; pauseStart = now; playCrownSound(); }
+      } else if (phase === 1) {
+        // Phase 2: dramatic hover — gentle wobble + golden shine sweeps
+        const el = now - pauseStart;
+        const wobble = Math.sin(el / 105) * 4.5;
+        const sp = Math.min(el / pauseDur, 1);
+        renderCoinHoverShine(canvas, pauseDeg + wobble, shimmer, sp);
+        if (el >= pauseDur) { phase = 2; landStart = now; }
       } else {
-        renderCoin(canvas, side === 'heads' ? 0 : 180, shimmer);
-        document.getElementById('cin-coin').classList.remove('glowing');
-        document.getElementById('cin-glow-ring').classList.remove('active');
-        screenFlash(won ? 'flash-gold' : 'flash-red');
-        onDone();
+        // Phase 3: ease into final result
+        const t = Math.min((now - landStart) / landDur, 1);
+        const e = 1 - Math.pow(1 - t, 3);
+        renderCoin(canvas, pauseDeg + e * (finalDeg - pauseDeg), shimmer);
+        if (t >= 1) {
+          renderCoin(canvas, side === 'heads' ? 0 : 180, shimmer);
+          document.getElementById('cin-coin').classList.remove('glowing');
+          document.getElementById('cin-glow-ring').classList.remove('active');
+          screenFlash(won ? 'flash-gold' : 'flash-red');
+          onDone();
+          return;
+        }
       }
-    })(start);
+      cinFlipAF = requestAnimationFrame(tick);
+    }
+    cinFlipAF = requestAnimationFrame(tick);
   }
 
   function showCinematicResult(won, bet, winningSide) {
