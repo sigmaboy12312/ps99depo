@@ -1,12 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PS99Gems — Leaderboard</title>
-  <link rel="stylesheet" href="style.css">
+  <title>99Depo â€” Leaderboard</title>
+  <link rel="stylesheet" href="style.css?v=99">
   <style>
-    /* ── LEADERBOARD ── */
+    /* â”€â”€ LEADERBOARD â”€â”€ */
     .lb-wrap {
       max-width: 960px;
       margin: 0 auto;
@@ -134,14 +137,10 @@
 </head>
 <body>
 
-<!-- ── TOP NAV ── -->
+<!-- â”€â”€ TOP NAV â”€â”€ -->
 <nav class="topnav">
   <a href="home.html" class="nav-logo">
-    <div class="logo-gem-wrap">
-      <svg viewBox="0 0 24 24" fill="none"><polygon points="12,2 20,8 17,20 7,20 4,8" fill="white" opacity=".9"/><polygon points="12,2 20,8 12,6" fill="white" opacity=".5"/></svg>
-    </div>
-    <div class="logo-text"><span class="t1">PS99</span><span class="t2">GEMS</span></div>
-    <img src="pets/cat.svg" style="width:26px;height:26px;object-fit:contain;opacity:.85;" alt="">
+    <img src="logo.png" alt="99Depo" style="height:36px;object-fit:contain;" onerror="this.outerHTML='<span class=&quot;logo-text&quot;><span class=&quot;t1&quot;>99</span><span class=&quot;t2&quot;>DEPO</span></span>'">
   </a>
   <div class="nav-games">
     <a href="home.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z"/><polyline points="9,20 9,13 11,13 11,20"/></svg> Home</a>
@@ -153,14 +152,13 @@
     <a href="values.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="10,2 13,8 19,8 14,12 16,18 10,14 4,18 6,12 1,8 7,8"/></svg> CV Values</a>
   </div>
   <div class="nav-right">
-    <div class="nav-balance"><span style="font-weight:900;margin-right:2px;font-size:1rem;">₿</span><span data-bal>5B</span></div>
-    <div class="nav-avatar"><img src="pets/cat.svg" alt="avatar"></div>
+    <div class="online-badge"><div class="online-dot"></div><span id="online-count">â€”</span> online</div>
   </div>
 </nav>
 
 <div class="announce-bar">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-  Rankings reset weekly &mdash; Top players by profit and total wagered &mdash; <a href="#">discord.gg/ps99gems</a>
+  Rankings reset weekly &mdash; Top players by profit and total wagered &mdash; <a href="#">discord.gg/99Depo</a>
 </div>
 
 <div class="page-body" style="overflow-y:auto;">
@@ -208,11 +206,11 @@
 </div>
 </div>
 
-<script src="app.js"></script>
+<script src="app.js?v=99"></script>
 <script>
   refreshBal();
 
-  /* ── Fake leaderboard data ── */
+  /* â”€â”€ Fake leaderboard data â”€â”€ */
   const PLAYER_COLORS = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b','#ec4899','#6366f1','#f97316','#a855f7','#14b8a6','#3b82f6','#84cc16'];
 
   function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
@@ -251,7 +249,7 @@
     return [...PLAYERS_RAW].sort((a, b) => b[field] - a[field]);
   }
 
-  const TROPHY_ICONS = { 0:'✦', 1:'✦', 2:'✦' };
+  const TROPHY_ICONS = { 0:'âœ¦', 1:'âœ¦', 2:'âœ¦' };
   const TROPHY_COLORS = { 0:'#fbbf24', 1:'#94a3b8', 2:'#cd7f32' };
 
   function buildPodium(players) {
@@ -268,10 +266,10 @@
       const subField = activeTab === 'profit' ? 'wagered' : 'profit';
       const card = document.createElement('div');
       card.className = `lb-pod-card rank-${rank}`;
-      card.onclick = () => showToast(`${p.name}'s profile — ${fmtB(p[field])} ${activeTab}`, 'info');
+      card.onclick = () => showToast(`${p.name}'s profile â€” ${fmtB(p[field])} ${activeTab}`, 'info');
       card.innerHTML = `
         <div class="lb-pod-rank">#${rank}</div>
-        <div class="lb-pod-trophy" style="color:${TROPHY_COLORS[idx]}">✦</div>
+        <div class="lb-pod-trophy" style="color:${TROPHY_COLORS[idx]}">âœ¦</div>
         <div class="lb-pod-avatar" style="background:linear-gradient(135deg,${p.color},${p.color}88);">${p.name[0].toUpperCase()}</div>
         <div class="lb-pod-name">${p.name}</div>
         <div class="lb-pod-stats">
@@ -298,7 +296,7 @@
       const sub   = activeTab === 'profit' ? 'wagered' : 'profit';
       const row = document.createElement('div');
       row.className = 'lb-row';
-      row.onclick = () => showToast(`${p.name} — Profit: ${fmtB(p.profit)} | Wagered: ${fmtB(p.wagered)}`, 'info');
+      row.onclick = () => showToast(`${p.name} â€” Profit: ${fmtB(p.profit)} | Wagered: ${fmtB(p.wagered)}`, 'info');
       const profColor = p.profit >= 0 ? '#22c55e' : '#ef4444';
       const mainColor = activeTab === 'profit' ? profColor : '#fbbf24';
       row.innerHTML = `
@@ -343,3 +341,4 @@
 </script>
 </body>
 </html>
+

@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PS99Gems — Home</title>
-  <link rel="stylesheet" href="style.css">
+  <title>99Depo â€” Home</title>
+  <link rel="stylesheet" href="style.css?v=99">
   <style>
     html, body { height:100%; overflow:hidden; }
 
@@ -20,7 +20,7 @@
       overflow:hidden;
     }
 
-    /* ─── LEFT HERO PANEL ─── */
+    /* â”€â”€â”€ LEFT HERO PANEL â”€â”€â”€ */
     .home-left {
       display:flex; flex-direction:column; justify-content:center;
       padding:28px 24px; gap:16px;
@@ -107,7 +107,7 @@
     }
     .cta-sec:hover { background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.2); }
 
-    /* ─── RIGHT: 3 GAME CARDS ─── */
+    /* â”€â”€â”€ RIGHT: 3 GAME CARDS â”€â”€â”€ */
     .home-right {
       display:flex; flex-direction:column; gap:12px;
       padding:16px 18px; overflow:hidden;
@@ -248,14 +248,10 @@
 <body>
 <div class="home-root">
 
-<!-- ── NAV ── -->
+<!-- â”€â”€ NAV â”€â”€ -->
 <nav class="topnav">
   <a href="home.html" class="nav-logo">
-    <div class="logo-gem-wrap">
-      <svg viewBox="0 0 24 24" fill="none"><polygon points="12,2 20,8 17,20 7,20 4,8" fill="white" opacity=".9"/><polygon points="12,2 20,8 12,6" fill="white" opacity=".5"/></svg>
-    </div>
-    <div class="logo-text"><span class="t1">PS99</span><span class="t2">GEMS</span></div>
-    <img src="pets/cat.svg" style="width:24px;height:24px;object-fit:contain;opacity:.8;" alt="">
+    <img src="logo.png" alt="99Depo" style="height:36px;object-fit:contain;" onerror="this.outerHTML='<span class=&quot;logo-text&quot;><span class=&quot;t1&quot;>99</span><span class=&quot;t2&quot;>DEPO</span></span>'">
   </a>
   <div class="nav-games">
     <a href="home.html" class="nav-btn active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z"/><polyline points="9,20 9,13 11,13 11,20"/></svg> Home</a>
@@ -272,31 +268,30 @@
     </a>
   </div>
   <div class="nav-right">
-    <div class="nav-balance"><span style="font-weight:900;margin-right:2px;font-size:1rem;">₿</span><span data-bal>5B</span></div>
-    <div class="nav-avatar"><img src="pets/cat.svg" alt="avatar"></div>
+    <div class="online-badge"><div class="online-dot"></div><span id="online-count">â€”</span> online</div>
   </div>
 </nav>
 
 <div class="announce-bar">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-  Entertainment only — Play responsibly — <a href="#">discord.gg/ps99gems</a>
+  Entertainment only â€” Play responsibly â€” <a href="#">discord.gg/99Depo</a>
 </div>
 
 <div class="home-body">
 
-  <!-- ── LEFT HERO ── -->
+  <!-- â”€â”€ LEFT HERO â”€â”€ -->
   <div class="home-left">
 
     <div class="live-pill"><div class="live-dot"></div><span id="hero-online">826 Online</span></div>
 
     <div class="hero-title">
       <div class="g1">The #1</div>
-      <div class="g2">PS99</div>
+      <div class="g2">99DEPO</div>
       <div class="g3">Gambling</div>
       <div class="g1">Site</div>
     </div>
 
-    <div class="hero-sub">Wager PSG gems on Coin Flip, Jackpot, and Dice. Pure entertainment — no real money.</div>
+    <div class="hero-sub">Wager PSG gems on Coin Flip, Jackpot, and Dice. Pure entertainment â€” no real money.</div>
 
     <!-- Floating top pets -->
     <div>
@@ -312,11 +307,11 @@
       </div>
       <div class="hs">
         <div class="hs-icon" id="hs-icon-1"></div>
-        <div><div class="hs-val" id="stat-wagered">₿2.4B</div><div class="hs-lbl">Wagered Today</div></div>
+        <div><div class="hs-val" id="stat-wagered">â‚¿2.4B</div><div class="hs-lbl">Wagered Today</div></div>
       </div>
       <div class="hs">
         <div class="hs-icon" id="hs-icon-2"></div>
-        <div><div class="hs-val">₿5B</div><div class="hs-lbl">Free Balance</div></div>
+        <div><div class="hs-val">â‚¿5B</div><div class="hs-lbl">Free Balance</div></div>
       </div>
       <div class="hs">
         <div class="hs-icon" id="hs-icon-3"></div>
@@ -325,13 +320,13 @@
     </div>
 
     <div class="hero-ctas">
-      <a href="coinflip.html" class="cta-main">▶ Play Now</a>
+      <a href="coinflip.html" class="cta-main">â–¶ Play Now</a>
       <a href="leaderboard.html" class="cta-sec">Leaderboard</a>
     </div>
 
   </div>
 
-  <!-- ── RIGHT: 3 GAME CARDS ── -->
+  <!-- â”€â”€ RIGHT: 3 GAME CARDS â”€â”€ -->
   <div class="home-right">
 
     <!-- COIN FLIP -->
@@ -350,15 +345,15 @@
           </span>
           <span class="gc-badge" style="background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.25);">
             <div class="gc-badge-pet" id="cf-badge-pet2"></div>
-            1% Edge
+            Instant P2P
           </span>
         </div>
-        <div class="gc-desc">Heads or tails — 50/50 shot to double your wager against another player in real time.</div>
+        <div class="gc-desc">Heads or tails â€” 50/50 shot to double your wager against another player in real time.</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
           <div class="gc-chips" id="cf-chips"></div>
           <div class="gc-online-chip"><div class="gc-online-dot"></div><span id="cf-online">312</span> playing</div>
         </div>
-        <button class="gc-play" style="background:linear-gradient(135deg,#f97316,#c2410c);color:#fff;box-shadow:0 0 14px rgba(249,115,22,.4);">Play Coin Flip →</button>
+        <button class="gc-play" style="background:linear-gradient(135deg,#f97316,#c2410c);color:#fff;box-shadow:0 0 14px rgba(249,115,22,.4);">Play Coin Flip â†’</button>
       </div>
     </a>
 
@@ -378,15 +373,15 @@
           </span>
           <span class="gc-badge" style="background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);">
             <div class="gc-badge-pet" id="jp-badge-pet2"></div>
-            5% House Edge
+            Big Pots Daily
           </span>
         </div>
-        <div class="gc-desc">Drop gems into the communal pot — the bigger your share, the higher your odds of winning everything.</div>
+        <div class="gc-desc">Drop gems into the communal pot â€” the bigger your share, the higher your odds of winning everything.</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
           <div class="gc-chips" id="jp-chips"></div>
           <div class="gc-online-chip"><div class="gc-online-dot"></div><span id="jp-online">187</span> playing</div>
         </div>
-        <button class="gc-play" style="background:linear-gradient(135deg,#fbbf24,#b45309);color:#78350f;box-shadow:0 0 14px rgba(251,191,36,.4);">Play Jackpot →</button>
+        <button class="gc-play" style="background:linear-gradient(135deg,#fbbf24,#b45309);color:#78350f;box-shadow:0 0 14px rgba(251,191,36,.4);">Play Jackpot â†’</button>
       </div>
     </a>
 
@@ -402,19 +397,19 @@
         <div class="gc-badge-row">
           <span class="gc-badge" style="background:rgba(124,77,232,.15);color:#a67dff;border:1px solid rgba(124,77,232,.35);">
             <div class="gc-badge-pet" id="dc-badge-pet"></div>
-            Roll 1–10 P2P
+            Roll 1â€“10 P2P
           </span>
           <span class="gc-badge" style="background:rgba(6,182,212,.1);color:#22d3ee;border:1px solid rgba(6,182,212,.25);">
             <div class="gc-badge-pet" id="dc-badge-pet2"></div>
-            1.5% House Edge
+            Highest Roll Wins
           </span>
         </div>
-        <div class="gc-desc">Roll a number 1–10 against another player — highest number wins the full pot. Pure luck.</div>
+        <div class="gc-desc">Roll a number 1â€“10 against another player â€” highest number wins the full pot. Pure luck.</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
           <div class="gc-chips" id="dc-chips"></div>
           <div class="gc-online-chip"><div class="gc-online-dot"></div><span id="dc-online">241</span> playing</div>
         </div>
-        <button class="gc-play" style="background:linear-gradient(135deg,#7c4de8,#4c1d95);color:#fff;box-shadow:0 0 14px rgba(124,77,232,.4);">Play Dice →</button>
+        <button class="gc-play" style="background:linear-gradient(135deg,#7c4de8,#4c1d95);color:#fff;box-shadow:0 0 14px rgba(124,77,232,.4);">Play Dice â†’</button>
       </div>
     </a>
 
@@ -429,7 +424,7 @@
 </div>
 
 <canvas id="home-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
-<script src="app.js"></script>
+<script src="app.js?v=99"></script>
 <script>
   refreshBal();
 
@@ -437,9 +432,9 @@
 
   // Specific iconic pets for each game (Titanic tier, well-known designs)
   const GAME_PETS = {
-    coinflip: '14976631515',   // Titanic Hippomelon — golden, wealth theme
-    jackpot:  '14976594978',   // Titanic Cat — most iconic PS99 pet
-    dice:     '14976666952',   // Titanic Sad Cat — random/luck theme
+    coinflip: '14976631515',   // Titanic Hippomelon â€” golden, wealth theme
+    jackpot:  '14976594978',   // Titanic Cat â€” most iconic PS99 pet
+    dice:     '14976666952',   // Titanic Sad Cat â€” random/luck theme
   };
 
   function setMainPet(id, petImgId) {
@@ -525,7 +520,7 @@
     setMainPet('jp-main-pet', GAME_PETS.jackpot);
     setMainPet('dc-main-pet', GAME_PETS.dice);
 
-    // Badge pet icons — tiny pets next to house edge / win chance labels
+    // Badge pet icons â€” tiny pets next to house edge / win chance labels
     const b1 = titanics[0],  b2 = titanics[1],  b3 = titanics[2];
     const b4 = titanics[3],  b5 = titanics[4],  b6 = titanics[5];
     setBadgePet('cf-badge-pet',  b1?.img  || GAME_PETS.coinflip);
@@ -535,7 +530,7 @@
     setBadgePet('dc-badge-pet',  b5?.img  || GAME_PETS.dice);
     setBadgePet('dc-badge-pet2', b6?.img  || GAME_PETS.coinflip);
 
-    // Stat icon pets — each stat box gets a pet icon
+    // Stat icon pets â€” each stat box gets a pet icon
     fillStatIcon('hs-icon-0', titanics[6]?.img  || GAME_PETS.coinflip);
     fillStatIcon('hs-icon-1', titanics[7]?.img  || GAME_PETS.jackpot);
     fillStatIcon('hs-icon-2', titanics[8]?.img  || GAME_PETS.dice);
@@ -566,7 +561,7 @@
   }
   setTimeout(() => {
     countUpEl(document.getElementById('stat-online'), 826, 1100, v => v.toLocaleString());
-    countUpEl(document.getElementById('stat-wagered'), 2400, 1400, v => '₿' + (v >= 1000 ? (v/1000).toFixed(1) + 'B' : v + 'M'));
+    countUpEl(document.getElementById('stat-wagered'), 2400, 1400, v => 'â‚¿' + (v >= 1000 ? (v/1000).toFixed(1) + 'B' : v + 'M'));
   }, 350);
 
   // Live counters (post-load updates)
@@ -585,22 +580,22 @@
   let wagered = 2.4e9;
   setInterval(() => {
     wagered += Math.floor(Math.random() * 4e6 + 1e6);
-    document.getElementById('stat-wagered').textContent = '₿' + fmtPSG(wagered);
+    document.getElementById('stat-wagered').textContent = 'â‚¿' + fmtPSG(wagered);
   }, 3200);
 
   // Scrolling live feed
   (function() {
     const events = [
-      {t:'TitanicX won ₿480M on Coin Flip', w:true},
-      {t:'GemLord lost ₿120M Dice Match', w:false},
-      {t:'xR4Zy won ₿2B on Jackpot', w:true},
-      {t:'NovaPro won ₿75M Coin Flip', w:true},
+      {t:'TitanicX won â‚¿480M on Coin Flip', w:true},
+      {t:'GemLord lost â‚¿120M Dice Match', w:false},
+      {t:'xR4Zy won â‚¿2B on Jackpot', w:true},
+      {t:'NovaPro won â‚¿75M Coin Flip', w:true},
       {t:'Sk1yRdr wagered Titanic Cat on Dice', w:true},
-      {t:'PurpleKing won ₿340M Coin Flip', w:true},
-      {t:'HugeGang lost ₿210M Jackpot', w:false},
-      {t:'LegacyPS won ₿88M Dice Match', w:true},
-      {t:'CrystalFly wagered ₿500M Jackpot', w:true},
-      {t:'TitanicX won ₿180M on Dice', w:true},
+      {t:'PurpleKing won â‚¿340M Coin Flip', w:true},
+      {t:'HugeGang lost â‚¿210M Jackpot', w:false},
+      {t:'LegacyPS won â‚¿88M Dice Match', w:true},
+      {t:'CrystalFly wagered â‚¿500M Jackpot', w:true},
+      {t:'TitanicX won â‚¿180M on Dice', w:true},
     ];
     const ticker = document.getElementById('home-feed-ticker');
     if (!ticker) return;
@@ -653,3 +648,4 @@
 </script>
 </body>
 </html>
+

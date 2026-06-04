@@ -1,5 +1,301 @@
 ﻿const PSG_ICON = '<span style="font-weight:900;letter-spacing:-0.02em;margin-right:1px;">₿</span>';
 
+/* ══════════════════════════════════════════════════
+   ACCOUNT SYSTEM — Roblox bio verification
+══════════════════════════════════════════════════ */
+
+// ── Helpers ──────────────────────────────────────────
+function currentUser() {
+  return {
+    username:    localStorage.getItem('ps99g_rblx_user')    || '',
+    uid:         localStorage.getItem('ps99g_rblx_uid')     || '',
+    displayName: localStorage.getItem('ps99g_rblx_display') || '',
+    avatar:      localStorage.getItem('ps99g_rblx_avatar')  || '',
+    verified:    localStorage.getItem('ps99g_rblx_verified') === '1',
+  };
+}
+
+function _genVerifyPhrase() {
+  const words = ['swift','neon','jade','frost','bolt','moon','peak','tide','gold','crimson',
+                 'arc','wave','blaze','echo','iron','oak','sage','vale','zen','rune'];
+  const pick = () => words[Math.floor(Math.random() * words.length)];
+  return `ps99depo-${pick()}-${pick()}-${1000 + Math.floor(Math.random() * 9000)}`;
+}
+
+async function _fetchRobloxAvatar(userId) {
+  try {
+    const r = await fetch(
+      `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`
+    );
+    const d = await r.json();
+    return d.data?.[0]?.imageUrl || null;
+  } catch { return null; }
+}
+
+function _applyUserEverywhere() {
+  const u = currentUser();
+  if (!u.username) return;
+
+  // Nav avatars
+  document.querySelectorAll('.nav-avatar img').forEach(img => {
+    if (u.avatar) { img.src = u.avatar; img.onerror = null; }
+  });
+
+  // Topbar / sidebar balance labels
+  document.querySelectorAll('[data-user-name]').forEach(el => {
+    el.textContent = u.displayName || u.username;
+  });
+
+  // Sidebar username line
+  document.querySelectorAll('#sidebar-username').forEach(el => {
+    el.innerHTML = u.avatar
+      ? `<img src="${u.avatar}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;margin-right:6px;vertical-align:middle;">${u.displayName || u.username}`
+      : (u.displayName || u.username);
+  });
+}
+
+
+// ── LOGIN SCREEN ──────────────────────────────────────
+function _showLoginScreen() {
+  if (document.getElementById('login-screen')) return;
+  const phrase = _genVerifyPhrase();
+  localStorage.setItem('ps99g_verify_phrase', phrase);
+
+  const el = document.createElement('div');
+  el.id = 'login-screen';
+  el.style.cssText = `position:fixed;inset:0;z-index:999999;overflow-y:auto;
+    background:radial-gradient(ellipse 80% 60% at 30% 40%,rgba(124,77,232,.18) 0%,transparent 60%),
+               radial-gradient(ellipse 60% 50% at 80% 20%,rgba(6,182,212,.1) 0%,transparent 55%),#080615;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    font-family:'Segoe UI',system-ui,sans-serif;`;
+
+  el.innerHTML = `
+  <div style="width:min(440px,100%);background:linear-gradient(160deg,#130f2e,#09071a);
+              border:1px solid rgba(124,77,232,.35);border-radius:24px;
+              box-shadow:0 0 80px rgba(124,77,232,.2),0 40px 80px rgba(0,0,0,.7);overflow:hidden;">
+
+    <!-- Header -->
+    <div style="padding:32px 32px 24px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);">
+      <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <div style="width:40px;height:40px;background:linear-gradient(135deg,#4c1d95,#7c4de8 50%,#06b6d4);
+                    border-radius:11px;display:flex;align-items:center;justify-content:center;
+                    box-shadow:0 0 20px rgba(124,77,232,.6);">
+          <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+            <polygon points="12,2 20,8 17,20 7,20 4,8" fill="white" opacity=".9"/>
+            <polygon points="12,2 20,8 12,6" fill="white" opacity=".5"/>
+          </svg>
+        </div>
+        <span style="font-size:1.4rem;font-weight:900;color:#fff;letter-spacing:-.02em;">PS99<span style="background:linear-gradient(90deg,#a67dff,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">GEMS</span></span>
+      </div>
+      <div style="font-size:1.1rem;font-weight:900;color:#fff;margin-bottom:4px;">Login / Sign Up</div>
+      <div style="font-size:.78rem;color:rgba(148,163,184,.6);">Verify your Roblox account to continue</div>
+    </div>
+
+    <!-- Steps -->
+    <div style="padding:24px 32px 32px;display:flex;flex-direction:column;gap:20px;">
+
+      <!-- Step 1 -->
+      <div id="login-step1">
+        <div style="font-size:.6rem;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:rgba(124,77,232,.8);margin-bottom:10px;">Step 1 — Your Roblox Username</div>
+        <input id="login-input" type="text" placeholder="YourRobloxName" autocomplete="off" spellcheck="false"
+          style="width:100%;padding:12px 14px;background:rgba(255,255,255,.05);border:1.5px solid rgba(124,77,232,.3);
+                 border-radius:11px;color:#fff;font-size:.95rem;font-family:inherit;outline:none;
+                 box-sizing:border-box;transition:border .15s;margin-bottom:8px;"
+          onfocus="this.style.borderColor='rgba(124,77,232,.7)'"
+          onblur="this.style.borderColor='rgba(124,77,232,.3)'"
+          oninput="_loginStep1Input()"
+          onkeydown="if(event.key==='Enter')_loginContinue()">
+        <button onclick="_loginContinue()" id="login-continue-btn"
+          style="width:100%;padding:12px;background:linear-gradient(135deg,#7c4de8,#6d28d9);border:none;
+                 border-radius:11px;color:#fff;font-size:.9rem;font-weight:900;cursor:pointer;
+                 box-shadow:0 0 20px rgba(124,77,232,.4);transition:all .18s;">
+          Continue →
+        </button>
+      </div>
+
+      <!-- Step 2 (hidden until username entered) -->
+      <div id="login-step2" style="display:none;opacity:0;transition:opacity .3s;">
+        <div style="font-size:.6rem;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:rgba(124,77,232,.8);margin-bottom:10px;">Step 2 — Paste This In Your Roblox Bio</div>
+        <div style="background:rgba(0,0,0,.4);border:1.5px solid rgba(124,77,232,.3);border-radius:11px;
+                    padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
+          <span id="login-phrase" style="font-size:.82rem;font-weight:800;color:#a67dff;font-family:monospace;letter-spacing:.04em;word-break:break-all;">${phrase}</span>
+          <button onclick="_copyPhrase()" id="copy-btn"
+            style="flex-shrink:0;padding:6px 14px;background:rgba(124,77,232,.2);border:1px solid rgba(124,77,232,.4);
+                   border-radius:8px;color:#a67dff;font-size:.72rem;font-weight:800;cursor:pointer;transition:all .15s;white-space:nowrap;">
+            Copy
+          </button>
+        </div>
+        <div style="font-size:.72rem;color:rgba(148,163,184,.6);margin-bottom:14px;line-height:1.5;">
+          Go to <strong style="color:#fff;">roblox.com → Profile → Edit → About</strong> and paste the code. Then come back and hit Verify.
+        </div>
+        <button onclick="_loginVerify()" id="verify-btn"
+          style="width:100%;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;
+                 border-radius:11px;color:#fff;font-size:.9rem;font-weight:900;cursor:pointer;
+                 box-shadow:0 0 20px rgba(34,197,94,.35);transition:all .18s;">
+          Verify →
+        </button>
+      </div>
+
+      <!-- Status / Error -->
+      <div id="login-status" style="font-size:.75rem;min-height:18px;font-weight:700;text-align:center;"></div>
+
+    </div>
+
+    <div style="padding:0 32px 20px;text-align:center;font-size:.62rem;color:rgba(100,116,139,.45);">
+      Entertainment only · No real money · PS99 fan site
+    </div>
+  </div>`;
+
+  document.body.appendChild(el);
+  setTimeout(() => document.getElementById('login-input')?.focus(), 150);
+}
+
+function _loginStep1Input() {
+  const v = (document.getElementById('login-input')?.value || '').trim();
+  const s2 = document.getElementById('login-step2');
+  if (v.length >= 3 && s2 && s2.style.display !== 'block') {
+    // Don't auto-show step 2 yet — wait for Continue click
+  }
+}
+
+function _loginContinue() {
+  const username = (document.getElementById('login-input')?.value || '').trim();
+  const st = document.getElementById('login-status');
+  if (!username || username.length < 3) {
+    if (st) { st.style.color = '#f87171'; st.textContent = 'Enter a valid Roblox username'; }
+    return;
+  }
+  if (st) st.textContent = '';
+  const s2 = document.getElementById('login-step2');
+  if (s2) { s2.style.display = 'block'; requestAnimationFrame(() => s2.style.opacity = '1'); }
+  document.getElementById('login-continue-btn').textContent = 'Update username';
+}
+
+function _copyPhrase() {
+  const phrase = document.getElementById('login-phrase')?.textContent || '';
+  navigator.clipboard.writeText(phrase).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = phrase; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  });
+  const btn = document.getElementById('copy-btn');
+  if (btn) { btn.textContent = 'Copied!'; btn.style.color = '#4ade80'; setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = '#a67dff'; }, 2000); }
+}
+
+async function _loginVerify() {
+  const username = (document.getElementById('login-input')?.value || '').trim();
+  const phrase   = localStorage.getItem('ps99g_verify_phrase') || '';
+  const btn      = document.getElementById('verify-btn');
+  const st       = document.getElementById('login-status');
+
+  if (!username || !phrase) return;
+  if (btn) { btn.textContent = 'Checking…'; btn.disabled = true; }
+  if (st)  { st.style.color = '#94a3b8'; st.textContent = 'Checking your Roblox bio…'; }
+
+  try {
+    const r = await fetch(_SERVER_HTTP + '/api/verify-bio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, phrase }),
+    });
+    const d = await r.json();
+
+    if (d.ok) {
+      // Verified — save account data
+      localStorage.setItem('ps99g_rblx_user',     username.toLowerCase());
+      localStorage.setItem('ps99g_rblx_uid',      d.userId || '');
+      localStorage.setItem('ps99g_rblx_display',  d.displayName || username);
+      localStorage.setItem('ps99g_rblx_verified', '1');
+
+      // Fetch their Roblox avatar
+      if (d.userId) {
+        if (st) st.textContent = 'Loading your avatar…';
+        const avatarUrl = await _fetchRobloxAvatar(d.userId);
+        if (avatarUrl) localStorage.setItem('ps99g_rblx_avatar', avatarUrl);
+      }
+
+      // Load server balance
+      try {
+        const br = await fetch(_SERVER_HTTP + '/api/user/' + encodeURIComponent(username.toLowerCase()));
+        if (br.ok) {
+          const bd = await br.json();
+          if (typeof bd.balance === 'number') setBalance(bd.balance);
+          if (Array.isArray(bd.inventory) && bd.inventory.length)
+            localStorage.setItem('ps99g_inv', JSON.stringify(bd.inventory));
+        }
+      } catch {}
+
+      _connectWS();
+      _applyUserEverywhere();
+      refreshBal();
+
+      // Success screen
+      if (st) { st.style.color = '#4ade80'; st.textContent = ''; }
+      _showVerifySuccess(d.displayName || username, localStorage.getItem('ps99g_rblx_avatar'));
+
+    } else {
+      if (st) { st.style.color = '#f87171'; st.textContent = d.error || 'Code not found in your bio. Make sure you pasted it and saved.'; }
+      if (btn) { btn.textContent = 'Verify →'; btn.disabled = false; }
+    }
+  } catch {
+    if (st) { st.style.color = '#f87171'; st.textContent = 'Server offline — try again shortly.'; }
+    if (btn) { btn.textContent = 'Verify →'; btn.disabled = false; }
+  }
+}
+
+function _showVerifySuccess(displayName, avatarUrl) {
+  const screen = document.getElementById('login-screen');
+  if (!screen) return;
+  screen.innerHTML = `
+    <div style="width:min(440px,100%);background:linear-gradient(160deg,#0d1f14,#09071a);
+                border:1px solid rgba(34,197,94,.35);border-radius:24px;padding:40px 32px;text-align:center;
+                box-shadow:0 0 60px rgba(34,197,94,.15),0 40px 80px rgba(0,0,0,.7);">
+      ${avatarUrl ? `<img src="${avatarUrl}" style="width:80px;height:80px;border-radius:50%;border:3px solid rgba(34,197,94,.6);box-shadow:0 0 24px rgba(34,197,94,.4);margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;">` : ''}
+      <div style="font-size:1.3rem;font-weight:900;color:#fff;margin-bottom:6px;">Welcome, ${displayName}!</div>
+      <div style="font-size:.8rem;color:rgba(148,163,184,.6);margin-bottom:24px;">Account verified — you're all set</div>
+      <button onclick="_enterSiteAfterVerify()"
+        style="padding:14px 40px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:12px;
+               color:#fff;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 0 24px rgba(34,197,94,.45);transition:all .18s;">
+        Enter Site →
+      </button>
+    </div>`;
+}
+
+function _enterSiteAfterVerify() {
+  const screen = document.getElementById('login-screen');
+  if (screen) {
+    screen.style.transition = 'opacity .4s ease';
+    screen.style.opacity = '0';
+    setTimeout(() => { screen.remove(); _applyUserEverywhere(); }, 400);
+  }
+}
+
+// ── SILENT AUTO-LOGIN (returning users) ───────────────
+function _silentLoad() {
+  const u = currentUser();
+  if (!u.username) return;
+  _connectWS();
+  _applyUserEverywhere();
+  fetch(_SERVER_HTTP + '/api/user/' + encodeURIComponent(u.username))
+    .then(r => r.ok ? r.json() : null)
+    .then(d => {
+      if (d?.balance != null) { setBalance(d.balance); refreshBal(); }
+      if (Array.isArray(d?.inventory) && d.inventory.length)
+        localStorage.setItem('ps99g_inv', JSON.stringify(d.inventory));
+    }).catch(() => {});
+}
+
+
+function _updateSidebarUsername() { _applyUserEverywhere(); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const u = currentUser();
+  if (u.username && u.verified) {
+    _silentLoad();
+  }
+  // Unverified users are handled by initVerification() further below
+});
+
 function fmtPSG(n) {
   function r(x) { return +(x.toFixed(x >= 100 ? 0 : x >= 10 ? 1 : 2)); }
   if (n >= 1e9) return r(n / 1e9) + 'B';
@@ -12,7 +308,7 @@ function fmtB(n) { return '₿' + fmtPSG(n); }
 /* ── WEBSOCKET — real-time link to trade-bot server ── */
 // Set SERVER_URL to your deployed server (e.g. 'https://myapp.railway.app')
 // Leave as '' to auto-detect (localhost in dev, same host in prod)
-const _SERVER_OVERRIDE = '';
+const _SERVER_OVERRIDE = 'https://ps99depo-production.up.railway.app';
 
 const _isLocal = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '';
 const _SERVER_HTTP = _SERVER_OVERRIDE || (_isLocal ? 'http://localhost:3001' : 'https://' + location.hostname);
@@ -64,8 +360,42 @@ function _connectWS() {
         }
         _depShowRealSuccess(msg.items, msg.gems);
 
+      } else if (msg.type === 'online_count') {
+        _updateOnlineCount(msg.count);
+
+      } else if (msg.type === 'chat') {
+        _renderChatMsg(msg, false);
+
+      } else if (msg.type === 'banned') {
+        alert('You have been banned from 99Depo.');
+        localStorage.clear(); location.href = '/home.html';
+
+      } else if (msg.type === 'timed_out') {
+        showToast(`You are timed out for ${msg.mins} minute${msg.mins!==1?'s':''}.`, 'info');
+
+      } else if (msg.type === 'item_received') {
+        showToast(`You received ${msg.item?.name} from the owner!`, 'win');
+        try {
+          const inv = JSON.parse(localStorage.getItem('ps99g_inv') || '[]');
+          inv.unshift(msg.item);
+          localStorage.setItem('ps99g_inv', JSON.stringify(inv));
+        } catch {}
+
+      } else if (msg.type === 'giveaway_start') {
+        _showGiveawayInChat(msg);
+
+      } else if (msg.type === 'giveaway_count') {
+        const el = document.getElementById('giveaway-entry-count');
+        if (el) el.textContent = msg.count + ' entered';
+
+      } else if (msg.type === 'giveaway_end') {
+        _showGiveawayResult(msg);
+
       } else if (msg.type === 'withdrawal_complete') {
         showToast('Withdrawal sent! Check your trade window.', 'info');
+
+      } else if (msg.type === 'games_update') {
+        if (typeof _handleServerGames === 'function') _handleServerGames(msg.games || []);
       }
     };
     _wsConn.onclose = () => {
@@ -151,13 +481,7 @@ function deductBal(n)  { if (n > _bal) return false; setBalance(_bal - n); retur
 
 function refreshBal() {
   document.querySelectorAll('[data-bal]').forEach(el => { el.textContent = fmtPSG(_bal); });
-  // Flash the nav balance on every update
-  const bal = document.querySelector('.nav-balance');
-  if (bal) {
-    bal.classList.remove('updated');
-    void bal.offsetWidth; // force reflow
-    bal.classList.add('updated');
-  }
+  _updateWalletDisplay();
 }
 
 function claimFree() { addBal(2500000000); showToast('+2.5B claimed!', 'info'); }
@@ -1521,35 +1845,7 @@ const CV = [
 function getCVByName(name) { return CV.find(p => p.name === name); }
 
 /* ── LIVE CHAT ── */
-const CHAT_PLAYERS = [
-  { name:'Didkpp',       color:'#f59e0b', pet:'pets/huge-cat.svg',    level:42, wagered:12400000000, won:5200000000,  lost:7200000000,  id:'#4829103847' },
-  { name:'Yaman1233',    color:'#ef4444', pet:'pets/dragon.svg',      level:31, wagered:3800000000,  won:1900000000,  lost:1900000000,  id:'#7732948201' },
-  { name:'igotbanneds',  color:'#8b5cf6', pet:'pets/husky.svg',       level:58, wagered:38000000000, won:15000000000, lost:23000000000, id:'#1029384756' },
-  { name:'TitanicPro',   color:'#06b6d4', pet:'pets/titanic-cat.svg', level:27, wagered:2100000000,  won:980000000,   lost:1120000000,  id:'#6647382910' },
-  { name:'GemLord',      color:'#22c55e', pet:'pets/golden-cat.svg',  level:19, wagered:640000000,   won:320000000,   lost:320000000,   id:'#3312948572' },
-  { name:'xR4Zy',        color:'#f97316', pet:'pets/unicorn.svg',     level:34, wagered:5800000000,  won:2400000000,  lost:3400000000,  id:'#8891023745' },
-  { name:'NovaPro',      color:'#a78bfa', pet:'pets/phoenix.svg',     level:18, wagered:420000000,   won:190000000,   lost:230000000,   id:'#2245679013' },
-  { name:'HugeGang',     color:'#fbbf24', pet:'pets/huge-dog.svg',    level:11, wagered:180000000,   won:88000000,    lost:92000000,    id:'#5534128976' },
-  { name:'Sk1yRdr',      color:'#34d399', pet:'pets/cat.svg',         level:7,  wagered:55000000,    won:21000000,    lost:34000000,    id:'#9921034857' },
-  { name:'LegacyPS',     color:'#fb7185', pet:'pets/titanic-dog.svg', level:24, wagered:1500000000,  won:720000000,   lost:780000000,   id:'#4478302916' },
-  { name:'AussieOutL',   color:'#818cf8', pet:'pets/huge-cat.svg',    level:15, wagered:290000000,   won:142000000,   lost:148000000,   id:'#7765432109' },
-  { name:'carsten_forr', color:'#e879f9', pet:'pets/titanic-cat.svg', level:73, wagered:95000000000, won:38000000000, lost:57000000000, id:'#3333962197' },
-];
-
-const CHAT_MSGS = [
-  'gg bro', 'let me win this one', 'odds?', 'bro my luck is gone',
-  'huge cat carry', 'no way i lost again', 'send it', '50M on jackpot rn',
-  'who wants to cf', 'just got titanic!!!', 'rigged lol',
-  'can i get a loan', 'wp wp', 'that was so close',
-  'been on 5 loss streak', 'lets go baby', 'never doubted it',
-  'coinflip me a huge cat', 'that payout tho', 'this site go hard',
-  'some post titan', 'not my fault ngl', 'depo', 'ok yamato and',
-  'huge cat carry fr', 'bro rainbow shiny is insane value',
-  'depositing titanic cat wish me luck', 'who has huge lucky dominus',
-];
-
-let chatInterval = null;
-let onlineCount = 847;
+let onlineCount = 0;
 
 function formatTime() {
   const d = new Date();
@@ -1559,53 +1855,17 @@ function formatTime() {
   return `${h}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
-function addChatMsg() {
-  const wrap = document.getElementById('chat-msgs');
-  if (!wrap) return;
-  const idx = Math.floor(Math.random() * CHAT_PLAYERS.length);
-  const p = CHAT_PLAYERS[idx];
-  const msg = CHAT_MSGS[Math.floor(Math.random() * CHAT_MSGS.length)];
-  const rank = getRank(p.wagered || 0);
-  const initials = p.name.slice(0,2).toUpperCase();
-  const div = document.createElement('div');
-  div.className = 'chat-msg';
-  div.innerHTML = `
-    <div class="cm-avatar-wrap">
-      <div class="cm-av-circle" style="background:linear-gradient(135deg,${p.color},${p.color}bb)"
-           onclick="openProfileModal('bot',${idx})" title="View ${p.name}&apos;s profile">
-        <span>${initials}</span>
-      </div>
-      <div class="cm-lvl">LVL ${p.level||1}</div>
-    </div>
-    <div class="cm-body">
-      <div class="cm-meta">
-        <span class="cm-name" style="color:${p.color}">${p.name}</span>
-        <span class="cm-rank-icon" title="${rank.name}" style="color:${rank.color}">${rank.icon}</span>
-        <span class="cm-time">${formatTime()}</span>
-      </div>
-      <div class="cm-text">${msg}</div>
-    </div>`;
-  wrap.appendChild(div);
-  if (wrap.children.length > 40) wrap.removeChild(wrap.firstChild);
-  wrap.scrollTop = wrap.scrollHeight;
+function _updateOnlineCount(n) {
+  onlineCount = n;
+  const display = Math.max(n, _isVerified() ? 1 : 0);
+  document.querySelectorAll('#online-count').forEach(el => el.textContent = display);
+  document.querySelectorAll('#chat-count').forEach(el => el.textContent = display + ' online');
 }
 
-function seedChat(count = 8) { for (let i = 0; i < count; i++) addChatMsg(); }
-
-function startChat() {
-  seedChat();
-  chatInterval = setInterval(addChatMsg, 2800 + Math.random() * 2000);
-}
-
-function animateOnline() {
-  const el = document.getElementById('online-count');
-  if (!el) return;
-  setInterval(() => {
-    onlineCount += Math.floor(Math.random() * 7) - 3;
-    onlineCount = Math.max(800, Math.min(950, onlineCount));
-    el.textContent = onlineCount;
-  }, 4000);
-}
+// Init online count to 1 if logged in
+document.addEventListener('DOMContentLoaded', () => {
+  if (_isVerified()) _updateOnlineCount(1);
+});
 
 /* ── COIN CANVAS (shared) ── */
 function drawCVGem(ctx, cx, cy, size) {
@@ -1909,35 +2169,54 @@ function _ensureProfileModal() {
   document.body.appendChild(wrap.firstElementChild);
 }
 
-function openProfileModal(type, idx) {
+function openProfileModal(type, idx, isOwner) {
   _ensureProfileModal();
   let data;
   if (type === 'you') {
     const p = myProfile();
+    const isOwnAdmin = localStorage.getItem('ps99g_isAdmin') === '1';
     data = { name:p.name, level:p.level, wagered:p.wagered, won:p.won, lost:p.lost, id:p.id, color:'#7c3aed',
-             winRate:p.winRate, bestWin:p.bestWin, maxStreak:p.maxStreak, winCount:p.winCount, lossCount:p.lossCount };
+             winRate:p.winRate, bestWin:p.bestWin, maxStreak:p.maxStreak, winCount:p.winCount, lossCount:p.lossCount,
+             isOwner: isOwner || isOwnAdmin };
   } else {
-    const p = CHAT_PLAYERS[idx];
-    const wc = p.won ? Math.round(p.won/p.wagered*100) : 0;
-    data = { name:p.name, level:p.level||1, wagered:p.wagered||0, won:p.won||0, lost:p.lost||0, id:p.id||'#0000000000', color:p.color,
-             winRate: Math.floor(Math.random()*30+45), bestWin: Math.floor(p.wagered*0.2*Math.random()+1e6),
-             maxStreak: Math.floor(Math.random()*8+1), winCount: Math.floor(Math.random()*50+10), lossCount: Math.floor(Math.random()*40+8) };
+    const p = CHAT_PLAYERS[idx] || {};
+    data = { name:p.name||'Player', level:p.level||1, wagered:p.wagered||0, won:p.won||0, lost:p.lost||0, id:p.id||'#0000000000', color:p.color||'#7c3aed',
+             winRate: Math.floor(Math.random()*30+45), bestWin: Math.floor((p.wagered||1e8)*0.2*Math.random()+1e6),
+             maxStreak: Math.floor(Math.random()*8+1), winCount: Math.floor(Math.random()*50+10), lossCount: Math.floor(Math.random()*40+8),
+             isOwner: false };
   }
-  const rank = getRank(data.wagered);
+
+  const rank   = getRank(data.wagered);
   const profit = data.won - data.lost;
   const initials = data.name.slice(0,2).toUpperCase();
-  const avEl = document.getElementById('prof-av-circle');
-  avEl.style.background = `linear-gradient(135deg,#1e1645,#120e2a)`;
-  avEl.textContent = initials;
+
+  const avEl  = document.getElementById('prof-av-circle');
   const ringEl = document.getElementById('prof-av-ring');
-  if (ringEl) ringEl.style.background = `linear-gradient(135deg,${data.color},${data.color}88)`;
-  const hdrEl = document.getElementById('prof-header-bg');
-  if (hdrEl) hdrEl.style.background = `linear-gradient(135deg,${data.color}55 0%,${data.color}22 50%,transparent 100%),linear-gradient(135deg,#3b0764,#6d28d9)`;
-  document.getElementById('prof-lv-pill').textContent = `LVL ${data.level}`;
-  document.getElementById('prof-uname').textContent = data.name;
+  const hdrEl  = document.getElementById('prof-header-bg');
   const rankPill = document.getElementById('prof-rank-pill');
-  rankPill.innerHTML = `${rank.icon}&nbsp;${rank.name.toUpperCase()}`;
-  rankPill.style.cssText = `color:${rank.color};border-color:${rank.color};background:${rank.bg}`;
+
+  if (data.isOwner) {
+    // ── OWNER: gold crown profile ──
+    avEl.style.cssText = 'background:linear-gradient(135deg,#92400e,#f59e0b,#78350f);box-shadow:0 0 24px rgba(245,158,11,.7);color:#fff;font-size:1.5rem;';
+    avEl.textContent = '👑';
+    if (ringEl) ringEl.style.background = 'linear-gradient(135deg,#f59e0b,#fbbf24,#f59e0b)';
+    if (hdrEl)  hdrEl.style.background  = 'linear-gradient(135deg,rgba(245,158,11,.45) 0%,rgba(180,83,9,.2) 50%,transparent 100%),linear-gradient(135deg,#451a03,#78350f,#92400e)';
+    document.getElementById('prof-lv-pill').textContent = '👑 OWNER';
+    document.getElementById('prof-lv-pill').style.cssText = 'background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;border:none;font-size:.65rem;box-shadow:0 0 12px rgba(245,158,11,.4);';
+    rankPill.innerHTML = '👑&nbsp;SITE OWNER';
+    rankPill.style.cssText = 'color:#fbbf24;border-color:#f59e0b;background:rgba(245,158,11,.12);font-size:.6rem;letter-spacing:.06em;';
+  } else {
+    avEl.style.cssText = 'background:linear-gradient(135deg,#1e1645,#120e2a);';
+    avEl.textContent = initials;
+    if (ringEl) ringEl.style.background = `linear-gradient(135deg,${data.color},${data.color}88)`;
+    if (hdrEl)  hdrEl.style.background  = `linear-gradient(135deg,${data.color}55 0%,${data.color}22 50%,transparent 100%),linear-gradient(135deg,#3b0764,#6d28d9)`;
+    document.getElementById('prof-lv-pill').textContent = `LVL ${data.level}`;
+    document.getElementById('prof-lv-pill').style.cssText = '';
+    rankPill.innerHTML = `${rank.icon}&nbsp;${rank.name.toUpperCase()}`;
+    rankPill.style.cssText = `color:${rank.color};border-color:${rank.color};background:${rank.bg}`;
+  }
+
+  document.getElementById('prof-uname').textContent = data.name;
   document.getElementById('prof-id-pill').textContent = data.id || '#0000000000';
   document.getElementById('pstat-w').textContent  = fmtB(data.wagered);
   const pEl = document.getElementById('pstat-p');
@@ -1951,6 +2230,14 @@ function openProfileModal(type, idx) {
   const ov = document.getElementById('prof-overlay');
   ov.style.display = 'flex';
   requestAnimationFrame(() => ov.classList.add('active'));
+}
+
+function _openOwnerProfile() {
+  _ensureProfileModal();
+  const adminName = _chatAdminName || localStorage.getItem('ps99g_admin_name') || 'Owner';
+  openProfileModal('you', 0, true);
+  // Override name with admin's display name
+  document.getElementById('prof-uname').textContent = adminName;
 }
 
 function closeProfileModal(e, force) {
@@ -1994,7 +2281,7 @@ function _updateNavInvBadge() {
 }
 
 /* ── DEPOSIT MODAL (Trade Bot Flow) ── */
-const _DEP_BOT        = 'PS99GemsBOT';
+const _DEP_BOT        = '99DepoBot';
 const _DEP_SERVER_URL = 'https://www.roblox.com/share?code=9e9097507ceb1241ba8d46a11037f79e&type=Server';
 let _depVerifyTimer = null;
 
@@ -2402,8 +2689,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initVerification();
   refreshBal();
   _connectWS();
-  startChat();
-  animateOnline();
 
   const chatIn = document.getElementById('chat-input');
   const chatBtn = document.getElementById('chat-send');
@@ -2439,31 +2724,115 @@ document.addEventListener('DOMContentLoaded', () => {
 function sendChatMsg() {
   const inp = document.getElementById('chat-input');
   if (!inp || !inp.value.trim()) return;
+  const text = inp.value.trim();
+  inp.value = '';
+
+  const u = currentUser();
+
+  // Send to server so everyone sees it
+  if (_wsConn && _wsConn.readyState === WebSocket.OPEN) {
+    _wsConn.send(JSON.stringify({
+      type:        'chat',
+      text,
+      displayName: u.displayName || u.username || 'You',
+      avatar:      u.avatar || '',
+    }));
+  } else {
+    // Offline fallback — show locally only
+    _renderChatMsg({ username: u.username || 'you', displayName: u.displayName || 'You', avatar: u.avatar, text, ts: Date.now() }, true);
+  }
+}
+
+let _isAdmin = false;
+
+function _checkAdminStatus() {
+  const u = currentUser();
+  if (!u.username) return;
+  fetch(_SERVER_HTTP + '/api/admin/check/' + encodeURIComponent(u.username))
+    .then(r => r.ok ? r.json() : null)
+    .then(d => {
+      if (d?.isAdmin) {
+        _isAdmin = true;
+        localStorage.setItem('ps99g_isAdmin', '1');
+        _applyAdminBadge();
+        _refreshAuthButton();
+      }
+    })
+    .catch(() => {
+      // Keep cached isAdmin from localStorage
+      if (localStorage.getItem('ps99g_isAdmin') === '1') { _isAdmin = true; _applyAdminBadge(); }
+    });
+}
+
+function _applyAdminBadge() {
+  document.querySelectorAll('.admin-crown-badge').forEach(el => el.style.display = 'inline');
+}
+
+let _chatAdminName = localStorage.getItem('ps99g_admin_name') || 'Owner';
+
+function _renderChatMsg(msg, isMe) {
   const wrap = document.getElementById('chat-msgs');
   if (!wrap) return;
-  const prof = myProfile();
-  const rank = getRank(prof.wagered);
+  const u = currentUser();
+  isMe = isMe || (msg.username && msg.username === u.username);
+
+  // System messages
+  if (msg.isSystem || msg.username === '__system') {
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:6px 14px;font-size:.72rem;color:rgba(148,163,184,.7);font-style:italic;text-align:center;animation:slideInMsg .2s ease;';
+    div.textContent = msg.text;
+    wrap.appendChild(div);
+    wrap.scrollTop = wrap.scrollHeight;
+    return;
+  }
+
+  const prof    = myProfile();
+  const rank    = getRank(prof.wagered);
+  const name    = msg.displayName || msg.username || 'Player';
+  const isAdminMsg = msg.isAdmin;
+  if (isAdminMsg) { _chatAdminName = msg.displayName || msg.username || 'Owner'; localStorage.setItem('ps99g_admin_name', _chatAdminName); }
+
+  const msgAvatar = isMe ? (u.avatar || '') : (msg.avatar || '');
+  const avatarHtml = msgAvatar
+    ? `<img src="${msgAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:.7rem;font-weight:900;\\'>${name.slice(0,2).toUpperCase()}</span>'">`
+    : `<span style="font-size:.7rem;font-weight:900;">${name.slice(0,2).toUpperCase()}</span>`;
+
+  const nameColor = isAdminMsg ? '#fbbf24' : isMe ? '#a78bfa' : '#93c5fd';
+  const circleBg  = isAdminMsg ? 'linear-gradient(135deg,#92400e,#f59e0b,#78350f)'
+                  : isMe       ? 'linear-gradient(135deg,#7c3aed,#a78bfa)'
+                  :              'linear-gradient(135deg,#1e1b4b,#4338ca)';
+
+  const adminBadge = isAdminMsg
+    ? `<span style="font-size:.54rem;font-weight:900;background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;padding:2px 7px;border-radius:20px;margin-left:4px;letter-spacing:.04em;box-shadow:0 0 8px rgba(245,158,11,.4);">👑 OWNER</span>`
+    : '';
+
+  const msgBg = isAdminMsg
+    ? 'background:linear-gradient(135deg,rgba(245,158,11,.07),rgba(180,83,9,.04));border-left:2px solid rgba(245,158,11,.45);'
+    : '';
+
+  const avatarClick = isAdminMsg
+    ? `onclick="_openOwnerProfile()" style="cursor:pointer;"`
+    : isMe ? '' : '';
+
   const div = document.createElement('div');
   div.className = 'chat-msg';
+  div.style.cssText = 'animation:slideInMsg .2s ease forwards;' + msgBg;
   div.innerHTML = `
     <div class="cm-avatar-wrap">
-      <div class="cm-av-circle" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)"
-           onclick="openProfileModal('you')" title="Your profile">
-        <span>YO</span>
-      </div>
-      <div class="cm-lvl">LVL ${prof.level}</div>
+      <div class="cm-av-circle" ${avatarClick} style="background:${circleBg};overflow:hidden;${isAdminMsg?'box-shadow:0 0 12px rgba(245,158,11,.5);':''}">${avatarHtml}</div>
     </div>
     <div class="cm-body">
       <div class="cm-meta">
-        <span class="cm-name" style="color:#9d71ff">You</span>
-        <span class="cm-rank-icon" title="${rank.name}" style="color:${rank.color}">${rank.icon}</span>
+        <span class="cm-name" style="color:${nameColor};font-weight:${isAdminMsg?'900':'800'}">${isMe ? (u.displayName||'You') : name}</span>
+        ${adminBadge}
+        ${isMe ? `<span class="cm-rank-icon" title="${rank.name}" style="color:${rank.color}">${rank.icon}</span>` : ''}
         <span class="cm-time">${formatTime()}</span>
       </div>
-      <div class="cm-text">${inp.value.trim()}</div>
+      <div class="cm-text">${msg.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
     </div>`;
   wrap.appendChild(div);
   wrap.scrollTop = wrap.scrollHeight;
-  inp.value = '';
+  while (wrap.children.length > 120) wrap.removeChild(wrap.firstChild);
 }
 
 /* ── BIO VERIFICATION ── */
@@ -2488,69 +2857,285 @@ function _genPhrase() {
 }
 
 function _isVerified() {
-  return !!localStorage.getItem(_VERIFY_KEY);
+  return !!localStorage.getItem(_VERIFY_KEY) || !!localStorage.getItem('ps99g_rblx_verified');
 }
 
-function _ensureVerifyModal() {
-  if (document.getElementById('bio-verify-overlay')) return;
+// ── COMPACT LOGIN SYSTEM ─────────────────────────────
+
+function _injectLoginCSS() {
+  if (document.getElementById('login-css')) return;
+  const s = document.createElement('style');
+  s.id = 'login-css';
+  s.textContent = `
+    @keyframes loginSlideIn {
+      from { opacity:0; transform:translateY(-14px) scale(.97); }
+      to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+    #login-modal-overlay {
+      position:fixed;inset:0;z-index:99999;
+      background:rgba(2,0,14,.6);backdrop-filter:blur(8px);
+      display:flex;align-items:flex-start;justify-content:flex-end;
+      padding:68px 18px 0 0;
+    }
+    #login-modal-box {
+      background:linear-gradient(160deg,#1e1245,#0d0824);
+      border:1.5px solid rgba(124,77,232,.55);
+      border-radius:20px;padding:28px 24px;width:310px;
+      max-width:calc(100vw - 36px);
+      box-shadow:0 0 60px rgba(124,77,232,.35),0 30px 60px rgba(0,0,0,.75);
+      animation:loginSlideIn .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    #auth-wrap button { font-family:inherit; }
+    .auth-user-chip {
+      display:flex;align-items:center;gap:7px;
+      padding:5px 12px 5px 5px;
+      background:rgba(124,77,232,.16);
+      border:1.5px solid rgba(124,77,232,.38);
+      border-radius:30px;color:#fff;cursor:pointer;
+      transition:all .15s;font-family:inherit;
+    }
+    .auth-user-chip:hover { background:rgba(124,77,232,.28); border-color:rgba(167,139,250,.6); }
+    .auth-login-btn {
+      padding:7px 18px;
+      background:linear-gradient(135deg,#7c4de8,#6d28d9);
+      border:none;border-radius:9px;color:#fff;
+      font-size:.75rem;font-weight:800;cursor:pointer;
+      transition:all .15s;font-family:inherit;
+      box-shadow:0 0 16px rgba(124,77,232,.4);letter-spacing:.03em;
+    }
+    .auth-login-btn:hover { transform:translateY(-1px); box-shadow:0 0 28px rgba(124,77,232,.65); }
+    #user-dropdown {
+      position:fixed;z-index:99998;
+      background:linear-gradient(160deg,#1e1245,#0d0824);
+      border:1.5px solid rgba(124,77,232,.4);
+      border-radius:14px;min-width:180px;
+      box-shadow:0 8px 40px rgba(0,0,0,.65);
+      overflow:hidden;animation:loginSlideIn .2s ease;
+    }
+    #user-dropdown button {
+      width:100%;padding:10px 16px;background:none;border:none;
+      color:rgba(255,255,255,.8);font-size:.78rem;font-weight:700;
+      cursor:pointer;text-align:left;font-family:inherit;
+      transition:background .12s;display:flex;align-items:center;gap:8px;
+    }
+    #user-dropdown button:hover { background:rgba(124,77,232,.2); color:#fff; }
+  `;
+  document.head.appendChild(s);
+}
+
+function _injectAuthButton() {
+  if (document.getElementById('auth-wrap')) return;
+  const target = document.querySelector('.nav-right') || document.querySelector('.topbar-right');
+  if (!target) return;
+  // + Free Balance button (small, subtle)
+  if (!document.getElementById('free-bal-nav-btn')) {
+    const fb = document.createElement('button');
+    fb.id = 'free-bal-nav-btn';
+    fb.textContent = '+ Free';
+    fb.title = 'Claim free balance';
+    fb.onclick = claimFree;
+    fb.style.cssText = 'padding:6px 11px;background:rgba(124,77,232,.12);border:1px solid rgba(124,77,232,.28);border-radius:8px;color:#a78bfa;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;';
+    fb.onmouseover = () => fb.style.background = 'rgba(124,77,232,.22)';
+    fb.onmouseout  = () => fb.style.background = 'rgba(124,77,232,.12)';
+    target.insertBefore(fb, target.firstChild);
+  }
+  // Inject wallet button
+  _injectWalletButton();
+  // Inject login/user chip
+  const wrap = document.createElement('div');
+  wrap.id = 'auth-wrap';
+  wrap.style.cssText = 'display:flex;align-items:center;margin-left:6px;';
+  target.appendChild(wrap);
+  _refreshAuthButton();
+}
+
+function _injectWalletButton() {
+  if (document.getElementById('wallet-btn-wrap')) return;
+  const wrap = document.createElement('div');
+  wrap.id = 'wallet-btn-wrap';
+  wrap.style.cssText = 'display:flex;align-items:center;';
+  wrap.innerHTML = `
+    <button id="wallet-btn" onclick="_openWalletPanel(event)" title="Wallet" style="
+      display:flex;align-items:center;gap:7px;
+      padding:7px 13px;background:rgba(124,77,232,.15);
+      border:1.5px solid rgba(124,77,232,.35);border-radius:10px;
+      color:#c4b5fd;cursor:pointer;font-family:inherit;
+      transition:all .15s;font-size:.78rem;font-weight:700;">
+      <svg viewBox="0 0 20 20" fill="none" width="16" height="16">
+        <rect x="2" y="5" width="16" height="12" rx="2" stroke="#a78bfa" stroke-width="1.6"/>
+        <path d="M2 8h16" stroke="#a78bfa" stroke-width="1.6"/>
+        <circle cx="15" cy="12" r="1.5" fill="#f59e0b"/>
+      </svg>
+      <span data-bal-nav>₿—</span>
+    </button>`;
+  const target = document.querySelector('.nav-right') || document.querySelector('.topbar-right');
+  if (target) target.insertBefore(wrap, target.firstChild);
+  // Keep balance in sync
+  _updateWalletDisplay();
+}
+
+function _updateWalletDisplay() {
+  const el = document.querySelector('[data-bal-nav]');
+  if (el) el.textContent = '₿' + fmtPSG(getBalance());
+}
+
+function _openWalletPanel(e) {
+  e?.stopPropagation();
+  const existing = document.getElementById('wallet-panel');
+  if (existing) { existing.remove(); return; }
+  _injectLoginCSS();
+  const inv = getInventory();
+  const bal = getBalance();
+  const wrap = document.getElementById('wallet-btn-wrap');
+  const rect = wrap?.getBoundingClientRect() || { bottom:56, left:100, right:200 };
+  const panel = document.createElement('div');
+  panel.id = 'wallet-panel';
+  panel.style.cssText = `position:fixed;top:${rect.bottom+6}px;left:${rect.left}px;
+    z-index:99997;width:280px;
+    background:linear-gradient(160deg,#1e1245,#0d0824);
+    border:1.5px solid rgba(124,77,232,.45);border-radius:16px;
+    box-shadow:0 8px 40px rgba(0,0,0,.7);overflow:hidden;
+    animation:loginSlideIn .2s ease;font-family:inherit;`;
+  const invRows = inv.slice(0,6).map(item =>
+    `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+      <div style="width:32px;height:32px;border-radius:7px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);overflow:hidden;flex-shrink:0;">
+        <img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.opacity='.2'">
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.72rem;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.name||'Item'}</div>
+        <div style="font-size:.6rem;color:#a67dff;">₿${fmtPSG(item.value||0)}</div>
+      </div>
+    </div>`
+  ).join('');
+  panel.innerHTML = `
+    <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.07);">
+      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(148,163,184,.45);margin-bottom:5px;">Balance</div>
+      <div style="font-size:1.3rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:6px;">
+        <svg viewBox="0 0 20 20" fill="none" width="18" height="18"><rect x="2" y="5" width="16" height="12" rx="2" stroke="#a78bfa" stroke-width="1.6"/><path d="M2 8h16" stroke="#a78bfa" stroke-width="1.6"/><circle cx="15" cy="12" r="1.5" fill="#f59e0b"/></svg>
+        ₿${fmtPSG(bal)}
+      </div>
+    </div>
+    ${inv.length ? `<div style="padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.07);">
+      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(148,163,184,.45);margin-bottom:8px;">Inventory (${inv.length})</div>
+      ${invRows}
+      ${inv.length > 6 ? `<div style="font-size:.62rem;color:rgba(148,163,184,.4);text-align:center;padding-top:6px;">+${inv.length-6} more items</div>` : ''}
+    </div>` : ''}
+    <div style="padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button onclick="openDepositModal();document.getElementById('wallet-panel')?.remove()" style="padding:9px;background:linear-gradient(135deg,#7c4de8,#6d28d9);border:none;border-radius:9px;color:#fff;font-size:.75rem;font-weight:800;cursor:pointer;font-family:inherit;">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13" style="vertical-align:middle;margin-right:3px;"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2"/></svg>
+        Deposit
+      </button>
+      <button onclick="openWithdrawModal();document.getElementById('wallet-panel')?.remove()" style="padding:9px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:9px;color:var(--text);font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13" style="vertical-align:middle;margin-right:3px;"><path d="M8 10V2M5 5l3-3 3 3"/><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2"/></svg>
+        Withdraw
+      </button>
+    </div>`;
+  document.body.appendChild(panel);
+  setTimeout(() => document.addEventListener('click', () => panel.remove(), { once:true }), 20);
+}
+
+function _refreshAuthButton() {
+  const wrap = document.getElementById('auth-wrap');
+  if (!wrap) return;
+  const verified = _isVerified();
+  const u = currentUser();
+  if (verified && u.username) {
+    const name = u.displayName || u.username;
+    const ini = name.slice(0,1).toUpperCase();
+    const isOwner = localStorage.getItem('ps99g_isAdmin') === '1';
+    const avHtml = u.avatar
+      ? `<img src="${u.avatar}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML='<div style=\\'width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7c4de8,#4c1d95);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;\\'>${ini}</div>'">`
+      : `<div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7c4de8,#4c1d95);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;flex-shrink:0;">${ini}</div>`;
+    wrap.innerHTML = `
+      <button class="auth-user-chip" onclick="_openUserDropdown(event)">
+        ${avHtml}
+        <span style="font-size:.75rem;font-weight:700;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
+        ${isOwner ? '<span style="font-size:.85rem;line-height:1;filter:drop-shadow(0 0 6px gold);">👑</span>' : ''}
+      </button>`;
+  } else {
+    wrap.innerHTML = `<button class="auth-login-btn" onclick="_openLoginModal()">Login</button>`;
+  }
+  const sbName = document.getElementById('sidebar-username');
+  if (sbName) {
+    if (verified && u.username) sbName.textContent = u.displayName || u.username;
+    else sbName.textContent = '';
+  }
+}
+
+function _openLoginModal() {
+  if (document.getElementById('login-modal-overlay')) return;
+  _injectLoginCSS();
   const phrase = _genPhrase();
   const el = document.createElement('div');
-  el.id = 'bio-verify-overlay';
-  el.style.cssText = `position:fixed;inset:0;z-index:99999;background:rgba(4,2,20,0.97);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;`;
+  el.id = 'login-modal-overlay';
+  el.addEventListener('click', e => { if (e.target === el) _closeLoginModal(); });
   el.innerHTML = `
-  <div style="background:linear-gradient(160deg,#12103a,#080615);border:1.5px solid rgba(124,77,232,0.45);border-radius:22px;padding:36px 32px;width:min(440px,94vw);box-shadow:0 0 80px rgba(124,77,232,0.2);">
-    <div style="text-align:center;margin-bottom:24px;">
-      <div style="font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-0.02em;margin-bottom:6px;">PS99 Gamble</div>
-      <div style="font-size:.8rem;color:var(--text-muted);">Verify your Roblox account to continue</div>
+  <div id="login-modal-box">
+    <div style="text-align:center;margin-bottom:20px;">
+      <img src="logo.png" alt="99Depo" style="height:44px;object-fit:contain;display:block;margin:0 auto 10px;"
+        onerror="this.outerHTML='<div style=&quot;font-size:1.3rem;font-weight:900;background:linear-gradient(90deg,#f472b6,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;&quot;>99DEPO</div>'">
+      <div style="font-size:.72rem;color:rgba(148,163,184,.55);">Verify your Roblox account to play</div>
     </div>
 
-    <div style="margin-bottom:16px;">
-      <div style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:7px;">Your Roblox Username</div>
-      <input id="bv-username" type="text" placeholder="YourRobloxUsername" autocomplete="off" spellcheck="false"
-        style="width:100%;padding:11px 14px;border-radius:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(124,77,232,.35);color:#fff;font-size:.95rem;outline:none;box-sizing:border-box;">
+    <div style="margin-bottom:12px;">
+      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(148,163,184,.45);margin-bottom:6px;">Your Roblox Username</div>
+      <input id="login-username" type="text" placeholder="YourRobloxUsername" autocomplete="off" spellcheck="false"
+        style="width:100%;padding:10px 13px;border-radius:10px;background:rgba(255,255,255,.05);border:1.5px solid rgba(124,77,232,.38);color:#fff;font-size:.92rem;outline:none;box-sizing:border-box;font-family:inherit;transition:border-color .15s;"
+        onfocus="this.style.borderColor='rgba(167,139,250,.8)'"
+        onblur="this.style.borderColor='rgba(124,77,232,.38)'"
+        onkeydown="if(event.key==='Enter')_doLogin()">
     </div>
 
-    <div style="margin-bottom:20px;">
-      <div style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:7px;">Verification Phrase — paste this into your Roblox bio</div>
-      <div style="background:rgba(124,77,232,.1);border:1.5px solid rgba(124,77,232,.35);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <span id="bv-phrase" style="font-family:monospace;font-size:.88rem;color:#c4b5fd;font-weight:700;letter-spacing:.01em;flex:1;">${phrase}</span>
-        <button onclick="_bvCopy()" style="padding:6px 12px;background:rgba(124,77,232,.25);border:1px solid rgba(124,77,232,.4);border-radius:7px;color:#a78bfa;font-size:.72rem;font-weight:800;cursor:pointer;white-space:nowrap;">Copy</button>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(148,163,184,.45);margin-bottom:6px;">Step 2 — Paste this phrase in your Roblox bio</div>
+      <div style="background:rgba(124,77,232,.1);border:1.5px solid rgba(124,77,232,.3);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px;">
+        <span id="login-phrase" style="font-family:monospace;font-size:.78rem;color:#c4b5fd;font-weight:700;flex:1;word-break:break-all;">${phrase}</span>
+        <button onclick="_loginCopyPhrase()" style="padding:5px 10px;background:rgba(124,77,232,.25);border:1px solid rgba(124,77,232,.4);border-radius:7px;color:#a78bfa;font-size:.68rem;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;">Copy</button>
       </div>
-      <div style="font-size:.65rem;color:var(--text-muted);margin-top:6px;line-height:1.5;">Go to your Roblox profile → Edit → put the phrase in your bio, then come back here and click Verify.</div>
+      <div style="font-size:.62rem;color:rgba(148,163,184,.45);margin-top:5px;line-height:1.45;">Open Roblox → Edit Profile → paste in bio → come back here and click Verify.</div>
     </div>
 
-    <label style="display:flex;align-items:center;gap:9px;margin-bottom:18px;cursor:pointer;">
-      <input type="checkbox" id="bv-tos" style="width:15px;height:15px;accent-color:#7c4de8;">
-      <span style="font-size:.75rem;color:var(--text-muted);line-height:1.4;">I am 18+ and agree to the <span style="color:#a78bfa;text-decoration:underline;cursor:pointer;">Terms of Service</span>. This site is for entertainment only.</span>
+    <label style="display:flex;align-items:flex-start;gap:8px;margin-bottom:14px;cursor:pointer;user-select:none;">
+      <input type="checkbox" id="login-tos" style="width:14px;height:14px;accent-color:#7c4de8;flex-shrink:0;margin-top:2px;">
+      <span style="font-size:.66rem;color:rgba(148,163,184,.55);line-height:1.45;">I am 18+ and agree to the Terms of Service. Entertainment only — not real gambling.</span>
     </label>
 
-    <div id="bv-error" style="font-size:.72rem;color:#ef4444;text-align:center;min-height:18px;margin-bottom:10px;"></div>
+    <div id="login-error" style="font-size:.68rem;color:#f87171;text-align:center;min-height:16px;margin-bottom:8px;font-weight:700;"></div>
 
-    <button id="bv-btn" onclick="_bvVerify()"
-      style="width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#7c4de8,#6d28d9);color:#fff;font-size:.95rem;font-weight:800;cursor:pointer;letter-spacing:.02em;transition:all .15s;">
-      Verify Account
+    <button onclick="_doLogin()" id="login-enter-btn"
+      style="width:100%;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#7c4de8,#6d28d9);color:#fff;font-size:.88rem;font-weight:800;cursor:pointer;transition:all .15s;box-shadow:0 0 24px rgba(124,77,232,.45);letter-spacing:.02em;font-family:inherit;">
+      Verify Account →
     </button>
+    <div style="text-align:center;margin-top:10px;">
+      <button onclick="_closeLoginModal()" style="background:none;border:none;color:rgba(148,163,184,.35);font-size:.65rem;cursor:pointer;font-family:inherit;">Maybe later</button>
+    </div>
   </div>`;
   document.body.appendChild(el);
+  setTimeout(() => document.getElementById('login-username')?.focus(), 80);
 }
 
-function _bvCopy() {
-  const phrase = document.getElementById('bv-phrase')?.textContent;
-  if (phrase) navigator.clipboard?.writeText(phrase).then(() => showToast('Phrase copied!', 'info'));
+function _loginCopyPhrase() {
+  const phrase = document.getElementById('login-phrase')?.textContent;
+  if (phrase) navigator.clipboard?.writeText(phrase).then(() => showToast('Phrase copied!', 'info')).catch(() => {});
 }
 
-async function _bvVerify() {
-  const username = (document.getElementById('bv-username')?.value || '').trim();
-  const tos = document.getElementById('bv-tos')?.checked;
-  const errEl = document.getElementById('bv-error');
-  const btn = document.getElementById('bv-btn');
-  const phrase = localStorage.getItem(_PHRASE_KEY);
+function _closeLoginModal() {
+  document.getElementById('login-modal-overlay')?.remove();
+}
+
+async function _doLogin() {
+  const username = (document.getElementById('login-username')?.value || '').trim();
+  const tos      = document.getElementById('login-tos')?.checked;
+  const errEl    = document.getElementById('login-error');
+  const btn      = document.getElementById('login-enter-btn');
+  const phrase   = localStorage.getItem(_PHRASE_KEY);
 
   if (!username) { errEl.textContent = 'Enter your Roblox username'; return; }
-  if (!tos) { errEl.textContent = 'You must agree to the Terms of Service'; return; }
-  if (!phrase) { errEl.textContent = 'No phrase found — reload the page'; return; }
+  if (!tos)      { errEl.textContent = 'You must agree to the Terms of Service'; return; }
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) { errEl.textContent = 'Invalid username (3–20 letters, numbers, underscores)'; return; }
+  if (!phrase)   { errEl.textContent = 'No phrase found — reload the page'; return; }
 
-  btn.textContent = 'Checking…'; btn.disabled = true; errEl.textContent = '';
+  btn.textContent = 'Verifying…'; btn.disabled = true; errEl.textContent = '';
 
   try {
     const resp = await fetch(_SERVER_HTTP + '/api/verify-bio', {
@@ -2559,39 +3144,88 @@ async function _bvVerify() {
       body: JSON.stringify({ username, phrase }),
     });
     const data = await resp.json();
-
     if (data.ok) {
-      localStorage.setItem(_VERIFY_KEY, '1');
-      // Save username to profile
-      const p = _getRawProfile();
-      p.name = data.displayName || username;
-      _saveRawProfile(p);
-      localStorage.removeItem(_PHRASE_KEY);
-      document.getElementById('bio-verify-overlay').remove();
-      showToast(`Welcome, ${p.name}!`, 'win');
+      btn.textContent = 'Loading profile…';
+      const avatarUrl = data.userId ? await _fetchRobloxAvatar(data.userId) : null;
+      _finishLogin(data.displayName || username, data.userId || '', avatarUrl);
     } else {
       errEl.textContent = data.error || 'Phrase not found in bio — make sure you saved it correctly';
-      btn.textContent = 'Verify Account'; btn.disabled = false;
+      btn.textContent = 'Verify Account →'; btn.disabled = false;
     }
   } catch {
-    // Server offline — allow skip for dev
-    errEl.textContent = 'Server offline. For dev use only — click Verify again to skip.';
+    errEl.textContent = 'Server offline — click Verify again to skip (dev mode)';
     if (btn.dataset.skip) {
-      localStorage.setItem(_VERIFY_KEY, '1');
-      const p = _getRawProfile(); p.name = username; _saveRawProfile(p);
-      localStorage.removeItem(_PHRASE_KEY);
-      document.getElementById('bio-verify-overlay')?.remove();
+      _finishLogin(username, '', null);
     } else {
       btn.dataset.skip = '1';
+      btn.textContent = 'Verify Account →'; btn.disabled = false;
     }
-    btn.textContent = 'Verify Account'; btn.disabled = false;
   }
 }
 
+function _finishLogin(displayName, userId, avatarUrl) {
+  // Set all keys so both old and new login systems see the user as authenticated
+  localStorage.setItem(_VERIFY_KEY, '1');
+  localStorage.setItem('ps99g_rblx_verified', '1');
+  localStorage.setItem('ps99g_rblx_user', displayName.toLowerCase());
+  localStorage.setItem('ps99g_rblx_display', displayName);
+  localStorage.setItem('ps99g_rblx_uid', userId || '');
+  if (avatarUrl) localStorage.setItem('ps99g_rblx_avatar', avatarUrl);
+  localStorage.removeItem(_PHRASE_KEY);
+  const p = _getRawProfile(); p.name = displayName; _saveRawProfile(p);
+  _closeLoginModal();
+  _refreshAuthButton();
+  _applyUserEverywhere();
+  refreshBal();
+  setTimeout(_connectWS, 100);
+  _checkAdminStatus();
+  showToast(`Welcome, ${displayName}! 🎉`, 'win');
+}
+
+function _openUserDropdown(e) {
+  e?.stopPropagation();
+  const existing = document.getElementById('user-dropdown');
+  if (existing) { existing.remove(); return; }
+  _injectLoginCSS();
+  const u = currentUser();
+  const name = u.displayName || u.username || 'Player';
+  const isOwner = localStorage.getItem('ps99g_isAdmin') === '1';
+  const wrap = document.getElementById('auth-wrap');
+  const rect = wrap?.getBoundingClientRect() || { bottom:60, right:window.innerWidth-20 };
+  const menu = document.createElement('div');
+  menu.id = 'user-dropdown';
+  menu.style.top  = (rect.bottom + 6) + 'px';
+  menu.style.right = (window.innerWidth - rect.right) + 'px';
+  menu.innerHTML = `
+    <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);">
+      <div style="font-size:.85rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px;">${name}${isOwner?' <span style="font-size:.9rem;filter:drop-shadow(0 0 5px gold)">👑</span>':''}</div>
+      <div style="font-size:.62rem;color:rgba(148,163,184,.45);margin-top:2px;">₿${typeof fmtPSG==='function'?fmtPSG(getBalance()):'...'}</div>
+    </div>
+    <button onclick="openProfileModal('you',0);document.getElementById('user-dropdown')?.remove()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="8" cy="5.5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+      My Profile
+    </button>
+    <button onclick="logoutAccount()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path d="M10 3h3v10h-3M6 11l4-4-4-4M1 8h8"/></svg>
+      Log Out
+    </button>`;
+  document.body.appendChild(menu);
+  setTimeout(() => document.addEventListener('click', () => menu.remove(), { once:true }), 20);
+}
+
+function logoutAccount() {
+  document.getElementById('user-dropdown')?.remove();
+  ['ps99g_verified','ps99g_rblx_verified','ps99g_rblx_user','ps99g_rblx_display',
+   'ps99g_rblx_uid','ps99g_rblx_avatar','ps99g_verify_phrase',
+   'ps99g_isAdmin','ps99g_admin_name'].forEach(k => localStorage.removeItem(k));
+  _refreshAuthButton();
+  showToast('Logged out', 'info');
+  setTimeout(() => location.reload(), 600);
+}
+
 function initVerification() {
-  if (!_isVerified()) {
-    setTimeout(_ensureVerifyModal, 300);
-  }
+  _injectLoginCSS();
+  setTimeout(_injectAuthButton, 200);
 }
 
 // Run inventory auto-fill after CV pets load
