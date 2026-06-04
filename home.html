@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>99Depo — Home</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { height:100%; overflow:hidden; }
+
+    .home-root {
+      display:grid;
+      grid-template-rows: var(--nav-h) var(--announce-h) 1fr auto;
+      height:100vh; overflow:hidden;
+    }
+
+    .home-body {
+      display:grid;
+      grid-template-columns: 300px 1fr;
+      overflow:hidden;
+    }
+
+    /* ─── LEFT HERO PANEL ─── */
+    .home-left {
+      display:flex; flex-direction:column; justify-content:center;
+      padding:28px 24px; gap:16px;
+      border-right:1px solid var(--border);
+      background:linear-gradient(175deg,rgba(124,77,232,.1) 0%,transparent 55%);
+      position:relative; overflow:hidden;
+    }
+    .home-left::before {
+      content:''; position:absolute; bottom:-60px; left:-60px;
+      width:220px; height:220px; border-radius:50%;
+      background:radial-gradient(circle,rgba(124,77,232,.18) 0%,transparent 70%);
+      pointer-events:none;
+    }
+
+    .live-pill {
+      display:inline-flex; align-items:center; gap:6px;
+      background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.3);
+      border-radius:20px; padding:4px 12px; width:fit-content;
+      font-size:.68rem; font-weight:800; color:#4ade80; letter-spacing:.08em;
+    }
+    .live-dot { width:6px; height:6px; border-radius:50%; background:#22c55e;
+      box-shadow:0 0 8px #22c55e; animation:ldot 2s infinite; }
+    @keyframes ldot { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+    .hero-title {
+      font-size:2.1rem; font-weight:900; letter-spacing:-.04em;
+      line-height:1.05; color:#fff; position:relative; z-index:1;
+    }
+    .hero-title .g1 { color:#fff; }
+    .hero-title .g2 {
+      background:linear-gradient(90deg,#a67dff,#06b6d4,#e879f9,#a67dff);
+      background-size:300%;
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      animation:titleShimmer 5s linear infinite;
+    }
+    @keyframes titleShimmer { from{background-position:0%} to{background-position:300%} }
+    .hero-title .g3 { color:#fbbf24; }
+
+    .hero-sub { font-size:.78rem; color:var(--text-sub); line-height:1.6; position:relative; z-index:1; }
+
+    /* Floating hero pets */
+    .hero-pets {
+      display:flex; gap:6px; align-items:center; position:relative; z-index:1;
+    }
+    .hp { width:36px; height:36px; border-radius:10px; overflow:hidden;
+      border:1.5px solid rgba(255,255,255,.12); background:rgba(0,0,0,.35);
+      flex-shrink:0; transition:transform .2s;
+    }
+    .hp:hover { transform:translateY(-3px) scale(1.1); }
+    .hp img { width:100%; height:100%; object-fit:contain; }
+    .hp-label { font-size:.6rem; color:var(--text-muted); font-weight:700; }
+
+    /* Stat grid */
+    .hero-stats {
+      display:grid; grid-template-columns:1fr 1fr; gap:6px; position:relative; z-index:1;
+    }
+    .hs {
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+      border-radius:10px; padding:9px 11px; display:flex; align-items:center; gap:8px;
+      transition:border-color .18s;
+    }
+    .hs:hover { border-color:rgba(124,77,232,.4); }
+    .hs-icon { width:28px; height:28px; border-radius:7px; overflow:hidden;
+      background:rgba(0,0,0,.3); flex-shrink:0;
+    }
+    .hs-icon img { width:100%; height:100%; object-fit:contain; }
+    .hs-val { font-size:.9rem; font-weight:900; color:#fff; line-height:1.1; }
+    .hs-lbl { font-size:.58rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.07em; }
+
+    .hero-ctas { display:flex; flex-direction:column; gap:7px; position:relative; z-index:1; }
+    .cta-main {
+      padding:11px 0; text-align:center;
+      background:linear-gradient(135deg,#7c4de8,#6d28d9);
+      border:none; border-radius:11px; color:#fff;
+      font-size:.88rem; font-weight:800; cursor:pointer; text-decoration:none; display:block;
+      box-shadow:0 0 22px rgba(124,77,232,.5); transition:all .18s; letter-spacing:.03em;
+    }
+    .cta-main:hover { transform:translateY(-2px); box-shadow:0 0 36px rgba(124,77,232,.75); }
+    .cta-sec {
+      padding:10px 0; text-align:center;
+      background:rgba(255,255,255,.05); border:1.5px solid rgba(255,255,255,.1);
+      border-radius:11px; color:var(--text); font-size:.82rem; font-weight:700;
+      cursor:pointer; text-decoration:none; display:block; transition:all .18s;
+    }
+    .cta-sec:hover { background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.2); }
+
+    /* ─── RIGHT: 3 GAME CARDS ─── */
+    .home-right {
+      display:flex; flex-direction:column; gap:12px;
+      padding:16px 18px; overflow:hidden;
+    }
+
+    .gcard {
+      flex:1; display:flex; border-radius:18px; overflow:hidden;
+      border:1.5px solid rgba(255,255,255,.07);
+      background:linear-gradient(135deg,var(--bg-card),var(--bg-card2));
+      text-decoration:none; color:inherit; position:relative;
+      transition:all .22s cubic-bezier(.34,1.56,.64,1);
+      min-height:0;
+    }
+    .gcard:hover {
+      border-color:var(--gcb,rgba(124,77,232,.5));
+      box-shadow:0 10px 36px rgba(0,0,0,.5), 0 0 24px var(--gcs,rgba(124,77,232,.2));
+      transform:translateY(-3px) scale(1.008);
+    }
+    .gcard::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg,transparent,var(--gcl,rgba(124,77,232,.6)),transparent);
+      opacity:.6;
+    }
+
+    /* Pet image panel */
+    .gc-pet-panel {
+      width:160px; flex-shrink:0; position:relative; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .gc-pet-panel-bg {
+      position:absolute; inset:0;
+    }
+    .gc-pet-panel-bg::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(to right,transparent 60%,var(--bg-card) 100%);
+    }
+    .gc-main-pet {
+      position:relative; z-index:1;
+      width:110px; height:110px;
+      filter:drop-shadow(0 8px 20px rgba(0,0,0,.6));
+      transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+    }
+    .gcard:hover .gc-main-pet { transform:scale(1.1) translateY(-4px); }
+
+    /* Info side */
+    .gc-info {
+      flex:1; display:flex; flex-direction:column; justify-content:center;
+      padding:14px 18px 14px 8px; gap:8px; min-width:0;
+    }
+    .gc-name { font-size:1.15rem; font-weight:900; color:#fff; letter-spacing:-.02em; }
+
+    /* Badge row with pet icon */
+    .gc-badge-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .gc-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:3px 10px; border-radius:20px;
+      font-size:.64rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+    }
+    .gc-badge-pet {
+      width:16px; height:16px; border-radius:5px; overflow:hidden;
+      background:rgba(0,0,0,.3); flex-shrink:0;
+    }
+    .gc-badge-pet img { width:100%; height:100%; object-fit:contain; }
+
+    .gc-desc { font-size:.74rem; color:var(--text-sub); line-height:1.55; max-width:360px; }
+
+    /* Small pet chips row */
+    .gc-chips { display:flex; gap:5px; align-items:center; }
+    .gc-chip {
+      width:28px; height:28px; border-radius:8px; overflow:hidden;
+      border:1.5px solid rgba(255,255,255,.1); background:rgba(0,0,0,.3);
+      flex-shrink:0; transition:transform .18s;
+    }
+    .gc-chip:hover { transform:scale(1.15) translateY(-2px); }
+    .gc-chip img { width:100%; height:100%; object-fit:contain; }
+    .gc-chip-more {
+      width:28px; height:28px; border-radius:8px;
+      background:rgba(255,255,255,.05); border:1.5px solid rgba(255,255,255,.08);
+      font-size:.58rem; font-weight:800; color:var(--text-muted);
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    /* Play button */
+    .gc-play {
+      align-self:flex-start; padding:8px 20px; border:none; border-radius:10px;
+      font-size:.78rem; font-weight:800; cursor:pointer; transition:all .18s;
+      letter-spacing:.03em; white-space:nowrap; margin-top:2px;
+    }
+    .gc-play:hover { transform:scale(1.07) translateY(-1px); }
+
+    /* Decorative glow orb behind cards */
+    .home-right::before {
+      content:''; position:absolute; right:80px; top:50%;
+      transform:translateY(-50%);
+      width:300px; height:300px; border-radius:50%;
+      background:radial-gradient(circle,rgba(124,77,232,.07) 0%,transparent 70%);
+      pointer-events:none; z-index:0;
+    }
+
+    /* Card shimmer sweep on hover */
+    .gcard::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.06) 50%,transparent 65%);
+      background-size:200%;
+      background-position:200%;
+      transition:background-position .5s ease;
+      pointer-events:none; border-radius:18px;
+    }
+    .gcard:hover::after { background-position:-50%; }
+
+    /* Online count chip on cards */
+    .gc-online-chip {
+      display:inline-flex; align-items:center; gap:5px;
+      background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.25);
+      border-radius:20px; padding:3px 9px;
+      font-size:.62rem; font-weight:800; color:#4ade80;
+    }
+    .gc-online-dot {
+      width:5px; height:5px; border-radius:50%;
+      background:#22c55e; box-shadow:0 0 6px #22c55e;
+      animation:ldot 2s infinite;
+    }
+
+    /* Hero left extra glow pulse */
+    .home-left::after {
+      content:''; position:absolute; top:-80px; right:-40px;
+      width:200px; height:200px; border-radius:50%;
+      background:radial-gradient(circle,rgba(6,182,212,.1) 0%,transparent 70%);
+      pointer-events:none;
+      animation:orbitPulse 6s ease-in-out infinite;
+    }
+    @keyframes orbitPulse {
+      0%,100%{opacity:.5;transform:translate(0,0);}
+      50%{opacity:1;transform:translate(10px,-10px);}
+    }
+  </style>
+</head>
+<body>
+<div class="home-root">
+
+<!-- ── NAV ── -->
+<nav class="topnav">
+  <a href="home.html" class="nav-logo">
+    <div class="logo-gem-wrap">
+      <svg viewBox="0 0 24 24" fill="none"><polygon points="12,2 20,8 17,20 7,20 4,8" fill="white" opacity=".9"/><polygon points="12,2 20,8 12,6" fill="white" opacity=".5"/></svg>
+    </div>
+    <div class="logo-text"><span class="t1">99</span><span class="t2">DEPO</span></div>
+    <img src="pets/cat.svg" style="width:24px;height:24px;object-fit:contain;opacity:.8;" alt="">
+  </a>
+  <div class="nav-games">
+    <a href="home.html" class="nav-btn active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z"/><polyline points="9,20 9,13 11,13 11,20"/></svg> Home</a>
+    <a href="coinflip.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="4.5"/><line x1="10" y1="5.5" x2="10" y2="14.5"/></svg> Coin Flip</a>
+    <a href="jackpot.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M6 10 L10 5 L14 10 L10 15 Z"/></svg> Jackpot</a>
+    <a href="dice.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="16" height="16" rx="3"/><circle cx="6.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="6.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="10" cy="10" r="1.2" fill="currentColor"/></svg> Dice</a>
+    <div class="nav-divider"></div>
+    <a href="leaderboard.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="10" width="3" height="8"/><rect x="8.5" y="6" width="3" height="12"/><rect x="15" y="2" width="3" height="16"/></svg> Leaderboard</a>
+    <a href="values.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="10,2 13,8 19,8 14,12 16,18 10,14 4,18 6,12 1,8 7,8"/></svg> CV Values</a>
+    <div class="nav-divider"></div>
+    <a href="#" class="nav-btn" style="color:#5865f2;">
+      <svg viewBox="0 0 20 20" fill="currentColor" style="color:#5865f2;"><path d="M16.9 4.2A16.4 16.4 0 0 0 13 3a.1.1 0 0 0-.1 0 11.4 11.4 0 0 0-.5 1 15.1 15.1 0 0 0-4.6 0A11 11 0 0 0 7.3 3a.1.1 0 0 0-.1 0 16.3 16.3 0 0 0-3.9 1.2A17.3 17.3 0 0 0 .3 14.7a16.5 16.5 0 0 0 5 2.5.1.1 0 0 0 .1 0 12 12 0 0 0 1-1.6.1.1 0 0 0-.1-.1 10.9 10.9 0 0 1-1.5-.7.1.1 0 0 1 0-.1 8 8 0 0 0 .3-.3.1.1 0 0 1 .1 0 11.7 11.7 0 0 0 10 0 .1.1 0 0 1 .1 0l.3.3a.1.1 0 0 1 0 .1 10.7 10.7 0 0 1-1.5.7.1.1 0 0 0 0 .1 13.4 13.4 0 0 0 1 1.6.1.1 0 0 0 .1 0 16.5 16.5 0 0 0 5-2.5A17.3 17.3 0 0 0 16.9 4.2ZM6.7 12.8c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Zm6.6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Z"/></svg>
+      Discord
+    </a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-balance"><span style="font-weight:900;margin-right:2px;font-size:1rem;">₿</span><span data-bal>5B</span></div>
+    <div class="nav-avatar"><img src="pets/cat.svg" alt="avatar"></div>
+  </div>
+</nav>
+
+<div class="announce-bar">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+  Entertainment only — Play responsibly — <a href="#">discord.gg/ps99gems</a>
+</div>
+
+<div class="home-body">
+
+  <!-- ── LEFT HERO ── -->
+  <div class="home-left">
+
+    <div class="live-pill"><div class="live-dot"></div><span id="hero-online">826 Online</span></div>
+
+    <div class="hero-title">
+      <div class="g1">The #1</div>
+      <div class="g2">99DEPO</div>
+      <div class="g3">Gambling</div>
+      <div class="g1">Site</div>
+    </div>
+
+    <div class="hero-sub">Wager PSG gems on Coin Flip, Jackpot, and Dice. Pure entertainment — no real money.</div>
+
+    <!-- Floating top pets -->
+    <div>
+      <div class="hp-label" style="margin-bottom:5px;">Top Wagered Pets</div>
+      <div class="hero-pets" id="hero-pets"></div>
+    </div>
+
+    <!-- Stats with pet icons -->
+    <div class="hero-stats" id="hero-stats">
+      <div class="hs">
+        <div class="hs-icon" id="hs-icon-0"></div>
+        <div><div class="hs-val" id="stat-online">826</div><div class="hs-lbl">Online Now</div></div>
+      </div>
+      <div class="hs">
+        <div class="hs-icon" id="hs-icon-1"></div>
+        <div><div class="hs-val" id="stat-wagered">₿2.4B</div><div class="hs-lbl">Wagered Today</div></div>
+      </div>
+      <div class="hs">
+        <div class="hs-icon" id="hs-icon-2"></div>
+        <div><div class="hs-val">₿5B</div><div class="hs-lbl">Free Balance</div></div>
+      </div>
+      <div class="hs">
+        <div class="hs-icon" id="hs-icon-3"></div>
+        <div><div class="hs-val">3 Games</div><div class="hs-lbl">Available</div></div>
+      </div>
+    </div>
+
+    <div class="hero-ctas">
+      <a href="coinflip.html" class="cta-main">▶ Play Now</a>
+      <a href="leaderboard.html" class="cta-sec">Leaderboard</a>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT: 3 GAME CARDS ── -->
+  <div class="home-right">
+
+    <!-- COIN FLIP -->
+    <a href="coinflip.html" class="gcard"
+       style="--gcb:rgba(249,115,22,.55);--gcs:rgba(249,115,22,.2);--gcl:rgba(249,115,22,.7);">
+      <div class="gc-pet-panel">
+        <div class="gc-pet-panel-bg" style="background:linear-gradient(135deg,rgba(249,115,22,.3) 0%,rgba(249,115,22,.05) 100%);"></div>
+        <img class="gc-main-pet" id="cf-main-pet" src="" alt="Coin Flip Pet">
+      </div>
+      <div class="gc-info">
+        <div class="gc-name">Coin Flip</div>
+        <div class="gc-badge-row">
+          <span class="gc-badge" style="background:rgba(249,115,22,.15);color:#f97316;border:1px solid rgba(249,115,22,.3);">
+            <div class="gc-badge-pet" id="cf-badge-pet"></div>
+            50% Win Chance
+          </span>
+          <span class="gc-badge" style="background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.25);">
+            <div class="gc-badge-pet" id="cf-badge-pet2"></div>
+            1% Edge
+          </span>
+        </div>
+        <div class="gc-desc">Heads or tails — 50/50 shot to double your wager against another player in real time.</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+          <div class="gc-chips" id="cf-chips"></div>
+          <div class="gc-online-chip"><div class="gc-online-dot"></div><span id="cf-online">312</span> playing</div>
+        </div>
+        <button class="gc-play" style="background:linear-gradient(135deg,#f97316,#c2410c);color:#fff;box-shadow:0 0 14px rgba(249,115,22,.4);">Play Coin Flip →</button>
+      </div>
+    </a>
+
+    <!-- JACKPOT -->
+    <a href="jackpot.html" class="gcard"
+       style="--gcb:rgba(251,191,36,.5);--gcs:rgba(251,191,36,.2);--gcl:rgba(251,191,36,.7);">
+      <div class="gc-pet-panel">
+        <div class="gc-pet-panel-bg" style="background:linear-gradient(135deg,rgba(251,191,36,.28) 0%,rgba(251,191,36,.04) 100%);"></div>
+        <img class="gc-main-pet" id="jp-main-pet" src="" alt="Jackpot Pet">
+      </div>
+      <div class="gc-info">
+        <div class="gc-name">Jackpot</div>
+        <div class="gc-badge-row">
+          <span class="gc-badge" style="background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);">
+            <div class="gc-badge-pet" id="jp-badge-pet"></div>
+            Pot Winner Takes All
+          </span>
+          <span class="gc-badge" style="background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);">
+            <div class="gc-badge-pet" id="jp-badge-pet2"></div>
+            5% House Edge
+          </span>
+        </div>
+        <div class="gc-desc">Drop gems into the communal pot — the bigger your share, the higher your odds of winning everything.</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+          <div class="gc-chips" id="jp-chips"></div>
+          <div class="gc-online-chip"><div class="gc-online-dot"></div><span id="jp-online">187</span> playing</div>
+        </div>
+        <button class="gc-play" style="background:linear-gradient(135deg,#fbbf24,#b45309);color:#78350f;box-shadow:0 0 14px rgba(251,191,36,.4);">Play Jackpot →</button>
+      </div>
+    </a>
+
+    <!-- DICE -->
+    <a href="dice.html" class="gcard"
+       style="--gcb:rgba(124,77,232,.55);--gcs:rgba(124,77,232,.2);--gcl:rgba(124,77,232,.7);">
+      <div class="gc-pet-panel">
+        <div class="gc-pet-panel-bg" style="background:linear-gradient(135deg,rgba(124,77,232,.3) 0%,rgba(124,77,232,.04) 100%);"></div>
+        <img class="gc-main-pet" id="dc-main-pet" src="" alt="Dice Pet">
+      </div>
+      <div class="gc-info">
+        <div class="gc-name">Dice</div>
+        <div class="gc-badge-row">
+          <span class="gc-badge" style="background:rgba(124,77,232,.15);color:#a67dff;border:1px solid rgba(124,77,232,.35);">
+            <div class="gc-badge-pet" id="dc-badge-pet"></div>
+            Roll 1–10 P2P
+          </span>
+          <span class="gc-badge" style="background:rgba(6,182,212,.1);color:#22d3ee;border:1px solid rgba(6,182,212,.25);">
+            <div class="gc-badge-pet" id="dc-badge-pet2"></div>
+            1.5% House Edge
+          </span>
+        </div>
+        <div class="gc-desc">Roll a number 1–10 against another player — highest number wins the full pot. Pure luck.</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+          <div class="gc-chips" id="dc-chips"></div>
+          <div class="gc-online-chip"><div class="gc-online-dot"></div><span id="dc-online">241</span> playing</div>
+        </div>
+        <button class="gc-play" style="background:linear-gradient(135deg,#7c4de8,#4c1d95);color:#fff;box-shadow:0 0 14px rgba(124,77,232,.4);">Play Dice →</button>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="live-feed">
+    <div class="feed-label">LIVE</div>
+    <div class="feed-ticker" id="home-feed-ticker"></div>
+  </div>
+
+</div>
+</div>
+
+<canvas id="home-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+<script src="app.js"></script>
+<script>
+  refreshBal();
+
+  const ROBLOX_IMG = id => `https://assetdelivery.roblox.com/v1/asset/?id=${id}`;
+
+  // Specific iconic pets for each game (Titanic tier, well-known designs)
+  const GAME_PETS = {
+    coinflip: '14976631515',   // Titanic Hippomelon — golden, wealth theme
+    jackpot:  '14976594978',   // Titanic Cat — most iconic PS99 pet
+    dice:     '14976666952',   // Titanic Sad Cat — random/luck theme
+  };
+
+  function setMainPet(id, petImgId) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.src = ROBLOX_IMG(petImgId);
+    el.onerror = () => { el.style.opacity = '.3'; };
+  }
+
+  function setBadgePet(id, petImgId) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const img = document.createElement('img');
+    img.src = ROBLOX_IMG(petImgId);
+    img.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+    img.onerror = () => { img.style.opacity = '.3'; };
+    el.appendChild(img);
+  }
+
+  function fillChips(rowId, pets, count) {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    const picked = [...pets].sort(() => Math.random() - .5).slice(0, count);
+    picked.forEach(p => {
+      const chip = document.createElement('div');
+      chip.className = 'gc-chip';
+      chip.title = p.name;
+      const img = document.createElement('img');
+      img.src = ROBLOX_IMG(p.img);
+      img.alt = p.name;
+      img.loading = 'lazy';
+      img.onerror = () => { img.style.opacity = '.3'; };
+      chip.appendChild(img);
+      row.appendChild(chip);
+    });
+    if (pets.length > count) {
+      const more = document.createElement('div');
+      more.className = 'gc-chip-more';
+      more.textContent = '+' + (pets.length - count);
+      row.appendChild(more);
+    }
+  }
+
+  function fillStatIcon(iconId, petImgId) {
+    const el = document.getElementById(iconId);
+    if (!el) return;
+    const img = document.createElement('img');
+    img.src = ROBLOX_IMG(petImgId);
+    img.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+    img.onerror = () => { img.style.opacity = '.3'; };
+    el.appendChild(img);
+  }
+
+  function fillHeroPets(pets, count) {
+    const row = document.getElementById('hero-pets');
+    if (!row) return;
+    [...pets].sort(() => Math.random() - .5).slice(0, count).forEach(p => {
+      const chip = document.createElement('div');
+      chip.className = 'hp';
+      chip.title = p.name;
+      const img = document.createElement('img');
+      img.src = ROBLOX_IMG(p.img);
+      img.alt = p.name;
+      img.loading = 'lazy';
+      img.onerror = () => { chip.style.display = 'none'; };
+      chip.appendChild(img);
+      row.appendChild(chip);
+    });
+  }
+
+  // Wait for CV to be available then populate
+  function initPets() {
+    if (typeof CV === 'undefined' || !CV.length) {
+      setTimeout(initPets, 100);
+      return;
+    }
+    const titanics = CV.filter(p => p.img && p.tier === 'Titanic');
+    const huges    = CV.filter(p => p.img && p.tier === 'Huge');
+    const all      = [...titanics, ...huges];
+
+    // Main pet images for each card
+    setMainPet('cf-main-pet', GAME_PETS.coinflip);
+    setMainPet('jp-main-pet', GAME_PETS.jackpot);
+    setMainPet('dc-main-pet', GAME_PETS.dice);
+
+    // Badge pet icons — tiny pets next to house edge / win chance labels
+    const b1 = titanics[0],  b2 = titanics[1],  b3 = titanics[2];
+    const b4 = titanics[3],  b5 = titanics[4],  b6 = titanics[5];
+    setBadgePet('cf-badge-pet',  b1?.img  || GAME_PETS.coinflip);
+    setBadgePet('cf-badge-pet2', b2?.img  || GAME_PETS.jackpot);
+    setBadgePet('jp-badge-pet',  b3?.img  || GAME_PETS.jackpot);
+    setBadgePet('jp-badge-pet2', b4?.img  || GAME_PETS.dice);
+    setBadgePet('dc-badge-pet',  b5?.img  || GAME_PETS.dice);
+    setBadgePet('dc-badge-pet2', b6?.img  || GAME_PETS.coinflip);
+
+    // Stat icon pets — each stat box gets a pet icon
+    fillStatIcon('hs-icon-0', titanics[6]?.img  || GAME_PETS.coinflip);
+    fillStatIcon('hs-icon-1', titanics[7]?.img  || GAME_PETS.jackpot);
+    fillStatIcon('hs-icon-2', titanics[8]?.img  || GAME_PETS.dice);
+    fillStatIcon('hs-icon-3', titanics[9]?.img  || GAME_PETS.coinflip);
+
+    // Pet chips along bottom of each card
+    fillChips('cf-chips', titanics, 6);
+    fillChips('jp-chips', huges.length ? huges : titanics, 6);
+    fillChips('dc-chips', [...titanics].reverse(), 6);
+
+    // Hero floating pets (top value Titanics)
+    fillHeroPets(titanics.slice(0, 8), 6);
+  }
+
+  initPets();
+
+  // Count-up animation for stats
+  function countUpEl(el, target, duration, fmt) {
+    if (!el) return;
+    const start = performance.now();
+    const step = now => {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(Math.floor(ease * target));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  setTimeout(() => {
+    countUpEl(document.getElementById('stat-online'), 826, 1100, v => v.toLocaleString());
+    countUpEl(document.getElementById('stat-wagered'), 2400, 1400, v => '₿' + (v >= 1000 ? (v/1000).toFixed(1) + 'B' : v + 'M'));
+  }, 350);
+
+  // Live counters (post-load updates)
+  setInterval(() => {
+    const n = 800 + Math.floor(Math.random() * 80);
+    document.getElementById('hero-online').textContent = n + ' Online';
+    document.getElementById('stat-online').textContent = n.toLocaleString();
+    const cf = document.getElementById('cf-online');
+    const jp = document.getElementById('jp-online');
+    const dc = document.getElementById('dc-online');
+    if (cf) cf.textContent = 280 + Math.floor(Math.random() * 80);
+    if (jp) jp.textContent = 150 + Math.floor(Math.random() * 70);
+    if (dc) dc.textContent = 200 + Math.floor(Math.random() * 90);
+  }, 4000);
+
+  let wagered = 2.4e9;
+  setInterval(() => {
+    wagered += Math.floor(Math.random() * 4e6 + 1e6);
+    document.getElementById('stat-wagered').textContent = '₿' + fmtPSG(wagered);
+  }, 3200);
+
+  // Scrolling live feed
+  (function() {
+    const events = [
+      {t:'TitanicX won ₿480M on Coin Flip', w:true},
+      {t:'GemLord lost ₿120M Dice Match', w:false},
+      {t:'xR4Zy won ₿2B on Jackpot', w:true},
+      {t:'NovaPro won ₿75M Coin Flip', w:true},
+      {t:'Sk1yRdr wagered Titanic Cat on Dice', w:true},
+      {t:'PurpleKing won ₿340M Coin Flip', w:true},
+      {t:'HugeGang lost ₿210M Jackpot', w:false},
+      {t:'LegacyPS won ₿88M Dice Match', w:true},
+      {t:'CrystalFly wagered ₿500M Jackpot', w:true},
+      {t:'TitanicX won ₿180M on Dice', w:true},
+    ];
+    const ticker = document.getElementById('home-feed-ticker');
+    if (!ticker) return;
+    const inner = document.createElement('div');
+    inner.className = 'feed-ticker-inner';
+    [...events, ...events].forEach(e => {
+      const span = document.createElement('span');
+      span.className = e.w ? 'win' : 'lose';
+      span.textContent = e.t;
+      inner.appendChild(span);
+    });
+    ticker.appendChild(inner);
+  })();
+
+  // Canvas particle background
+  (function() {
+    const c = document.getElementById('home-bg');
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    let W, H, pts;
+    function resize() { W = c.width = innerWidth; H = c.height = innerHeight; }
+    function init() {
+      pts = Array.from({length:55}, () => ({
+        x: Math.random() * W, y: Math.random() * H,
+        r: Math.random() * 1.6 + .3,
+        vx: (Math.random() - .5) * .22,
+        vy: (Math.random() - .5) * .22,
+        a: Math.random() * .32 + .07,
+        hue: [['124,77,232'],['6,182,212'],['251,191,36'],['167,125,255'],['236,72,153']][Math.floor(Math.random()*5)][0]
+      }));
+    }
+    function draw() {
+      ctx.clearRect(0,0,W,H);
+      pts.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(${p.hue},${p.a})`;
+        ctx.fill();
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < -5) p.x = W+5;
+        if (p.x > W+5) p.x = -5;
+        if (p.y < -5) p.y = H+5;
+        if (p.y > H+5) p.y = -5;
+      });
+      requestAnimationFrame(draw);
+    }
+    resize(); init(); draw();
+    addEventListener('resize', () => { resize(); init(); });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <radialGradient id="body" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#fdf4ff"/>
+      <stop offset="100%" stop-color="#e9d5ff"/>
+    </radialGradient>
+    <radialGradient id="iris" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#7e22ce"/>
+    </radialGradient>
+    <linearGradient id="horn" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="mane" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6"/>
+      <stop offset="50%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <!-- Horn -->
+  <polygon points="60,8 54,38 66,38" fill="url(#horn)"/>
+  <line x1="57" y1="15" x2="63" y2="35" stroke="#d97706" stroke-width="0.8" opacity="0.5"/>
+  <line x1="60" y1="10" x2="60" y2="38" stroke="#fef3c7" stroke-width="1" opacity="0.4"/>
+  <!-- Ears -->
+  <polygon points="26,52 34,26 46,50" fill="#e9d5ff"/>
+  <polygon points="74,50 86,26 94,52" fill="#e9d5ff"/>
+  <polygon points="29,50 35,30 43,49" fill="#f0abfc" opacity="0.7"/>
+  <polygon points="77,49 85,30 91,50" fill="#f0abfc" opacity="0.7"/>
+  <!-- Mane wisps -->
+  <path d="M92,42 Q110,55 106,75" stroke="url(#mane)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <path d="M94,48 Q115,65 108,85" stroke="#f472b6" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <!-- Head -->
+  <circle cx="60" cy="70" r="36" fill="url(#body)"/>
+  <!-- Eye whites -->
+  <ellipse cx="46" cy="67" rx="10" ry="11" fill="white"/>
+  <ellipse cx="74" cy="67" rx="10" ry="11" fill="white"/>
+  <!-- Irises -->
+  <ellipse cx="46" cy="68" rx="7.5" ry="9" fill="url(#iris)"/>
+  <ellipse cx="74" cy="68" rx="7.5" ry="9" fill="url(#iris)"/>
+  <!-- Pupils -->
+  <ellipse cx="46" cy="68" rx="4" ry="7" fill="#0a0a0a"/>
+  <ellipse cx="74" cy="68" rx="4" ry="7" fill="#0a0a0a"/>
+  <!-- Eye shine -->
+  <circle cx="49" cy="63" r="2.5" fill="white" opacity="0.95"/>
+  <circle cx="77" cy="63" r="2.5" fill="white" opacity="0.95"/>
+  <circle cx="50" cy="65" r="1" fill="white" opacity="0.7"/>
+  <circle cx="78" cy="65" r="1" fill="white" opacity="0.7"/>
+  <!-- Stars -->
+  <path d="M20,50 L21.5,45 L23,50 L28,51.5 L23,53 L21.5,58 L20,53 L15,51.5 Z" fill="#f472b6" opacity="0.8" transform="scale(0.7) translate(12,20)"/>
+  <!-- Nose -->
+  <ellipse cx="60" cy="79" rx="4" ry="3" fill="#f0abfc"/>
+  <!-- Mouth -->
+  <path d="M56 82 Q60 87 64 82" stroke="#a855f7" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <!-- Cheek blush -->
+  <ellipse cx="38" cy="76" rx="7" ry="4" fill="#f9a8d4" opacity="0.5"/>
+  <ellipse cx="82" cy="76" rx="7" ry="4" fill="#f9a8d4" opacity="0.5"/>
+</svg>

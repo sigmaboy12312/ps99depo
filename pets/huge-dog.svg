@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <radialGradient id="aura" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="body" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#fef9c3"/>
+      <stop offset="50%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </radialGradient>
+    <radialGradient id="iris" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="65" r="56" fill="url(#aura)"/>
+  <path d="M18,20 L20,13 L22,20 L29,22 L22,24 L20,31 L18,24 L11,22 Z" fill="#fbbf24"/>
+  <path d="M100,15 L102,8 L104,15 L111,17 L104,19 L102,26 L100,19 L93,17 Z" fill="#fde68a"/>
+  <path d="M108,82 L110,76 L112,82 L118,84 L112,86 L110,92 L108,86 L102,84 Z" fill="#fbbf24"/>
+  <!-- Floppy ears (golden) -->
+  <ellipse cx="26" cy="62" rx="17" ry="24" fill="#d97706" transform="rotate(-12,26,62)"/>
+  <ellipse cx="94" cy="62" rx="17" ry="24" fill="#d97706" transform="rotate(12,94,62)"/>
+  <!-- Head -->
+  <circle cx="60" cy="65" r="36" fill="url(#body)"/>
+  <!-- Snout -->
+  <ellipse cx="60" cy="82" rx="18" ry="12" fill="#fef3c7" opacity="0.6"/>
+  <!-- Eye whites -->
+  <ellipse cx="46" cy="63" rx="10" ry="11" fill="white"/>
+  <ellipse cx="74" cy="63" rx="10" ry="11" fill="white"/>
+  <!-- Irises -->
+  <ellipse cx="46" cy="64" rx="7.5" ry="9" fill="url(#iris)"/>
+  <ellipse cx="74" cy="64" rx="7.5" ry="9" fill="url(#iris)"/>
+  <!-- Pupils -->
+  <ellipse cx="46" cy="64" rx="4" ry="6.5" fill="#0a0a0a"/>
+  <ellipse cx="74" cy="64" rx="4" ry="6.5" fill="#0a0a0a"/>
+  <!-- Triple shine -->
+  <circle cx="49" cy="59" r="3" fill="white" opacity="0.95"/>
+  <circle cx="50.5" cy="61.5" r="1.5" fill="white" opacity="0.7"/>
+  <circle cx="77" cy="59" r="3" fill="white" opacity="0.95"/>
+  <circle cx="78.5" cy="61.5" r="1.5" fill="white" opacity="0.7"/>
+  <!-- Nose -->
+  <ellipse cx="60" cy="79" rx="7" ry="5" fill="#78350f"/>
+  <ellipse cx="58" cy="77.5" rx="2.5" ry="1.5" fill="white" opacity="0.4"/>
+  <!-- Mouth -->
+  <path d="M55 84 Q60 89 65 84" stroke="#78350f" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Blush -->
+  <ellipse cx="36" cy="71" rx="8" ry="5" fill="#fbbf24" opacity="0.4"/>
+  <ellipse cx="84" cy="71" rx="8" ry="5" fill="#fbbf24" opacity="0.4"/>
+  <!-- HUGE badge -->
+  <rect x="42" y="100" width="36" height="14" rx="7" fill="#92400e" opacity="0.9"/>
+  <text x="60" y="111" font-family="Segoe UI,sans-serif" font-size="8" font-weight="800" fill="#fef9c3" text-anchor="middle">HUGE</text>
+</svg>

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <radialGradient id="body" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="50%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#9f1239"/>
+    </radialGradient>
+    <radialGradient id="iris" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Glow -->
+  <circle cx="60" cy="65" r="54" fill="url(#glow)"/>
+  <!-- Flame feathers/tail above -->
+  <path d="M38,52 Q30,20 45,8 Q42,30 55,40" fill="#f97316" opacity="0.8"/>
+  <path d="M60,48 Q60,15 72,5 Q65,28 68,42" fill="#fbbf24" opacity="0.8"/>
+  <path d="M78,52 Q90,20 80,6 Q75,28 65,40" fill="#ef4444" opacity="0.8"/>
+  <!-- Side flame wings -->
+  <path d="M22,60 Q5,40 12,25 Q18,45 32,55" fill="#f97316" opacity="0.75"/>
+  <path d="M98,60 Q115,40 108,25 Q102,45 88,55" fill="#f97316" opacity="0.75"/>
+  <!-- Head -->
+  <circle cx="60" cy="70" r="32" fill="url(#body)"/>
+  <!-- Crest feathers on head -->
+  <path d="M50,40 Q46,28 52,22 Q52,32 57,38" fill="#fbbf24" opacity="0.9"/>
+  <path d="M60,38 Q60,24 63,18 Q62,30 64,36" fill="#fef08a" opacity="0.9"/>
+  <path d="M70,40 Q74,28 68,22 Q68,32 63,38" fill="#f97316" opacity="0.9"/>
+  <!-- Eye whites -->
+  <ellipse cx="46" cy="68" rx="10" ry="10" fill="white"/>
+  <ellipse cx="74" cy="68" rx="10" ry="10" fill="white"/>
+  <!-- Irises -->
+  <ellipse cx="46" cy="68" rx="7.5" ry="8" fill="url(#iris)"/>
+  <ellipse cx="74" cy="68" rx="7.5" ry="8" fill="url(#iris)"/>
+  <!-- Pupils -->
+  <ellipse cx="46" cy="68" rx="3.5" ry="5.5" fill="#0a0a0a"/>
+  <ellipse cx="74" cy="68" rx="3.5" ry="5.5" fill="#0a0a0a"/>
+  <!-- Shine -->
+  <circle cx="49" cy="64" r="2.5" fill="white" opacity="0.9"/>
+  <circle cx="77" cy="64" r="2.5" fill="white" opacity="0.9"/>
+  <!-- Beak -->
+  <polygon points="60,82 54,90 66,90" fill="#f59e0b"/>
+  <line x1="54" y1="86" x2="66" y2="86" stroke="#d97706" stroke-width="1"/>
+</svg>

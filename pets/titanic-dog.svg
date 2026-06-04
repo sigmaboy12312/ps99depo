@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <linearGradient id="rainbow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6"/>
+      <stop offset="33%" stop-color="#60a5fa"/>
+      <stop offset="66%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <radialGradient id="aura2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="white" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="body" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#f0f9ff"/>
+      <stop offset="40%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </radialGradient>
+    <radialGradient id="iris" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="60" r="58" fill="none" stroke="url(#rainbow)" stroke-width="4" opacity="0.7"/>
+  <circle cx="60" cy="60" r="53" fill="none" stroke="url(#rainbow)" stroke-width="2" opacity="0.4"/>
+  <circle cx="60" cy="60" r="57" fill="url(#aura2)"/>
+  <path d="M8,18 L10,11 L12,18 L19,20 L12,22 L10,29 L8,22 L1,20 Z" fill="#60a5fa"/>
+  <path d="M105,12 L107,5 L109,12 L116,14 L109,16 L107,23 L105,16 L98,14 Z" fill="#f472b6"/>
+  <path d="M110,85 L112,78 L114,85 L121,87 L114,89 L112,96 L110,89 L103,87 Z" fill="#34d399"/>
+  <!-- Rainbow floppy ears -->
+  <ellipse cx="24" cy="62" rx="17" ry="24" fill="#1d4ed8" transform="rotate(-12,24,62)"/>
+  <ellipse cx="96" cy="62" rx="17" ry="24" fill="#1d4ed8" transform="rotate(12,96,62)"/>
+  <ellipse cx="24" cy="58" rx="12" ry="18" fill="#60a5fa" opacity="0.5" transform="rotate(-12,24,58)"/>
+  <ellipse cx="96" cy="58" rx="12" ry="18" fill="#60a5fa" opacity="0.5" transform="rotate(12,96,58)"/>
+  <!-- Head -->
+  <circle cx="60" cy="65" r="36" fill="url(#body)"/>
+  <circle cx="60" cy="65" r="35" fill="none" stroke="url(#rainbow)" stroke-width="2" opacity="0.4"/>
+  <!-- Snout -->
+  <ellipse cx="60" cy="83" rx="18" ry="12" fill="#e0f2fe" opacity="0.5"/>
+  <!-- Eyes -->
+  <ellipse cx="46" cy="62" rx="11" ry="12" fill="white"/>
+  <ellipse cx="74" cy="62" rx="11" ry="12" fill="white"/>
+  <ellipse cx="46" cy="63" rx="8.5" ry="10" fill="url(#iris)"/>
+  <ellipse cx="74" cy="63" rx="8.5" ry="10" fill="url(#iris)"/>
+  <ellipse cx="46" cy="63" rx="4.5" ry="7" fill="#0a0a0a"/>
+  <ellipse cx="74" cy="63" rx="4.5" ry="7" fill="#0a0a0a"/>
+  <!-- Mega shine -->
+  <circle cx="49.5" cy="57" r="3.5" fill="white" opacity="0.98"/>
+  <circle cx="51" cy="59.5" r="1.8" fill="white" opacity="0.8"/>
+  <circle cx="47" cy="59" r="1" fill="white" opacity="0.6"/>
+  <circle cx="77.5" cy="57" r="3.5" fill="white" opacity="0.98"/>
+  <circle cx="79" cy="59.5" r="1.8" fill="white" opacity="0.8"/>
+  <!-- Nose -->
+  <ellipse cx="60" cy="79" rx="7" ry="5" fill="#1e3a8a"/>
+  <ellipse cx="58" cy="77.5" rx="2.5" ry="1.5" fill="white" opacity="0.4"/>
+  <!-- Mouth -->
+  <path d="M55 84 Q60 89 65 84" stroke="#1e3a8a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- TITANIC badge -->
+  <rect x="30" y="100" width="60" height="15" rx="7" fill="#1e3a8a" opacity="0.95"/>
+  <text x="60" y="111.5" font-family="Segoe UI,sans-serif" font-size="8" font-weight="800" fill="#fde68a" text-anchor="middle">TITANIC</text>
+</svg>

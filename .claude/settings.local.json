@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:db.biggames.io)",
+      "WebFetch(domain:ps99.biggames.io)",
+      "WebFetch(domain:petsimulator99.wiki.gg)",
+      "PowerShell($html = [System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\cwnow\\\\Downloads\\\\Website\\\\tg_doc1.html\"\\); $idx = $html.IndexOf\\(\"assetId\"\\); if \\($idx -ge 0\\) { Write-Host \"assetId at $idx\"; $html.Substring\\([Math]::Max\\(0,$idx-100\\), 400\\) } else { Write-Host \"assetId not found\" })"
+    ]
+  }
+}
