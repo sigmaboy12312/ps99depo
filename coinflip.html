@@ -6,13 +6,8 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
   <title>99Depo — Coin Flip</title>
   <link rel="stylesheet" href="style.css">
-=======
-  <title>99Depo â€” Coin Flip</title>
-  <link rel="stylesheet" href="style.css?v=99">
->>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
   <style>
     /* â”€â”€ LAYOUT â”€â”€ */
     .cf-layout {
@@ -452,7 +447,6 @@
       display:none; flex-direction:column; align-items:center; justify-content:center;
       padding:20px; opacity:0;
       background:
-<<<<<<< HEAD
         radial-gradient(ellipse 70% 55% at 50% 38%, rgba(100,30,200,0.6) 0%, transparent 65%),
         radial-gradient(ellipse 45% 35% at 20% 80%, rgba(200,40,130,0.2) 0%, transparent 60%),
         radial-gradient(ellipse 45% 35% at 80% 80%, rgba(30,90,220,0.18) 0%, transparent 60%),
@@ -462,28 +456,6 @@
       display:flex; animation:cinOpen 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
     }
     #cin-overlay.closing { animation:cinClose 0.38s ease forwards; }
-=======
-        radial-gradient(ellipse 80% 60% at 50% 40%, rgba(80,20,180,0.55) 0%, transparent 65%),
-        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(200,40,140,0.18) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(30,100,220,0.15) 0%, transparent 60%),
-        linear-gradient(160deg, #100820 0%, #050215 50%, #030110 100%);
-    }
-    #cin-overlay::before {
-      content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
-      background:
-        radial-gradient(ellipse 55% 35% at 50% 44%, rgba(124,77,232,0.28) 0%, transparent 70%),
-        radial-gradient(ellipse 30% 20% at 50% 50%, rgba(180,80,255,0.12) 0%, transparent 60%);
-      animation:cinAmbient 4s ease-in-out infinite alternate;
-    }
-    @keyframes cinAmbient {
-      from { opacity:0.7; transform:scale(1); }
-      to   { opacity:1;   transform:scale(1.05); }
-    }
-    #cin-overlay.open {
-      display:flex; animation:cinOpen 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
-    }
-    #cin-overlay.closing { animation:cinClose 0.4s ease forwards; }
->>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
 
     .cin-logo-bar {
       font-size:1.3rem; font-weight:900; color:#f472b6; letter-spacing:0.1em;
@@ -668,19 +640,11 @@
     #particleCanvas { position:fixed; inset:0; pointer-events:none; z-index:9000; }
 
     @keyframes cinOpen {
-<<<<<<< HEAD
       from { opacity:0; backdrop-filter:blur(0px); transform:scale(1.02); }
       to   { opacity:1; backdrop-filter:blur(18px); transform:scale(1); }
     }
     @keyframes cinClose {
       from { opacity:1; backdrop-filter:blur(18px); }
-=======
-      from { opacity:0; backdrop-filter:blur(0px); transform:scale(1.015); }
-      to   { opacity:1; backdrop-filter:blur(16px); transform:scale(1); }
-    }
-    @keyframes cinClose {
-      from { opacity:1; backdrop-filter:blur(16px); }
->>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
       to   { opacity:0; backdrop-filter:blur(0px); }
     }
     @keyframes countFlash {
@@ -900,28 +864,12 @@
   </div>
 </div>
 
-<<<<<<< HEAD
 <!-- ═══════════ SIDEBAR ═══════════ -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <a href="coinflip.html" class="logo-text">
       99DEPO
     </a>
-=======
-<!-- â•â•â•â•â•â•â•â•â•â•â• TOP NAV â•â•â•â•â•â•â•â•â•â•â• -->
-<nav class="topnav">
-  <a href="home.html" class="nav-logo">
-    <img src="logo.png" alt="99Depo" style="height:36px;object-fit:contain;" onerror="this.outerHTML='<span class=&quot;logo-text&quot;><span class=&quot;t1&quot;>99</span><span class=&quot;t2&quot;>DEPO</span></span>'">
-  </a>
-  <div class="nav-games">
-    <a href="home.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#4ade80" stroke-width="1.8"><path d="M3 9l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z"/><polyline points="9,20 9,13 11,13 11,20"/></svg> Home</a>
-    <a href="coinflip.html" class="nav-btn active"><svg viewBox="0 0 20 20" fill="none" stroke="#f97316" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="4"/><line x1="10" y1="2" x2="10" y2="6"/><line x1="10" y1="14" x2="10" y2="18"/></svg> Coin Flip</a>
-    <a href="jackpot.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#fbbf24" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M6 10 L10 5 L14 10 L10 15 Z"/></svg> Jackpot</a>
-    <a href="dice.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#a78bfa" stroke-width="1.8"><rect x="2" y="2" width="16" height="16" rx="3"/><circle cx="6.5" cy="6.5" r="1.2" fill="#a78bfa"/><circle cx="13.5" cy="13.5" r="1.2" fill="#a78bfa"/><circle cx="13.5" cy="6.5" r="1.2" fill="#a78bfa"/><circle cx="6.5" cy="13.5" r="1.2" fill="#a78bfa"/><circle cx="10" cy="10" r="1.2" fill="#a78bfa"/></svg> Dice</a>
-    <div class="nav-divider"></div>
-    <a href="leaderboard.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#60a5fa" stroke-width="1.8"><rect x="2" y="10" width="3" height="8"/><rect x="8.5" y="6" width="3" height="12"/><rect x="15" y="2" width="3" height="16"/></svg> Leaderboard</a>
-    <a href="values.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#f472b6" stroke-width="1.8"><polygon points="10,2 13,8 19,8 14,12 16,18 10,14 4,18 6,12 1,8 7,8"/></svg> CV Values</a>
->>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
   </div>
   <div class="nav-right">
     <div class="online-badge"><div class="online-dot"></div><span id="online-count">â€”</span> online</div>
@@ -1416,7 +1364,6 @@
     ctx.fillStyle = baseC;
     ctx.fill();
 
-<<<<<<< HEAD
     // Gold metallic edge — visible as coin turns
     const edgeVis = Math.max(0, 1 - scaleX * 4);
     if (edgeVis > 0.01) {
@@ -1427,20 +1374,6 @@
       edgeG.addColorStop(0.5, '#ffd700');
       edgeG.addColorStop(0.75,'#e8960c');
       edgeG.addColorStop(1,   '#7a4800');
-=======
-    // Draw thick 3D edge (unscaled, always behind the face)
-    const edgeThick = r * 0.24;
-    const edgeVis = Math.sqrt(Math.max(0, 1 - scaleX * scaleX)); // sin(angle) â€” visible at all tilt angles
-    if (edgeVis > 0) {
-      ctx.save();
-      const edgeH = edgeThick * 2 * edgeVis;
-      const edgeG = ctx.createLinearGradient(cx - r, cy, cx + r, cy);
-      edgeG.addColorStop(0,   '#1a0a00');
-      edgeG.addColorStop(0.2, '#8b5e00');
-      edgeG.addColorStop(0.5, '#d4a00a');
-      edgeG.addColorStop(0.8, '#8b5e00');
-      edgeG.addColorStop(1,   '#1a0a00');
->>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
       ctx.beginPath();
       ctx.ellipse(cx, cy, r, Math.max(edgeH, 2), 0, 0, Math.PI * 2);
       ctx.fillStyle = edgeG;
@@ -2300,11 +2233,7 @@
     const cd = document.getElementById('cin-countdown');
     const steps = ['3','2','1','GO!'];
     let i = 0;
-<<<<<<< HEAD
     function next() {
-=======
-    function showStep() {
->>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
       if (i >= steps.length) {
         cd.className = 'cin-countdown';
         cd.textContent = '';
@@ -2313,19 +2242,11 @@
       }
       cd.textContent = steps[i];
       cd.className = 'cin-countdown flash';
-<<<<<<< HEAD
       const hold = steps[i] === 'GO!' ? 350 : 600;
       i++;
       setTimeout(() => { cd.className = 'cin-countdown'; setTimeout(next, 80); }, hold);
     }
     next();
-=======
-      const dur = steps[i] === 'GO!' ? 380 : 620;
-      i++;
-      setTimeout(() => { cd.className = 'cin-countdown'; setTimeout(showStep, 100); }, dur);
-    }
-    showStep();
->>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
   }
 
   function screenFlash(cls) {
@@ -2407,16 +2328,7 @@
     // Pause near face-on (330Â° = slightly tilted heads face fully visible)
     const pauseDeg = (spins - 1) * 360 + 330;
     const finalDeg = (side === 'heads' ? 0 : 180) + spins * 360;
-<<<<<<< HEAD
     const duration = 2600;
-=======
-
-    const spinDur  = 2800; // ms â€” fast spin to pause point
-    const pauseDur = 1400; // ms â€” dramatic hover
-    const landDur  = 1500; // ms â€” settle to result
-
-    let shimmer = 0, phase = 0, pauseStart = 0, landStart = 0;
->>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
     const start = performance.now();
 
     function tick(now) {

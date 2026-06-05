@@ -2281,11 +2281,7 @@ function _updateNavInvBadge() {
 }
 
 /* ── DEPOSIT MODAL (Trade Bot Flow) ── */
-<<<<<<< HEAD
 const _DEP_BOT        = '99DepoBOT';
-=======
-const _DEP_BOT        = '99DepoBot';
->>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
 const _DEP_SERVER_URL = 'https://www.roblox.com/share?code=9e9097507ceb1241ba8d46a11037f79e&type=Server';
 let _depVerifyTimer = null;
 
@@ -3074,18 +3070,10 @@ function _openLoginModal() {
   el.id = 'login-modal-overlay';
   el.addEventListener('click', e => { if (e.target === el) _closeLoginModal(); });
   el.innerHTML = `
-<<<<<<< HEAD
   <div style="background:linear-gradient(160deg,#12103a,#080615);border:1.5px solid rgba(124,77,232,0.45);border-radius:22px;padding:36px 32px;width:min(440px,94vw);box-shadow:0 0 80px rgba(124,77,232,0.2);">
     <div style="text-align:center;margin-bottom:24px;">
       <div style="font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-0.02em;margin-bottom:6px;">99Depo</div>
       <div style="font-size:.8rem;color:var(--text-muted);">Verify your Roblox account to continue</div>
-=======
-  <div id="login-modal-box">
-    <div style="text-align:center;margin-bottom:20px;">
-      <img src="logo.png" alt="99Depo" style="height:44px;object-fit:contain;display:block;margin:0 auto 10px;"
-        onerror="this.outerHTML='<div style=&quot;font-size:1.3rem;font-weight:900;background:linear-gradient(90deg,#f472b6,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;&quot;>99DEPO</div>'">
-      <div style="font-size:.72rem;color:rgba(148,163,184,.55);">Verify your Roblox account to play</div>
->>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
     </div>
 
     <div style="margin-bottom:12px;">
