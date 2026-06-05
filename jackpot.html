@@ -1,14 +1,30 @@
+<<<<<<< HEAD
 <!DOCTYSE html>
+=======
+﻿<!DOCTYPE html>
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
   <title>SS99Gems — Jackpot</title>
   <link rel="stylesheet" href="style.css">
   <style>
     /* ═══════════════════════════════════════════
        JACKSOT SAGE — DONUT WHEEL
     ═══════════════════════════════════════════ */
+=======
+  <title>99Depo â€” Jackpot</title>
+  <link rel="stylesheet" href="style.css?v=99">
+  <style>
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       JACKPOT PAGE â€” DONUT WHEEL
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
 
     #jp-canvas {
       position:fixed; inset:0; pointer-events:none; z-index:800;
@@ -108,18 +124,6 @@
       border-top:26px solid #fbbf24;
       z-index:10;
       filter:drop-shadow(0 0 8px rgba(251,191,36,0.9)) drop-shadow(0 2px 4px rgba(0,0,0,0.8));
-    }
-    .jp-wheel-pointer-b {
-      position:absolute;
-      bottom:-2px;
-      left:50%;
-      transform:translateX(-50%);
-      width:0; height:0;
-      border-left:14px solid transparent;
-      border-right:14px solid transparent;
-      border-bottom:26px solid #fbbf24;
-      z-index:10;
-      filter:drop-shadow(0 0 8px rgba(251,191,36,0.9)) drop-shadow(0 -2px 4px rgba(0,0,0,0.8));
     }
 
     /* ---------- Timer bar ---------- */
@@ -259,7 +263,7 @@
 <canvas id="jp-canvas"></canvas>
 <div id="jp-flash"></div>
 
-<!-- ── WINNER OVERLAY ── -->
+<!-- â”€â”€ WINNER OVERLAY â”€â”€ -->
 <div id="jp-winner">
   <div class="jp-win-box">
     <div class="jp-win-label">Jackpot Winner</div>
@@ -267,7 +271,7 @@
       <span id="win-initial" style="font-size:2.5rem;font-weight:900;color:#fff;"></span>
     </div>
     <div class="jp-win-name" id="win-name">???</div>
-    <div class="jp-win-prize" id="win-prize">₿0</div>
+    <div class="jp-win-prize" id="win-prize">â‚¿0</div>
     <div class="jp-win-odds" id="win-odds">had 0% chance</div>
     <div style="margin:16px 0 8px;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(251,191,36,0.55);font-weight:800;">Sot Items</div>
     <div id="win-items" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-height:220px;overflow-y:auto;margin-bottom:16px;padding:4px;scrollbar-width:thin;"></div>
@@ -277,7 +281,11 @@
   </div>
 </div>
 
+<<<<<<< HEAD
 <!-- ── DESOSIT MODAL ── -->
+=======
+<!-- â”€â”€ DEPOSIT MODAL â”€â”€ -->
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
 <div class="dep-overlay" id="dep-modal">
   <div class="dep-box">
     <div class="dep-title">
@@ -302,33 +310,40 @@
   </div>
 </div>
 
-<!-- ── NAV ── -->
+<!-- â”€â”€ NAV â”€â”€ -->
 <nav class="topnav">
   <a href="coinflip.html" class="nav-logo">
+<<<<<<< HEAD
     <div class="logo-gem-wrap">
       <svg viewBox="0 0 24 24" fill="none"><polygon points="12,2 20,8 17,20 7,20 4,8" fill="white" opacity=".9"/><polygon points="12,2 20,8 12,6" fill="white" opacity=".5"/></svg>
     </div>
     <div class="logo-text"><span class="t1">SS99</span><span class="t2">GEMS</span></div>
     <img src="pets/cat.svg" style="width:26px;height:26px;object-fit:contain;opacity:.85;" alt="">
+=======
+    <img src="logo.png" alt="99Depo" style="height:36px;object-fit:contain;" onerror="this.outerHTML='<span class=&quot;logo-text&quot;><span class=&quot;t1&quot;>99</span><span class=&quot;t2&quot;>DEPO</span></span>'">
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
   </a>
   <div class="nav-games">
-    <a href="home.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z"/><polyline points="9,20 9,13 11,13 11,20"/></svg> Home</a>
-    <a href="coinflip.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="4.5"/><line x1="10" y1="5.5" x2="10" y2="14.5"/></svg> Coin Flip</a>
-    <a href="jackpot.html" class="nav-btn active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M6 10 L10 5 L14 10 L10 15 Z"/></svg> Jackpot</a>
-    <a href="dice.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="16" height="16" rx="3"/><circle cx="6.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="6.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="10" cy="10" r="1.2" fill="currentColor"/></svg> Dice</a>
+    <a href="home.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#4ade80" stroke-width="1.8"><path d="M3 9l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z"/><polyline points="9,20 9,13 11,13 11,20"/></svg> Home</a>
+    <a href="coinflip.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#f97316" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="4"/><line x1="10" y1="2" x2="10" y2="6"/><line x1="10" y1="14" x2="10" y2="18"/></svg> Coin Flip</a>
+    <a href="jackpot.html" class="nav-btn active"><svg viewBox="0 0 20 20" fill="none" stroke="#fbbf24" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M6 10 L10 5 L14 10 L10 15 Z"/></svg> Jackpot</a>
+    <a href="dice.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#a78bfa" stroke-width="1.8"><rect x="2" y="2" width="16" height="16" rx="3"/><circle cx="6.5" cy="6.5" r="1.2" fill="#a78bfa"/><circle cx="13.5" cy="13.5" r="1.2" fill="#a78bfa"/><circle cx="13.5" cy="6.5" r="1.2" fill="#a78bfa"/><circle cx="6.5" cy="13.5" r="1.2" fill="#a78bfa"/><circle cx="10" cy="10" r="1.2" fill="#a78bfa"/></svg> Dice</a>
     <div class="nav-divider"></div>
-    <a href="leaderboard.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="10" width="3" height="8"/><rect x="8.5" y="6" width="3" height="12"/><rect x="15" y="2" width="3" height="16"/></svg> Leaderboard</a>
-    <a href="values.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="10,2 13,8 19,8 14,12 16,18 10,14 4,18 6,12 1,8 7,8"/></svg> CV Values</a>
+    <a href="leaderboard.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#60a5fa" stroke-width="1.8"><rect x="2" y="10" width="3" height="8"/><rect x="8.5" y="6" width="3" height="12"/><rect x="15" y="2" width="3" height="16"/></svg> Leaderboard</a>
+    <a href="values.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#f472b6" stroke-width="1.8"><polygon points="10,2 13,8 19,8 14,12 16,18 10,14 4,18 6,12 1,8 7,8"/></svg> CV Values</a>
   </div>
   <div class="nav-right">
-    <div class="nav-balance"><span style="font-weight:900;margin-right:2px;font-size:1rem;">₿</span><span data-bal>5B</span></div>
-    <div class="nav-avatar"><img src="pets/cat.svg" alt="avatar"></div>
+    <div class="online-badge"><div class="online-dot"></div><span id="online-count">â€”</span> online</div>
   </div>
 </nav>
 
 <div class="announce-bar">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+<<<<<<< HEAD
   Leave suggestions on our Discord &mdash; <a href="#">discord.gg/99depo</a>
+=======
+  Leave suggestions on our Discord &mdash; <a href="#">discord.gg/99Depo</a>
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
 </div>
 
 <div class="page-body">
@@ -376,7 +391,6 @@
               <div class="jp-wheel-wrap" id="jp-wheel-wrap">
                 <canvas id="jp-wheel" width="500" height="500"></canvas>
                 <div class="jp-wheel-pointer"></div>
-                <div class="jp-wheel-pointer-b"></div>
               </div>
             </div>
           </div>
@@ -385,7 +399,7 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
             <div class="card" style="margin:0;text-align:center;">
               <div class="card-title" style="justify-content:center;">Your Odds</div>
-              <div id="my-odds" style="font-size:2.2rem;font-weight:900;color:var(--text-muted);margin:8px 0 4px;">—</div>
+              <div id="my-odds" style="font-size:2.2rem;font-weight:900;color:var(--text-muted);margin:8px 0 4px;">â€”</div>
               <div style="font-size:.68rem;color:var(--text-muted);">Deposit to enter</div>
             </div>
             <div class="card" style="margin:0;">
@@ -411,13 +425,13 @@
           <div class="card" style="margin:0;">
             <div class="card-title">Drop Into the Sot</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
-              <button onclick="qDep(10000000)"   style="padding:9px;background:rgba(124,77,232,.12);border:1px solid rgba(124,77,232,.28);border-radius:9px;color:#a67dff;font-size:.76rem;font-weight:800;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='rgba(124,77,232,.22)'" onmouseout="this.style.background='rgba(124,77,232,.12)'">₿10M</button>
-              <button onclick="qDep(100000000)"  style="padding:9px;background:rgba(124,77,232,.12);border:1px solid rgba(124,77,232,.28);border-radius:9px;color:#a67dff;font-size:.76rem;font-weight:800;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='rgba(124,77,232,.22)'" onmouseout="this.style.background='rgba(124,77,232,.12)'">₿100M</button>
-              <button onclick="qDep(1000000000)" style="padding:9px;background:rgba(124,77,232,.12);border:1px solid rgba(124,77,232,.28);border-radius:9px;color:#a67dff;font-size:.76rem;font-weight:800;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='rgba(124,77,232,.22)'" onmouseout="this.style.background='rgba(124,77,232,.12)'">₿1B</button>
+              <button onclick="qDep(10000000)"   style="padding:9px;background:rgba(124,77,232,.12);border:1px solid rgba(124,77,232,.28);border-radius:9px;color:#a67dff;font-size:.76rem;font-weight:800;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='rgba(124,77,232,.22)'" onmouseout="this.style.background='rgba(124,77,232,.12)'">â‚¿10M</button>
+              <button onclick="qDep(100000000)"  style="padding:9px;background:rgba(124,77,232,.12);border:1px solid rgba(124,77,232,.28);border-radius:9px;color:#a67dff;font-size:.76rem;font-weight:800;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='rgba(124,77,232,.22)'" onmouseout="this.style.background='rgba(124,77,232,.12)'">â‚¿100M</button>
+              <button onclick="qDep(1000000000)" style="padding:9px;background:rgba(124,77,232,.12);border:1px solid rgba(124,77,232,.28);border-radius:9px;color:#a67dff;font-size:.76rem;font-weight:800;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='rgba(124,77,232,.22)'" onmouseout="this.style.background='rgba(124,77,232,.12)'">â‚¿1B</button>
               <button onclick="qDep(getBalance())" style="padding:9px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.28);border-radius:9px;color:#fbbf24;font-size:.76rem;font-weight:800;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='rgba(251,191,36,.2)'" onmouseout="this.style.background='rgba(251,191,36,.1)'">MAX</button>
             </div>
             <div style="background:rgba(0,0,0,.3);border:1.5px solid rgba(124,77,232,.4);border-radius:11px;padding:10px 14px;display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-              <span style="font-weight:900;color:#f59e0b;font-size:.95rem;">₿</span>
+              <span style="font-weight:900;color:#f59e0b;font-size:.95rem;">â‚¿</span>
               <input type="number" id="jp-bet" value="10000000" min="1" style="flex:1;background:none;border:none;outline:none;color:#fff;font-size:.92rem;font-weight:800;font-family:inherit;">
             </div>
             <button class="btn-primary" onclick="quickDeposit()" id="deposit-btn" style="letter-spacing:.04em;font-size:.88rem;">Deposit into Sot</button>
@@ -438,13 +452,18 @@
               </div>
               <div style="display:flex;gap:10px;align-items:flex-start;">
                 <div style="width:20px;height:20px;border-radius:50%;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.28);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:900;color:#22c55e;flex-shrink:0;margin-top:1px;">3</div>
-                <div style="font-size:.72rem;color:var(--text-sub);line-height:1.5;">The wheel spins — one winner takes 95% of everything.</div>
+                <div style="font-size:.72rem;color:var(--text-sub);line-height:1.5;">The wheel spins â€” one winner takes 95% of everything.</div>
               </div>
             </div>
           </div>
         </div>
 
       </div>
+    </div>
+
+    <div class="live-feed">
+      <div class="feed-label">LIVE</div>
+      <div class="feed-ticker" id="feed-ticker"></div>
     </div>
 
   </div>
@@ -459,11 +478,17 @@
   </div>
 </div>
 
-<script src="app.js"></script>
+<script src="app.js?v=99"></script>
 <script>
+<<<<<<< HEAD
   /* ══════════════════════════════════════════════
      JACKSOT — DONUT WHEEL
   ══════════════════════════════════════════════ */
+=======
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     JACKPOT â€” DONUT WHEEL
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
 
   const COLORS = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b','#ec4899','#6366f1','#f97316','#a855f7','#14b8a6'];
 
@@ -491,7 +516,11 @@
 
   function getTotalSot() { return players.reduce((s,p) => s + p.bet, 0); }
 
+<<<<<<< HEAD
   /* ── DESOSIT ── */
+=======
+  /* â”€â”€ DEPOSIT â”€â”€ */
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
   function openDeposit()  { document.getElementById('dep-modal').classList.add('open'); }
   function closeDeposit() { document.getElementById('dep-modal').classList.remove('open'); }
   document.getElementById('dep-modal').addEventListener('click', e => {
@@ -531,14 +560,14 @@
     const me = players.find(p => p.name === 'You');
     const total = getTotalSot();
     const el = document.getElementById('my-odds');
-    if (!me || total === 0) { el.textContent = '—'; el.style.color = 'var(--text-muted)'; return; }
+    if (!me || total === 0) { el.textContent = 'â€”'; el.style.color = 'var(--text-muted)'; return; }
     el.textContent = Math.round((me.bet / total) * 100) + '%';
     el.style.color = 'var(--purple-b)';
   }
 
-  /* ══════════════════════════════════════
-     DONUT WHEEL — CANVAS
-  ══════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     DONUT WHEEL â€” CANVAS
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
   const jpWheel = document.getElementById('jp-wheel');
   const wctx    = jpWheel.getContext('2d');
@@ -659,7 +688,7 @@
     } else {
       wctx.fillStyle = 'rgba(255,255,255,0.2)';
       wctx.font = `700 ${Math.round(size * 0.045)}px Inter, system-ui, sans-serif`;
-      wctx.fillText('Waiting…', cx, cy);
+      wctx.fillText('Waitingâ€¦', cx, cy);
     }
     wctx.restore();
   }
@@ -705,7 +734,11 @@
     if (wheelIdleRAF) { cancelAnimationFrame(wheelIdleRAF); wheelIdleRAF = null; }
   }
 
+<<<<<<< HEAD
   /* ── SSIN WHEEL ── */
+=======
+  /* â”€â”€ SPIN WHEEL â”€â”€ */
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
   function spinWheel() {
     if (spinning || getTotalSot() === 0) { resetRound(); return; }
     spinning = true;
@@ -733,10 +766,17 @@
     const landFrac = winnerStartFrac + margin + Math.random() * (winnerFrac - 2 * margin);
 
     /* Compute final rotation:
+<<<<<<< HEAD
        In drawWheel, segment at fraction f starts at angle: rot - π/2 + f*2π
        Sointer at top = angle -π/2
        Solve: rot - π/2 + landFrac*2π = -π/2  =>  rot = -landFrac*2π */
     let finalRot = -landFrac * 2 * Math.SI;
+=======
+       In drawWheel, segment at fraction f starts at angle: rot - Ï€/2 + f*2Ï€
+       Pointer at top = angle -Ï€/2
+       Solve: rot - Ï€/2 + landFrac*2Ï€ = -Ï€/2  =>  rot = -landFrac*2Ï€ */
+    let finalRot = -landFrac * 2 * Math.PI;
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
 
     /* Ensure we spin forward at least 6 full rotations */
     while (finalRot < wheelRotation + 6 * 2 * Math.SI) {
@@ -767,7 +807,7 @@
 
   function onSpinComplete(winner, total) {
     const flash = document.getElementById('jp-flash');
-    // Single strong gold flash, then fade — no repeated strobing
+    // Single strong gold flash, then fade â€” no repeated strobing
     flash.style.background = '#fbbf24';
     flash.style.transition = 'opacity 0.06s ease';
     flash.style.opacity = '0.5';
@@ -780,8 +820,13 @@
     setTimeout(() => showWinner(winner, total), 800);
   }
 
+<<<<<<< HEAD
   /* ── SLAYER LIST ── */
   function renderSlayerList() {
+=======
+  /* â”€â”€ PLAYER LIST â”€â”€ */
+  function renderPlayerList() {
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
     const list  = document.getElementById('jp-player-list');
     list.innerHTML = '';
     const total = getTotalSot();
@@ -811,7 +856,11 @@
               <div style="height:100%;border-radius:2px;background:${p.color};width:${barW}%;transition:width .5s ease;box-shadow:0 0 6px ${p.color}88;"></div>
             </div>
           </div>
+<<<<<<< HEAD
           <div style="font-size:.82rem;font-weight:900;color:#fbbf24;">₿${fmtSSG(p.bet)}</div>
+=======
+          <div style="font-size:.82rem;font-weight:900;color:#fbbf24;">â‚¿${fmtPSG(p.bet)}</div>
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
         </div>
         ${thumbHtml}`;
       list.appendChild(entry);
@@ -828,7 +877,7 @@
     renderSlayerList();
   }
 
-  /* ── TIMER ── */
+  /* â”€â”€ TIMER â”€â”€ */
   function startTimer() {
     timerSec = 25;
     document.getElementById('timer-fill').style.width = '100%';
@@ -837,12 +886,12 @@
       const pct = (timerSec / 25) * 100;
       document.getElementById('timer-fill').style.width = pct + '%';
       document.getElementById('stat-timer').textContent = timerSec + 's';
-      document.getElementById('timer-lbl').textContent = timerSec > 0 ? `Spinning in ${timerSec}s…` : '🎰 Spinning!';
+      document.getElementById('timer-lbl').textContent = timerSec > 0 ? `Spinning in ${timerSec}sâ€¦` : 'ðŸŽ° Spinning!';
       if (timerSec <= 0) { clearInterval(timerIv); spinWheel(); }
     }, 1000);
   }
 
-  /* ── WINNER REVEAL ── */
+  /* â”€â”€ WINNER REVEAL â”€â”€ */
   function showWinner(winner, total) {
     const prize = Math.floor(total * 0.95);
     const isYou = winner.name === 'You';
@@ -869,10 +918,10 @@
         const img = document.createElement('img');
         img.src   = petThumbUrl(p.cvSet);
         img.style.cssText = 'width:100%;height:100%;object-fit:contain;';
-        img.onerror = () => { img.style.display='none'; imgWrap.innerHTML = `<span style="font-size:1.4rem">₿</span>`; };
+        img.onerror = () => { img.style.display='none'; imgWrap.innerHTML = `<span style="font-size:1.4rem">â‚¿</span>`; };
         imgWrap.appendChild(img);
       } else {
-        imgWrap.innerHTML = `<span style="font-size:1.4rem;color:${p.color};">₿</span>`;
+        imgWrap.innerHTML = `<span style="font-size:1.4rem;color:${p.color};">â‚¿</span>`;
       }
       const nameTag = document.createElement('div');
       nameTag.style.cssText = `font-size:.52rem;font-weight:800;color:${p.color};max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;`;
@@ -894,8 +943,13 @@
     if (isYou) { addBal(prize); showToast(`JACKSOT! +${fmtB(prize)}!`, 'win'); }
     else        showToast(`${winner.name} won ${fmtB(prize)}`, 'info');
 
+<<<<<<< HEAD
     addRecentWinner(winner.name, prize, winner.color, winner.cvSet);
     // Auto-close after 10s (was 6.5s) — enough time to read the result
+=======
+    addRecentWinner(winner.name, prize, winner.color, winner.cvPet);
+    // Auto-close after 10s (was 6.5s) â€” enough time to read the result
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
     setTimeout(closeWinner, 10000);
   }
 
@@ -912,7 +966,7 @@
 
     document.getElementById('deposit-btn').disabled        = false;
     document.getElementById('jp-rolling-btn').style.display = 'none';
-    document.getElementById('my-odds').textContent         = '—';
+    document.getElementById('my-odds').textContent         = 'â€”';
     document.getElementById('my-odds').style.color         = 'var(--text-muted)';
     document.getElementById('stat-timer').textContent      = '25s';
     document.getElementById('timer-lbl').textContent       = 'Round starts soon';
@@ -925,7 +979,7 @@
     setTimeout(startTimer, 600);
   }
 
-  /* ── RECENT WINNERS ── */
+  /* â”€â”€ RECENT WINNERS â”€â”€ */
   const recentWinners = [];
   function addRecentWinner(name, prize, color, cvSet) {
     recentWinners.unshift({ name, prize, color: color || '#7c4de8', cvSet });
@@ -947,9 +1001,15 @@
     }).join('');
   }
 
+<<<<<<< HEAD
   /* ══════════════════════════════════════
      SARTICLE SYSTEM
   ══════════════════════════════════════ */
+=======
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     PARTICLE SYSTEM
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+>>>>>>> e8f4dd3328c1134ae8af3bdeb0b17d9f625d4542
   const canvas = document.getElementById('jp-canvas');
   const ctx    = canvas.getContext('2d');
   let particles = [];
@@ -1046,11 +1106,36 @@
     if (!rafId) rafId = requestAnimationFrame(animSarticles);
   }
 
-  /* ── INIT ── */
+  /* â”€â”€ INIT â”€â”€ */
   resizeWheel();
   render();
   startIdleWheel();
   startTimer();
+
+  // Live feed
+  (function() {
+    const ticker = document.getElementById('feed-ticker');
+    const events = [
+      {t:'TitanicX won â‚¿480M Jackpot', w:true},
+      {t:'GemLord lost â‚¿120M Jackpot', w:false},
+      {t:'xR4Zy won â‚¿2B on Jackpot', w:true},
+      {t:'NovaPro won â‚¿75M Coin Flip', w:true},
+      {t:'Sk1yRdr lost â‚¿200M Jackpot', w:false},
+      {t:'PurpleKing won â‚¿340M Jackpot', w:true},
+      {t:'HugeGang lost â‚¿90M Jackpot', w:false},
+      {t:'LegacyPS won â‚¿55M Jackpot', w:true},
+    ];
+    const inner = document.createElement('div');
+    inner.className = 'feed-ticker-inner';
+    [...events, ...events].forEach(e => {
+      const span = document.createElement('span');
+      span.className = e.w ? 'win' : 'lose';
+      span.textContent = e.t;
+      inner.appendChild(span);
+    });
+    ticker.appendChild(inner);
+  })();
 </script>
 </body>
 </html>
+
