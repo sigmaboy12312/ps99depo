@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>99Depo — Roulette</title>
-  <link rel="stylesheet" href="style.css">
+  <title>99Depo &mdash; Roulette</title>
+  <link rel="stylesheet" href="style.css?v=205">
   <style>
-    /* ══ ROULETTE WHEEL TRACK ══ */
+    /*  ROULETTE WHEEL TRACK  */
     .rl-wheel-wrap {
       position:relative; overflow:hidden; height:90px;
       border-radius:16px; background:var(--bg-card2);
@@ -56,7 +59,7 @@
     .rl-wheel-wrap::before { left:0; background:linear-gradient(to right,var(--bg-card2),transparent); }
     .rl-wheel-wrap::after  { right:0; background:linear-gradient(to left,var(--bg-card2),transparent); }
 
-    /* ══ RESULT FLASH ══ */
+    /*  RESULT FLASH  */
     .rl-result-bar {
       height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center;
       font-size:1.05rem; font-weight:900; letter-spacing:.04em;
@@ -66,7 +69,7 @@
     .rl-result-bar.win  { background:rgba(34,197,94,.1); border-color:var(--green); color:var(--green); box-shadow:0 0 24px rgba(34,197,94,.2); }
     .rl-result-bar.lose { background:rgba(239,68,68,.1); border-color:var(--red); color:var(--red); box-shadow:0 0 24px rgba(239,68,68,.15); }
 
-    /* ══ BET TILES ══ */
+    /*  BET TILES  */
     .rl-bet-tiles { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
     .rl-tile {
       padding:16px 12px; border-radius:14px; cursor:pointer; text-align:center;
@@ -96,7 +99,7 @@
     .rl-tile-odds { font-size:.72rem; color:var(--text-muted); font-weight:700; }
     .rl-tile-chance { font-size:.64rem; color:var(--text-muted); margin-top:2px; }
 
-    /* ══ CONTROLS ══ */
+    /*  CONTROLS  */
     .rl-controls-grid { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:end; }
     .rl-bet-group { display:flex; flex-direction:column; gap:8px; }
     .rl-bet-lbl { font-size:.76rem; color:var(--text-muted); font-weight:700; }
@@ -129,7 +132,7 @@
     .rl-chip.c-black { background:rgba(71,85,105,.3);  border:1px solid rgba(71,85,105,.6); color:#94a3b8; }
     .rl-chip.c-green { background:rgba(34,197,94,.18); border:1px solid rgba(34,197,94,.5); color:#22c55e; }
 
-    /* ══ LIVE BETS PANEL ══ */
+    /*  LIVE BETS PANEL  */
     .rl-live-panel { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:16px; }
     .rl-live-title { font-size:.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
     .rl-live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); animation:blink 2s infinite; }
@@ -148,7 +151,7 @@
     .rl-live-color.c-r { color:#ef4444; } .rl-live-color.c-b { color:#94a3b8; } .rl-live-color.c-g { color:#22c55e; }
     .rl-live-amt { font-size:.72rem; font-weight:700; color:var(--text-sub); }
 
-    /* ══ HISTORY DOTS ══ */
+    /*  HISTORY DOTS  */
     .rl-hist-dots { display:flex; gap:5px; flex-wrap:wrap; }
     .rl-hist-d {
       width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
@@ -158,12 +161,12 @@
     .rl-hist-d.black { background:rgba(71,85,105,.3); color:#94a3b8; border:1px solid rgba(71,85,105,.4); }
     .rl-hist-d.green { background:rgba(34,197,94,.2); color:#22c55e; border:1px solid rgba(34,197,94,.35); }
 
-    /* ══ STATS ══ */
+    /*  STATS  */
     .rl-sbox { flex:1; background:var(--bg-card2); border:1px solid var(--border); border-radius:10px; padding:12px 8px; text-align:center; }
     .rl-sval { font-size:1.05rem; font-weight:800; }
     .rl-slbl { font-size:.65rem; color:var(--text-muted); margin-top:2px; }
 
-    /* ══ WIN FLASH OVERLAY ══ */
+    /*  WIN FLASH OVERLAY  */
     #rl-win-flash {
       position:fixed; inset:0; z-index:800; pointer-events:none;
       display:flex; align-items:center; justify-content:center;
@@ -186,14 +189,10 @@
 </head>
 <body>
 
-<!-- ── TOP NAV ── -->
+<!--  TOP NAV  -->
 <nav class="topnav">
   <a href="coinflip.html" class="nav-logo">
-    <div class="logo-gem-wrap">
-      <svg viewBox="0 0 24 24" fill="none"><polygon points="12,2 20,8 17,20 7,20 4,8" fill="white" opacity="0.9"/><polygon points="12,2 20,8 12,6" fill="white" opacity="0.5"/></svg>
-    </div>
-    <div class="logo-text"><span class="t1">99</span><span class="t2">DEPO</span></div>
-    <img src="pets/cat.svg" style="width:26px;height:26px;object-fit:contain;opacity:.85;" alt="">
+    <img src="logo.png" alt="99DEPO" style="height:44px;object-fit:contain" onerror="this.outerHTML='<span class=&quot;logo-text&quot;><span class=&quot;t1&quot;>99</span><span class=&quot;t2&quot;>DEPO</span></span>'">
   </a>
   <div class="nav-games">
     <a href="home.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z"/><polyline points="9,20 9,13 11,13 11,20"/></svg> Home</a>
@@ -211,18 +210,12 @@
     </a>
   </div>
   <div class="nav-right">
-    <div class="nav-balance"><span style="font-weight:900;margin-right:2px;font-size:1rem;">₿</span><span data-bal>50M</span></div>
-    <div class="nav-avatar"><img src="pets/cat.svg" alt="avatar"></div>
+    <div class="online-badge"><div class="online-dot"></div><span id="online-count">&mdash;</span> online</div>
   </div>
 </nav>
 
-<!-- ── ANNOUNCE ── -->
-<div class="announce-bar">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-  Red &amp; Black pay <strong>2×</strong> &mdash; Green pays <strong>10×</strong> &mdash; House edge 2.5% &mdash; <a href="#">discord.gg/ps99gems</a>
-</div>
 
-<!-- ── PAGE ── -->
+<!--  PAGE  -->
 <div class="page-body">
   <div class="main-area">
 
@@ -279,13 +272,13 @@
             <div class="rl-tile red-tile" id="tile-red" onclick="selectColor('red')">
               <div class="rl-tile-dot"><svg viewBox="0 0 14 14" width="14" height="14"><circle cx="7" cy="7" r="5" fill="currentColor"/></svg></div>
               <div class="rl-tile-name">Red</div>
-              <div class="rl-tile-odds">2× Payout</div>
+              <div class="rl-tile-odds">2&times; Payout</div>
               <div class="rl-tile-chance">~46.3% chance</div>
             </div>
             <div class="rl-tile black-tile" id="tile-black" onclick="selectColor('black')">
               <div class="rl-tile-dot"><svg viewBox="0 0 14 14" width="14" height="14"><circle cx="7" cy="7" r="5" fill="currentColor"/></svg></div>
               <div class="rl-tile-name">Black</div>
-              <div class="rl-tile-odds">2× Payout</div>
+              <div class="rl-tile-odds">2&times; Payout</div>
               <div class="rl-tile-chance">~46.3% chance</div>
             </div>
             <div class="rl-tile green-tile" id="tile-green" onclick="selectColor('green')">
@@ -293,7 +286,7 @@
                 <svg viewBox="0 0 14 14" width="14" height="14"><polygon points="7,2 12,11 2,11" fill="currentColor"/></svg>
               </div>
               <div class="rl-tile-name">Green</div>
-              <div class="rl-tile-odds">10× Payout</div>
+              <div class="rl-tile-odds">10&times; Payout</div>
               <div class="rl-tile-chance">~7.4% chance</div>
             </div>
           </div>
@@ -303,7 +296,7 @@
             <div class="rl-bet-group">
               <div class="rl-bet-lbl">Bet Amount</div>
               <div class="rl-bet-row">
-                <div class="rl-bet-prefix" style="font-weight:900;font-size:.95rem;color:#f59e0b;">₿</div>
+                <div class="rl-bet-prefix" style="color:#f59e0b;display:flex;align-items:center;"><svg width="13" height="13" viewBox="0 0 28 28" fill="none"><polygon points="25,14 19.5,23.5 8.5,23.5 3,14 8.5,4.5 19.5,4.5" fill="#7c4de8"/><polygon points="14,8.5 19.5,14 14,19.5 8.5,14" fill="white" opacity="0.9"/></svg></div>
                 <input type="number" id="rl-bet" class="rl-bet-input" placeholder="Amount..." min="500000" value="1000000">
               </div>
               <div class="rl-quick-row">
@@ -312,8 +305,8 @@
                 <button class="rl-qbtn" onclick="qbet(5000000)">5M</button>
                 <button class="rl-qbtn" onclick="qbet(25000000)">25M</button>
                 <button class="rl-qbtn" onclick="qbet(100000000)">100M</button>
-                <button class="rl-qbtn" onclick="rlDouble()">2×</button>
-                <button class="rl-qbtn" onclick="rlHalf()">½</button>
+                <button class="rl-qbtn" onclick="rlDouble()">2&times;</button>
+                <button class="rl-qbtn" onclick="rlHalf()">&frac12;</button>
                 <button class="rl-qbtn" onclick="rlMax()">MAX</button>
               </div>
             </div>
@@ -390,19 +383,19 @@
 <div id="rl-win-flash">
   <div class="rl-win-bubble">
     <div class="rl-win-label" id="rl-win-label">YOU WON!</div>
-    <div class="rl-win-amount" id="rl-win-amount">+₿0</div>
+    <div class="rl-win-amount" id="rl-win-amount">+0</div>
   </div>
 </div>
 
-<script src="app.js"></script>
+<script src="app.js?v=205"></script>
 <script>
-/* ── Helpers ── */
+/*  Helpers  */
 function qbet(v) { document.getElementById('rl-bet').value = v; }
 function rlDouble() { const e=document.getElementById('rl-bet'); e.value=Math.min((parseInt(e.value)||0)*2,getBalance()); }
 function rlHalf()  { const e=document.getElementById('rl-bet'); e.value=Math.max(500000,Math.floor((parseInt(e.value)||0)/2)); }
 function rlMax()   { document.getElementById('rl-bet').value=getBalance(); }
 
-/* ── Reel sequence (37 colored cells matching a real roulette layout) ── */
+/*  Reel sequence (37 colored cells matching a real roulette layout)  */
 const REEL_SEQ = [
   'red','black','red','black','green','red','black','red','black','red',
   'black','red','black','red','black','green','red','black','red','black',
@@ -434,7 +427,7 @@ let activeBet = { color: null, amount: 0 };
 let wins = 0, losses = 0, netPL = 0, totalSpins = 0;
 let history = [];
 
-/* ── Live bots ── */
+/*  Live bots  */
 const BOT_BETTORS = [
   { name:'xR4Zy',       color:'#f97316' },
   { name:'TitanicPro',  color:'#06b6d4' },
@@ -467,7 +460,7 @@ function seedLiveBets() {
         <div class="rl-live-av" style="background:${b.color}">${initials}</div>
         <div class="rl-live-name" style="color:${b.color}">${b.name}</div>
         <div class="rl-live-color ${colorClass}">${colorLabel}</div>
-        <div class="rl-live-amt">₿${fmtPSG(amt)}</div>
+        <div class="rl-live-amt">${fmtPSG(amt)}</div>
       </div>`;
   }
 }
@@ -486,14 +479,14 @@ function updateActiveRow() {
   }
   const cls = { red:'c-red', black:'c-black', green:'c-green' }[activeBet.color];
   const label = { red:'Red', black:'Black', green:'Green' }[activeBet.color];
-  row.innerHTML = `<div class="rl-chip ${cls}">₿${fmtPSG(activeBet.amount)} on ${label}</div>`;
+  row.innerHTML = `<div class="rl-chip ${cls}">${fmtPSG(activeBet.amount)} on ${label}</div>`;
 }
 
 function spin() {
   if (spinning) return;
   const betAmt = parseInt(document.getElementById('rl-bet').value) || 0;
   if (!selectedColor) return showToast('Pick a color first!', 'info');
-  if (betAmt < 500000) return showToast('Minimum bet is ₿500K', 'info');
+  if (betAmt < 500000) return showToast('Minimum bet is 500K', 'info');
   if (!deductBal(betAmt)) return showToast('Insufficient balance!', 'lose');
   refreshBal();
 
@@ -505,7 +498,7 @@ function spin() {
   document.getElementById('spin-btn').disabled = true;
   const resultBar = document.getElementById('rl-result-bar');
   resultBar.className = 'rl-result-bar';
-  resultBar.innerHTML = '<span style="letter-spacing:.2em;opacity:.6;">SPINNING…</span>';
+  resultBar.innerHTML = '<span style="letter-spacing:.2em;opacity:.6;">SPINNING...</span>';
 
   reelSeq = buildTrack();
   const track = document.getElementById('rl-track');
@@ -515,7 +508,7 @@ function spin() {
   const roll = Math.random();
   let result = roll < 0.074 ? 'green' : roll < 0.537 ? 'red' : 'black';
 
-  // Build candidate landing positions — always match result color
+  // Build candidate landing positions &mdash; always match result color
   const candidates = [];
   reelSeq.forEach((c, i) => { if (c === result && i > 55 && i < 92) candidates.push(i); });
   if (!candidates.length) reelSeq.forEach((c, i) => { if (c === result && i > 30) candidates.push(i); });
@@ -552,10 +545,10 @@ function showResult(result, betAmt) {
     addBal(winAmt); refreshBal();
     recordWin(winAmt);
     bar.className = 'rl-result-bar win';
-    bar.innerHTML = `<span>${label}</span><span style="opacity:.5;">·</span><span>Won ${fmtB(winAmt)}!</span>`;
+    bar.innerHTML = `<span>${label}</span><span style="opacity:.5;">&middot;</span><span>Won ${fmtB(winAmt)}!</span>`;
     wins++; netPL += winAmt - betAmt;
     const flash = document.getElementById('rl-win-flash');
-    document.getElementById('rl-win-label').textContent = `${label} — YOU WIN!`;
+    document.getElementById('rl-win-label').textContent = `${label} &mdash; YOU WIN!`;
     document.getElementById('rl-win-amount').textContent = `+${fmtB(winAmt)}`;
     flash.classList.add('show');
     setTimeout(() => flash.classList.remove('show'), 2000);
@@ -563,7 +556,7 @@ function showResult(result, betAmt) {
   } else {
     recordLoss(betAmt);
     bar.className = 'rl-result-bar lose';
-    bar.innerHTML = `<span>${label}</span><span style="opacity:.5;">·</span><span>Lost ${fmtB(betAmt)}</span>`;
+    bar.innerHTML = `<span>${label}</span><span style="opacity:.5;">&middot;</span><span>Lost ${fmtB(betAmt)}</span>`;
     losses++; netPL -= betAmt;
   }
 
@@ -613,3 +606,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+

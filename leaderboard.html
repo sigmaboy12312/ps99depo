@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>99Depo — Leaderboard</title>
-  <link rel="stylesheet" href="style.css">
+  <title>99Depo &mdash; Leaderboard</title>
+  <link rel="stylesheet" href="style.css?v=205">
   <style>
-    /* ── LEADERBOARD ── */
+    /*  LEADERBOARD  */
     .lb-wrap {
       max-width: 960px;
       margin: 0 auto;
@@ -130,18 +133,29 @@
     .lb-row-val-lbl { font-size: .6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
 
     .lb-empty { text-align: center; padding: 32px; color: var(--text-muted); font-size: .8rem; }
+
+    /* "You" highlight row */
+    .lb-row.lb-you {
+      background: linear-gradient(135deg,rgba(124,77,232,.12),rgba(124,77,232,.06));
+      border-left: 3px solid var(--purple);
+    }
+    .lb-row.lb-you .lb-row-name::after {
+      content: ' (you)'; font-size: .68rem; color: var(--purple-b); font-weight: 700;
+    }
+
+    /* Rank badge inline */
+    .lb-rank-badge {
+      font-size: .58rem; font-weight: 900; padding: 1px 6px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: .05em;
+    }
   </style>
 </head>
 <body>
 
-<!-- ── TOP NAV ── -->
+<!--  TOP NAV  -->
 <nav class="topnav">
-  <a href="home.html" class="nav-logo">
-    <div class="logo-gem-wrap">
-      <svg viewBox="0 0 24 24" fill="none"><polygon points="12,2 20,8 17,20 7,20 4,8" fill="white" opacity=".9"/><polygon points="12,2 20,8 12,6" fill="white" opacity=".5"/></svg>
-    </div>
-    <div class="logo-text"><span class="t1">99</span><span class="t2">DEPO</span></div>
-    <img src="pets/cat.svg" style="width:26px;height:26px;object-fit:contain;opacity:.85;" alt="">
+  <a href="coinflip.html" class="nav-logo">
+    <img src="logo.png" alt="99DEPO" style="height:44px;object-fit:contain" onerror="this.outerHTML='<span class=&quot;logo-text&quot;><span class=&quot;t1&quot;>99</span><span class=&quot;t2&quot;>DEPO</span></span>'">
   </a>
   <div class="nav-games">
     <a href="home.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z"/><polyline points="9,20 9,13 11,13 11,20"/></svg> Home</a>
@@ -153,15 +167,10 @@
     <a href="values.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="10,2 13,8 19,8 14,12 16,18 10,14 4,18 6,12 1,8 7,8"/></svg> CV Values</a>
   </div>
   <div class="nav-right">
-    <div class="nav-balance"><span style="font-weight:900;margin-right:2px;font-size:1rem;">₿</span><span data-bal>5B</span></div>
-    <div class="nav-avatar"><img src="pets/cat.svg" alt="avatar"></div>
+    <div class="online-badge"><div class="online-dot"></div><span id="online-count">&mdash;</span> online</div>
   </div>
 </nav>
 
-<div class="announce-bar">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-  Rankings reset weekly &mdash; Top players by profit and total wagered &mdash; <a href="#">discord.gg/ps99gems</a>
-</div>
 
 <div class="page-body" style="overflow-y:auto;">
 <div class="lb-wrap">
@@ -174,7 +183,7 @@
     <div class="lb-head-text">
       <div class="lb-head-label">Rankings</div>
       <div class="lb-head-title">Leaderboard</div>
-      <div class="lb-head-sub">Top players by profit and total wagered.</div>
+      <div class="lb-head-sub">All-time rankings &mdash; never resets.</div>
     </div>
   </div>
 
@@ -208,134 +217,118 @@
 </div>
 </div>
 
-<script src="app.js"></script>
+<script src="app.js?v=205"></script>
 <script>
   refreshBal();
+  const PLAYER_COLORS=["#7c4de8","#ef4444","#06b6d4","#10b981","#f59e0b","#ec4899","#6366f1","#f97316","#a855f7","#14b8a6","#3b82f6","#84cc16"];
+  const BASE_PLAYERS=[
+    {name:"Levi2legitt",wagered:344e6,profit:48.9e6},
+    {name:"MuRaTwalker22",wagered:939.6e6,profit:40.4e6},
+    {name:"0Frockko0",wagered:549.7e6,profit:31.6e6},
+    {name:"mrduperman19",wagered:106.7e6,profit:28.2e6},
+    {name:"virapofarm5",wagered:132.9e6,profit:26e6},
+    {name:"NightToLegit",wagered:261.8e6,profit:23.7e6},
+    {name:"IchDerMeister0",wagered:381.1e6,profit:21.8e6},
+    {name:"TitanicPro",wagered:220e6,profit:19.4e6},
+    {name:"GemLord",wagered:185e6,profit:17.2e6},
+    {name:"xR4Zy",wagered:140e6,profit:14.8e6},
+    {name:"Sk1yRdr",wagered:310e6,profit:12.3e6},
+    {name:"LegacyPS",wagered:95e6,profit:9.7e6},
+    {name:"HugeGang",wagered:430e6,profit:8.1e6},
+    {name:"NovaPro",wagered:72e6,profit:6.8e6},
+    {name:"PurpleKing",wagered:55e6,profit:5.5e6},
+    {name:"CrystalFly",wagered:48e6,profit:4.2e6},
+    {name:"Didkpp",wagered:290e6,profit:3.8e6},
+    {name:"carsten_forr",wagered:680e6,profit:3.1e6},
+    {name:"Yaman1233",wagered:150e6,profit:2.7e6},
+    {name:"igotbanneds",wagered:210e6,profit:1.9e6},
+    {name:"TitanicX",wagered:88e6,profit:1.4e6},
+    {name:"fish12256",wagered:316.2e6,profit:-175.8e6},
+    {name:"HugeHunter",wagered:44e6,profit:0.9e6},
+    {name:"RainbowPro",wagered:37e6,profit:0.5e6},
+    {name:"GalacticCat",wagered:29e6,profit:-0.3e6},
+  ].map((p,i)=>({...p,color:PLAYER_COLORS[i%PLAYER_COLORS.length],isBot:true}));
 
-  /* ── Fake leaderboard data ── */
-  const PLAYER_COLORS = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b','#ec4899','#6366f1','#f97316','#a855f7','#14b8a6','#3b82f6','#84cc16'];
-
-  function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-  const PLAYERS_RAW = [
-    { name:'Levi2legitt',  wagered:344e6,  profit:48.9e6 },
-    { name:'MuRaTwalker22',wagered:939.6e6,profit:40.4e6 },
-    { name:'0Frockko0',    wagered:549.7e6,profit:31.6e6 },
-    { name:'mrduperman19', wagered:106.7e6,profit:28.2e6 },
-    { name:'virapofarm5',  wagered:132.9e6,profit:26e6   },
-    { name:'NightToLegit', wagered:261.8e6,profit:23.7e6 },
-    { name:'IchDerMeister0',wagered:381.1e6,profit:21.8e6},
-    { name:'TitanicPro',   wagered:220e6,  profit:19.4e6 },
-    { name:'GemLord',      wagered:185e6,  profit:17.2e6 },
-    { name:'xR4Zy',        wagered:140e6,  profit:14.8e6 },
-    { name:'Sk1yRdr',      wagered:310e6,  profit:12.3e6 },
-    { name:'LegacyPS',     wagered:95e6,   profit:9.7e6  },
-    { name:'HugeGang',     wagered:430e6,  profit:8.1e6  },
-    { name:'NovaPro',      wagered:72e6,   profit:6.8e6  },
-    { name:'PurpleKing',   wagered:55e6,   profit:5.5e6  },
-    { name:'CrystalFly',   wagered:48e6,   profit:4.2e6  },
-    { name:'Didkpp',       wagered:290e6,  profit:3.8e6  },
-    { name:'carsten_forr', wagered:680e6,  profit:3.1e6  },
-    { name:'Yaman1233',    wagered:150e6,  profit:2.7e6  },
-    { name:'igotbanneds',  wagered:210e6,  profit:1.9e6  },
-    { name:'TitanicX',     wagered:88e6,   profit:1.4e6  },
-    { name:'fish12256',    wagered:316.2e6,profit:-175.8e6},
-    { name:'HugeHunter',   wagered:44e6,   profit:0.9e6  },
-    { name:'RainbowPro',   wagered:37e6,   profit:0.5e6  },
-    { name:'GalacticCat',  wagered:29e6,   profit:-0.3e6 },
-  ].map((p, i) => ({ ...p, color: PLAYER_COLORS[i % PLAYER_COLORS.length], id: i }));
-
-  let activeTab = 'profit';
-
-  function getTopBy(field) {
-    return [...PLAYERS_RAW].sort((a, b) => b[field] - a[field]);
+  function buildPlayerList(){
+    const prof=typeof myProfile==="function"?myProfile():null;
+    const u=typeof currentUser==="function"?currentUser():null;
+    const list=[...BASE_PLAYERS];
+    if(prof&&u&&u.username){
+      const profit=(prof.won||0)-(prof.lost||0);
+      const ex=list.findIndex(p=>p.name.toLowerCase()===u.username.toLowerCase());
+      if(ex>=0) list[ex]={...list[ex],wagered:prof.wagered||0,profit,isYou:true};
+      else list.push({name:u.displayName||u.username,wagered:prof.wagered||0,profit,color:"#7c4de8",isYou:true});
+    }
+    return list;
   }
 
-  const TROPHY_ICONS = { 0:'✦', 1:'✦', 2:'✦' };
-  const TROPHY_COLORS = { 0:'#fbbf24', 1:'#94a3b8', 2:'#cd7f32' };
 
-  function buildPodium(players) {
-    const pod = document.getElementById('lb-podium');
-    pod.innerHTML = '';
-    const top3 = players.slice(0, 3);
-    // Render in order: 2nd, 1st, 3rd
-    const order = [1, 0, 2];
-    order.forEach(idx => {
-      if (!top3[idx]) return;
-      const p = top3[idx];
-      const rank = idx + 1;
-      const field = activeTab === 'profit' ? 'profit' : 'wagered';
-      const subField = activeTab === 'profit' ? 'wagered' : 'profit';
-      const card = document.createElement('div');
-      card.className = `lb-pod-card rank-${rank}`;
-      card.onclick = () => showToast(`${p.name}'s profile — ${fmtB(p[field])} ${activeTab}`, 'info');
-      card.innerHTML = `
-        <div class="lb-pod-rank">#${rank}</div>
-        <div class="lb-pod-trophy" style="color:${TROPHY_COLORS[idx]}">✦</div>
-        <div class="lb-pod-avatar" style="background:linear-gradient(135deg,${p.color},${p.color}88);">${p.name[0].toUpperCase()}</div>
-        <div class="lb-pod-name">${p.name}</div>
-        <div class="lb-pod-stats">
-          <div class="lb-pod-stat">
-            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12"><polyline points="2,9 5,6 7,8 12,3"/></svg>
-            <span>${activeTab === 'profit' ? 'Profit' : 'Wagered'}</span>
-            <span class="lb-pod-stat-val ${p[field] >= 0 ? 'green' : ''}">${fmtB(Math.abs(p[field]))}</span>
-          </div>
-          <div class="lb-pod-stat">
-            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12"><circle cx="7" cy="7" r="5"/><path d="M7,4.5 L7,7 L9,8.2"/></svg>
-            <span>${activeTab === 'profit' ? 'Wagered' : 'Profit'}</span>
-            <span class="lb-pod-stat-val gold">${fmtB(Math.abs(p[subField]))}</span>
-          </div>
-        </div>`;
+  const TROPHY_COLORS=["#fbbf24","#94a3b8","#cd7f32"];
+  const TROPHY_SVG=[
+    `<svg viewBox="0 0 16 16" width="20" height="20"><path d="M8 1l1.8 3.6L14 5.4l-3 2.9.7 4.1L8 10.5l-3.7 1.9.7-4.1-3-2.9 4.2-.8z" fill="#fbbf24"/></svg>`,
+    `<svg viewBox="0 0 16 16" width="18" height="18"><path d="M8 1l1.8 3.6L14 5.4l-3 2.9.7 4.1L8 10.5l-3.7 1.9.7-4.1-3-2.9 4.2-.8z" fill="#94a3b8"/></svg>`,
+    `<svg viewBox="0 0 16 16" width="16" height="16"><path d="M8 1l1.8 3.6L14 5.4l-3 2.9.7 4.1L8 10.5l-3.7 1.9.7-4.1-3-2.9 4.2-.8z" fill="#cd7f32"/></svg>`,
+  ];
+  let activeTab="profit";
+
+  function buildPodium(players){
+    const pod=document.getElementById("lb-podium");pod.innerHTML="";
+    const top3=players.slice(0,3);
+    [1,0,2].forEach(idx=>{
+      if(!top3[idx]) return;
+      const p=top3[idx],rank=idx+1;
+      const field=activeTab==="profit"?"profit":"wagered";
+      const sub=activeTab==="profit"?"wagered":"profit";
+      const rk=typeof getRank==="function"?getRank(p.wagered):null;
+      const card=document.createElement("div");
+      card.className="lb-pod-card rank-"+rank+(p.isYou?" lb-you":"");
+      card.onclick=()=>showToast(p.name+" &mdash; "+fmtB(Math.abs(p[field]))+" "+activeTab,"info");
+      card.innerHTML=
+        `<div class="lb-pod-rank">#${rank}</div>`+
+        `<div class="lb-pod-trophy">${TROPHY_SVG[idx]}</div>`+
+        `<div class="lb-pod-avatar" style="background:linear-gradient(135deg,${p.color},${p.color}88);">${p.name[0].toUpperCase()}</div>`+
+        `<div class="lb-pod-name">${p.name}${p.isYou?" <span style=\"font-size:.6rem;color:#a78bfa\">(you)</span>":""}</div>`+
+        (rk?`<div style="font-size:.58rem;font-weight:800;padding:1px 7px;border-radius:20px;background:${rk.bg};color:${rk.color};margin-bottom:2px;">${rk.name}</div>`:"")+
+        `<div class="lb-pod-stats">`+
+          `<div class="lb-pod-stat"><span>${activeTab==="profit"?"Profit":"Wagered"}</span><span class="lb-pod-stat-val ${activeTab==="profit"&&p.profit>=0?"green":activeTab==="wagered"?"gold":""}">${activeTab==="profit"&&p.profit>=0?"+":""}${fmtB(Math.abs(p[field]))}</span></div>`+
+          `<div class="lb-pod-stat"><span>${activeTab==="profit"?"Wagered":"Profit"}</span><span class="lb-pod-stat-val gold">${fmtB(Math.abs(p[sub]))}</span></div>`+
+        `</div>`;
       pod.appendChild(card);
     });
   }
 
-  function buildRows(players) {
-    const el = document.getElementById('lb-rows');
-    el.innerHTML = '';
-    players.forEach((p, i) => {
-      const field = activeTab === 'profit' ? 'profit' : 'wagered';
-      const sub   = activeTab === 'profit' ? 'wagered' : 'profit';
-      const row = document.createElement('div');
-      row.className = 'lb-row';
-      row.onclick = () => showToast(`${p.name} — Profit: ${fmtB(p.profit)} | Wagered: ${fmtB(p.wagered)}`, 'info');
-      const profColor = p.profit >= 0 ? '#22c55e' : '#ef4444';
-      const mainColor = activeTab === 'profit' ? profColor : '#fbbf24';
-      row.innerHTML = `
-        <div class="lb-row-rank">#${i+1}</div>
-        <div class="lb-row-av" style="background:linear-gradient(135deg,${p.color},${p.color}88);">${p.name[0].toUpperCase()}</div>
-        <div style="flex:1;min-width:0;">
-          <div class="lb-row-name">${p.name}</div>
-          <div class="lb-row-sub">Ranked by ${activeTab}</div>
-        </div>
-        <div class="lb-row-vals">
-          <div class="lb-row-val">
-            <div class="lb-row-val-main" style="color:${mainColor};">
-              ${activeTab === 'profit' && p.profit >= 0 ? '+' : activeTab === 'profit' && p.profit < 0 ? '-' : ''}${fmtB(Math.abs(p[field]))}
-            </div>
-            <div class="lb-row-val-lbl">${activeTab === 'profit' ? 'Profit' : 'Wagered'}</div>
-          </div>
-          <div class="lb-row-val" style="display:none;" id="row-sub-${p.id}">
-            <div class="lb-row-val-main" style="color:var(--text-sub);">${fmtB(Math.abs(p[sub]))}</div>
-            <div class="lb-row-val-lbl">${activeTab === 'profit' ? 'Wagered' : 'Profit'}</div>
-          </div>
-        </div>`;
+  function buildRows(players){
+    const el=document.getElementById("lb-rows");el.innerHTML="";
+    players.forEach((p,i)=>{
+      const field=activeTab==="profit"?"profit":"wagered";
+      const profColor=p.profit>=0?"#22c55e":"#ef4444";
+      const mainColor=activeTab==="profit"?profColor:"#fbbf24";
+      const rk=typeof getRank==="function"?getRank(p.wagered):null;
+      const badge=rk?`<span style="font-size:.56rem;font-weight:900;padding:1px 5px;border-radius:20px;background:${rk.bg};color:${rk.color};margin-left:5px;">${rk.name}</span>`:"";
+      const row=document.createElement("div");
+      row.className="lb-row"+(p.isYou?" lb-you":"");
+      row.onclick=()=>showToast(`${p.name} &mdash; Profit: ${fmtB(p.profit)} | Wagered: ${fmtB(p.wagered)}`,"info");
+      row.innerHTML=
+        `<div class="lb-row-rank" style="${i<3?"color:"+TROPHY_COLORS[i]+";font-weight:900;":""}">${i<3?TROPHY_SVG[i]:"#"+(i+1)}</div>`+
+        `<div class="lb-row-av" style="background:linear-gradient(135deg,${p.color},${p.color}88);">${p.name[0].toUpperCase()}</div>`+
+        `<div style="flex:1;min-width:0;"><div class="lb-row-name">${p.name}${badge}</div><div class="lb-row-sub">Wagered ${fmtB(p.wagered)}</div></div>`+
+        `<div class="lb-row-vals"><div class="lb-row-val"><div class="lb-row-val-main" style="color:${mainColor};">${activeTab==="profit"&&p.profit>=0?"+":activeTab==="profit"&&p.profit<0?"-":""}${fmtB(Math.abs(p[field]))}</div><div class="lb-row-val-lbl">${activeTab==="profit"?"Profit":"Wagered"}</div></div></div>`;
       el.appendChild(row);
     });
   }
 
-  function render() {
-    const sorted = getTopBy(activeTab === 'profit' ? 'profit' : 'wagered');
-    document.getElementById('podium-label').textContent = activeTab === 'profit' ? 'Profit' : 'Wagered';
-    buildPodium(sorted);
-    buildRows(sorted);
-    document.getElementById('lb-count').textContent = sorted.length + ' players';
+  function render(){
+    const all=buildPlayerList(),field=activeTab==="profit"?"profit":"wagered";
+    const sorted=[...all].sort((a,b)=>b[field]-a[field]);
+    document.getElementById("podium-label").textContent=activeTab==="profit"?"Top Profit":"Most Wagered";
+    buildPodium(sorted);buildRows(sorted);
+    document.getElementById("lb-count").textContent=sorted.length+" players";
   }
 
-  function switchTab(tab) {
-    activeTab = tab;
-    document.getElementById('tab-profit').classList.toggle('active', tab === 'profit');
-    document.getElementById('tab-wagered').classList.toggle('active', tab === 'wagered');
+  function switchTab(tab){
+    activeTab=tab;
+    document.getElementById("tab-profit").classList.toggle("active",tab==="profit");
+    document.getElementById("tab-wagered").classList.toggle("active",tab==="wagered");
     render();
   }
 

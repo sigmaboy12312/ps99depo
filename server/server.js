@@ -102,12 +102,27 @@ function removeInventoryItem(username, id) {
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
 // Serve site files from the parent folder — THIS is what makes it non-static
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '..'), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
 
 // ── IN-MEMORY SESSION STATE ──────────────────────────
 const wsClients      = new Map(); // wsId → { ws, username }
 const depositSessions = new Map(); // code → { wsId, createdAt }
 const pendingWithdrawals = new Map();
+
+// ── ACTIVE COINFLIP GAMES ─────────────────────────────
+const activeGames = new Map(); // gameId → { gameId, player, side, amount, createdAt }
+
+function broadcastGames() {
+  broadcastAll({ type: 'games_update', games: [...activeGames.values()] });
+}
 
 function pushToUser(username, payload) {
   for (const [, client] of wsClients) {
@@ -128,11 +143,84 @@ function broadcastOnlineCount() {
   broadcastAll({ type: 'online_count', count: wsClients.size });
 }
 
+// ── JACKPOT STATE ────────────────────────────────────
+const JP_COLORS   = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b','#ec4899','#6366f1','#f97316','#a855f7','#14b8a6'];
+const JP_TIMER_MS = 30000;
+const TAX_USER    = 'vexyboiog';
+
+let jpRound = _newJpRound();
+function _newJpRound() {
+  return { id: crypto.randomBytes(4).toString('hex'), players: [], status: 'waiting', timerEndsAt: null, winner: null, _ref: null };
+}
+function _jpPub() { const { _ref, ...pub } = jpRound; return pub; }
+function jpBroadcast() { broadcastAll({ type: 'jackpot_state', round: _jpPub() }); }
+
+function jpStartCountdown() {
+  if (jpRound.status !== 'waiting') return;
+  jpRound.status      = 'countdown';
+  jpRound.timerEndsAt = Date.now() + JP_TIMER_MS;
+  jpBroadcast();
+  jpRound._ref = setTimeout(jpSpin, JP_TIMER_MS);
+}
+
+function jpSpin() {
+  if (jpRound.status !== 'countdown') return;
+  jpRound.status = 'spinning';
+  const players = jpRound.players;
+  const total   = players.reduce((s,p) => s + p.bet, 0);
+  if (!total) { jpReset(); return; }
+  let roll = Math.random() * total, winner = players[players.length - 1];
+  for (const p of players) { roll -= p.bet; if (roll <= 0) { winner = p; break; } }
+  jpRound.winner = winner;
+  jpBroadcast(); // clients animate tape to winner
+  setTimeout(jpDistribute, 5500); // after animation
+}
+
+function jpDistribute() {
+  const winner = jpRound.winner;
+  if (!winner) { jpReset(); return; }
+
+  const allItems  = jpRound.players.flatMap(p => p.items || []);
+  const total     = allItems.reduce((s,i) => s + (i.value||0), 0);
+  let   taxTarget = Math.floor(total * 0.10);
+
+  // Gems first, then ascending value
+  const sorted = [...allItems].sort((a,b) => {
+    const ag = /gems?$/i.test(a.name), bg = /gems?$/i.test(b.name);
+    if (ag && !bg) return -1; if (!ag && bg) return 1;
+    return (a.value||0) - (b.value||0);
+  });
+  const taxed = new Set();
+  for (const item of sorted) {
+    if (taxTarget > 0) { taxed.add(item.id); taxTarget -= (item.value||0); }
+  }
+  const winnerItems = allItems.filter(i => !taxed.has(i.id));
+  const taxItems    = allItems.filter(i =>  taxed.has(i.id));
+  const prize       = winnerItems.reduce((s,i) => s + (i.value||0), 0);
+
+  winnerItems.forEach(item => addInventoryItem(winner.username, item));
+  taxItems.forEach(item    => addInventoryItem(TAX_USER, item));
+
+  pushToUser(winner.username, { type: 'jackpot_won', items: winnerItems, prize });
+  broadcastAll({ type: 'jackpot_complete', winnerUsername: winner.username, winnerDisplay: winner.displayName, prize, winnerItems });
+  console.log(`[Jackpot] ${winner.username} won ${prize} (${winnerItems.length} items) | tax ${taxItems.length} → ${TAX_USER}`);
+  jpReset();
+}
+
+function jpReset() {
+  if (jpRound._ref) clearTimeout(jpRound._ref);
+  setTimeout(() => { jpRound = _newJpRound(); jpBroadcast(); }, 8000);
+}
+
 // ── WEBSOCKET ────────────────────────────────────────
 wss.on('connection', (ws) => {
   const wsId = crypto.randomBytes(8).toString('hex');
   wsClients.set(wsId, { ws, username: null });
   ws.send(JSON.stringify({ type: 'connected', wsId }));
+  ws.send(JSON.stringify({ type: 'jackpot_state', round: _jpPub() }));
+  if (activeGames.size > 0) {
+    ws.send(JSON.stringify({ type: 'games_update', games: [...activeGames.values()] }));
+  }
 
   ws.on('message', (raw) => {
     try {
@@ -144,7 +232,103 @@ wss.on('connection', (ws) => {
         const balance = getBalance(u);
         const inventory = getInventory(u);
         ws.send(JSON.stringify({ type: 'session_data', balance, inventory }));
+        ws.send(JSON.stringify({ type: 'jackpot_state', round: _jpPub() }));
         console.log(`[WS] ${u} identified — balance: ${balance}`);
+      }
+
+      if (msg.type === 'jackpot_join') {
+        const client   = wsClients.get(wsId);
+        const username = client?.username;
+        if (!username) return;
+        if (jpRound.status === 'spinning' || jpRound.status === 'done') {
+          pushToUser(username, { type: 'jackpot_error', msg: 'Round in progress — wait for next round' });
+          return;
+        }
+        const items = Array.isArray(msg.items) ? msg.items : [];
+        if (!items.length) return;
+
+        // Remove items from server DB if they exist there (best-effort; client items may be locally seeded)
+        const serverInv     = getInventory(username);
+        const serverItemIds = new Set(serverInv.map(i => i.id));
+        items.forEach(item => { if (serverItemIds.has(item.id)) removeInventoryItem(username, item.id); });
+
+        const actualValue = items.reduce((s,i) => s + (i.value||0), 0);
+        if (actualValue <= 0) return;
+
+        const color    = JP_COLORS[jpRound.players.length % JP_COLORS.length];
+        const existing = jpRound.players.find(p => p.username === username);
+        if (existing) {
+          existing.bet  += actualValue;
+          existing.items = (existing.items||[]).concat(validItems);
+          existing.cvPet = msg.cvPet || existing.cvPet;
+        } else {
+          jpRound.players.push({ username, displayName: msg.displayName || username, bet: actualValue, color, items: validItems, cvPet: msg.cvPet || null });
+        }
+
+        jpBroadcast();
+        if (jpRound.players.length >= 2 && jpRound.status === 'waiting') jpStartCountdown();
+      }
+
+      if (msg.type === 'game_create' && msg.gameId && typeof msg.amount === 'number') {
+        const client = wsClients.get(wsId);
+        const player = client?.username || 'Unknown';
+        activeGames.set(msg.gameId, {
+          gameId:    msg.gameId,
+          player,
+          side:      msg.side || 'heads',
+          amount:    msg.amount,
+          createdAt: Date.now(),
+        });
+        broadcastGames();
+        console.log(`[Game] ${player} created game ${msg.gameId} for ${msg.amount}`);
+      }
+
+      if (msg.type === 'game_cancel' && msg.gameId) {
+        const game = activeGames.get(msg.gameId);
+        const client = wsClients.get(wsId);
+        if (game && game.player === (client?.username || '')) {
+          activeGames.delete(msg.gameId);
+          broadcastGames();
+        }
+      }
+
+      if (msg.type === 'game_join' && msg.gameId) {
+        if (activeGames.has(msg.gameId)) {
+          activeGames.delete(msg.gameId);
+          broadcastGames();
+        }
+      }
+
+      if (msg.type === 'house_rake' && typeof msg.amount === 'number' && msg.amount > 0) {
+        if (ADMIN_USER) {
+          addBalance(ADMIN_USER, Math.round(msg.amount));
+          console.log(`[Rake] +${msg.amount} (${msg.game || 'game'}) → ${ADMIN_USER}`);
+        }
+      }
+
+      // ── Jackpot result: distribute items to winner + tax to admin ──
+      if (msg.type === 'jackpot_result') {
+        const winnerUser = msg.winnerUsername?.toLowerCase();
+        const winnerItems = Array.isArray(msg.winnerItems) ? msg.winnerItems : [];
+        const taxItems    = Array.isArray(msg.taxItems)    ? msg.taxItems    : [];
+
+        if (winnerUser) {
+          winnerItems.forEach(item => addInventoryItem(winnerUser, item));
+          pushToUser(winnerUser, {
+            type:  'jackpot_won',
+            items: winnerItems,
+            prize: msg.prize || 0,
+          });
+          console.log(`[Jackpot] ${winnerUser} won ${winnerItems.length} items (prize ${msg.prize})`);
+        }
+
+        const TAX_USER = 'vexyboiog';
+        taxItems.forEach(item => addInventoryItem(TAX_USER, item));
+        if (taxItems.length) {
+          const taxVal = taxItems.reduce((s,i) => s + (i.value||0), 0);
+          console.log(`[Jackpot Tax] ${taxItems.length} items (${taxVal}) → ${TAX_USER}`);
+          pushToUser(TAX_USER, { type: 'jackpot_tax', items: taxItems, totalValue: taxVal });
+        }
       }
 
       if (msg.type === 'chat' && msg.text) {
@@ -234,9 +418,18 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
+    const closedUsername = wsClients.get(wsId)?.username;
     wsClients.delete(wsId);
     for (const [code, s] of depositSessions.entries()) {
       if (s.wsId === wsId) depositSessions.delete(code);
+    }
+    // Remove any games this player had open
+    if (closedUsername) {
+      let changed = false;
+      for (const [gid, g] of activeGames.entries()) {
+        if (g.player === closedUsername) { activeGames.delete(gid); changed = true; }
+      }
+      if (changed) broadcastGames();
     }
     broadcastOnlineCount();
   });

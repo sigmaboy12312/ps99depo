@@ -1,4 +1,6 @@
-/* ── RESET & VARS ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* -- RESET & VARS -- */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
 :root {
@@ -24,14 +26,14 @@
   --cyan:        #06b6d4;
   --chat-w:      300px;
   --nav-h:       58px;
-  --announce-h:  40px;
+  --announce-h:  0px;
   --card-r:      14px;
 }
 
 html, body { height:100%; }
 
 body {
-  font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family:'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   background:
     radial-gradient(ellipse 70% 60% at 15% 40%, rgba(124,77,232,0.12) 0%, transparent 60%),
     radial-gradient(ellipse 50% 40% at 85% 20%, rgba(6,182,212,0.07) 0%, transparent 55%),
@@ -42,7 +44,7 @@ body {
   min-height:100vh; overflow:hidden;
 }
 
-/* ── TOP NAV ── */
+/* -- TOP NAV -- */
 .topnav {
   height:var(--nav-h);
   background:linear-gradient(180deg, var(--bg-nav) 0%, rgba(13,11,30,0.97) 100%);
@@ -68,12 +70,16 @@ body {
 }
 .nav-logo .logo-gem-wrap svg { width:22px; height:22px; }
 .nav-logo .logo-text {
-  font-size:1.15rem; font-weight:900; letter-spacing:-0.02em; line-height:1;
+  font-size:1.55rem; font-weight:900; letter-spacing:-0.03em; line-height:1;
 }
-.nav-logo .logo-text .t1 { color:#f472b6; text-shadow:0 0 20px rgba(244,114,182,0.5); }
+.nav-logo .logo-text .t1 {
+  color:#f472b6;
+  text-shadow:0 0 22px rgba(244,114,182,0.7), 0 0 44px rgba(244,114,182,0.3);
+}
 .nav-logo .logo-text .t2 {
-  background:linear-gradient(90deg,#e879f9,#a78bfa);
+  background:linear-gradient(90deg,#e879f9,#a78bfa,#c084fc);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter:drop-shadow(0 0 8px rgba(167,139,250,0.5));
 }
 
 /* NAV GAME BUTTONS */
@@ -99,6 +105,14 @@ body {
   box-shadow:0 0 16px rgba(124,77,232,0.2), inset 0 1px 0 rgba(255,255,255,0.07);
 }
 .nav-btn.active svg { color:var(--purple-b); }
+
+/* -- Colored nav icons -- */
+a.nav-btn[href="home.html"]        svg { stroke:#4ade80; color:#4ade80; }
+a.nav-btn[href="coinflip.html"]    svg { stroke:#f97316; color:#f97316; }
+a.nav-btn[href="jackpot.html"]     svg { stroke:#fbbf24; color:#fbbf24; }
+a.nav-btn[href="dice.html"]        svg { stroke:#a78bfa; color:#a78bfa; fill:#a78bfa; }
+a.nav-btn[href="leaderboard.html"] svg { stroke:#60a5fa; color:#60a5fa; }
+a.nav-btn[href="values.html"]      svg { stroke:#f472b6; color:#f472b6; }
 
 .nav-btn.soon { opacity:0.5; cursor:not-allowed; pointer-events:none; }
 .nav-btn.soon::after {
@@ -134,7 +148,7 @@ body {
 }
 .nav-avatar img { width:100%; height:100%; object-fit:cover; }
 
-/* ── ANNOUNCEMENT BAR ── */
+/* -- ANNOUNCEMENT BAR -- */
 .announce-bar {
   height:var(--announce-h);
   background:linear-gradient(90deg, rgba(244,114,182,0.07), transparent 30%, transparent 70%, rgba(232,121,249,0.06));
@@ -146,13 +160,13 @@ body {
 .announce-bar a { color:#e879f9; text-decoration:none; font-weight:700; }
 .announce-bar a:hover { text-decoration:underline; }
 
-/* ── PAGE BODY ── */
+/* -- PAGE BODY -- */
 .page-body {
   display:flex; flex:1; overflow:hidden;
   height:calc(100vh - var(--nav-h) - var(--announce-h));
 }
 
-/* ── MAIN AREA ── */
+/* -- MAIN AREA -- */
 .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 
 /* STATS ROW */
@@ -227,7 +241,7 @@ body {
 }
 .empty-state svg { width:52px; height:52px; opacity:0.15; }
 
-/* ── COIN FLIP GAME LIST ── */
+/* -- COIN FLIP GAME LIST -- */
 .cf-list { display:flex; flex-direction:column; gap:10px; }
 
 .cf-entry {
@@ -278,7 +292,7 @@ body {
   box-shadow:0 0 24px rgba(124,77,232,0.45);
 }
 
-/* ── RIGHT CHAT PANEL ── */
+/* -- RIGHT CHAT PANEL -- */
 .chat-panel {
   width:var(--chat-w); flex-shrink:0;
   background:linear-gradient(180deg, var(--bg-chat) 0%, #090718 100%);
@@ -355,7 +369,7 @@ body {
 .chat-send svg { width:16px; height:16px; }
 .chat-send:hover, .btn-send:hover { background:linear-gradient(135deg,#8b5cf6,#a78bfa); box-shadow:0 0 20px rgba(124,77,232,0.5); }
 
-/* ── MODAL ── */
+/* -- MODAL -- */
 .modal-overlay {
   position:fixed; inset:0; background:rgba(0,0,0,0.8);
   z-index:500; display:none; align-items:center; justify-content:center;
@@ -382,7 +396,7 @@ body {
 }
 .modal-close:hover { color:var(--text); background:var(--bg-card2); }
 
-/* ── SIDE SELECT ── */
+/* -- SIDE SELECT -- */
 .side-row { display:flex; gap:12px; margin-bottom:20px; }
 .side-pick {
   flex:1; padding:16px 12px; background:var(--bg-card2);
@@ -395,7 +409,7 @@ body {
 .side-pick:hover, .side-pick.selected { border-color:var(--purple); background:var(--purple-dim); }
 .side-pick.selected .sp-label { color:var(--purple-b); }
 
-/* ── BET INPUT ── */
+/* -- BET INPUT -- */
 .bet-wrap { margin-bottom:16px; }
 .bet-label { font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:7px; }
 
@@ -424,7 +438,7 @@ body {
 }
 .bet-quick button:hover { color:var(--purple-b); border-color:var(--border-p); background:var(--purple-dim); }
 
-/* ── PRIMARY / SECONDARY BTNS ── */
+/* -- PRIMARY / SECONDARY BTNS -- */
 .btn-primary {
   width:100%; padding:13px;
   background:linear-gradient(135deg,var(--purple),#8b5cf6);
@@ -440,7 +454,7 @@ body {
 }
 .btn-primary:disabled { opacity:0.4; cursor:not-allowed; box-shadow:none; transform:none; }
 
-/* ── TOAST ── */
+/* -- TOAST -- */
 .toast-wrap { position:fixed; top:18px; right:18px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
 .toast {
   padding:12px 18px; border-radius:11px; font-size:0.83rem; font-weight:700;
@@ -454,7 +468,7 @@ body {
 .toast-lose { background:rgba(239,68,68,0.15);  border:1px solid rgba(239,68,68,0.5);  color:#f87171; }
 .toast-info { background:rgba(124,77,232,0.15); border:1px solid rgba(124,77,232,0.5); color:var(--purple-b); }
 
-/* ── JACKPOT TAPE ── */
+/* -- JACKPOT TAPE -- */
 .jp-tape-container {
   position:relative; overflow:hidden; border-radius:14px;
   border:1px solid var(--border-p);
@@ -469,11 +483,11 @@ body {
   box-shadow:0 0 14px var(--gold); z-index:10;
 }
 .jp-tape-pointer::before {
-  content:'▼'; position:absolute; top:-4px; left:50%; transform:translateX(-50%);
+  content:'v'; position:absolute; top:-4px; left:50%; transform:translateX(-50%);
   color:var(--gold); font-size:0.9rem; text-shadow:0 0 10px var(--gold);
 }
 .jp-tape-pointer::after {
-  content:'▲'; position:absolute; bottom:-4px; left:50%; transform:translateX(-50%);
+  content:'^'; position:absolute; bottom:-4px; left:50%; transform:translateX(-50%);
   color:var(--gold); font-size:0.9rem; text-shadow:0 0 10px var(--gold);
 }
 .jp-tape { display:flex; height:100%; will-change:transform; }
@@ -494,7 +508,7 @@ body {
 .jp-seg .js-name { font-size:0.7rem; font-weight:800; color:#fff; z-index:1; white-space:nowrap; text-shadow:0 1px 4px rgba(0,0,0,0.9); }
 .jp-seg .js-pct  { font-size:0.62rem; color:rgba(255,255,255,0.7); z-index:1; }
 
-/* ── JACKPOT LAYOUT ── */
+/* -- JACKPOT LAYOUT -- */
 .jp-layout { display:grid; grid-template-columns:1fr 270px; gap:16px; height:100%; }
 .jp-main { display:flex; flex-direction:column; gap:14px; }
 .jp-side { display:flex; flex-direction:column; gap:14px; }
@@ -533,7 +547,7 @@ body {
 .jp-player .jp-ppct  { font-size:0.72rem; color:var(--text-muted); }
 .jp-player .jp-pval  { font-size:0.82rem; font-weight:800; color:var(--gold); }
 
-/* ── DICE GAME ── */
+/* -- DICE GAME -- */
 .dice-arena {
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:30px; padding:40px 20px; min-height:420px;
@@ -586,7 +600,7 @@ body {
 .dice-result.lose { color:var(--red);   text-shadow:0 0 20px rgba(239,68,68,0.5); }
 .dice-result.tie  { color:var(--gold);  text-shadow:0 0 20px rgba(245,158,11,0.5); }
 
-/* ── ROULETTE ── */
+/* -- ROULETTE -- */
 .rl-layout { max-width:840px; display:flex; flex-direction:column; gap:14px; }
 
 .rl-track-wrap {
@@ -600,7 +614,7 @@ body {
   width:3px; background:linear-gradient(180deg,transparent,var(--gold) 20%,var(--gold) 80%,transparent);
   box-shadow:0 0 14px var(--gold); z-index:5;
 }
-.rl-pointer::before { content:'▼'; position:absolute; top:-4px; left:50%; transform:translateX(-50%); color:var(--gold); font-size:0.9rem; text-shadow:0 0 10px var(--gold); }
+.rl-pointer::before { content:'v'; position:absolute; top:-4px; left:50%; transform:translateX(-50%); color:var(--gold); font-size:0.9rem; text-shadow:0 0 10px var(--gold); }
 .rl-track { display:flex; gap:4px; padding:10px; will-change:transform; }
 
 .rl-cell {
@@ -638,7 +652,7 @@ body {
 .h-dot.green { background:rgba(22,163,74,0.3); color:#6ee7b7; border:1px solid rgba(22,163,74,0.5); }
 @keyframes popIn { from{transform:scale(0) rotate(-20deg)} to{transform:scale(1) rotate(0)} }
 
-/* ── COMING SOON ── */
+/* -- COMING SOON -- */
 .soon-page {
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   height:100%; gap:20px; text-align:center;
@@ -647,7 +661,7 @@ body {
 .soon-page h2 { font-size:1.8rem; font-weight:900; color:var(--text-muted); }
 .soon-page p  { font-size:0.88rem; color:var(--text-muted); }
 
-/* ── CARD ── */
+/* -- CARD -- */
 .card {
   background:linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card2) 100%);
   border:1px solid var(--border); border-radius:14px; padding:18px;
@@ -655,7 +669,7 @@ body {
 }
 .card-title { font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:14px; }
 
-/* ── CV VALUES PAGE ── */
+/* -- CV VALUES PAGE -- */
 .cv-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:12px; }
 .cv-card {
   background:linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card2) 100%);
@@ -672,15 +686,13 @@ body {
 .cv-card .cv-trend-down { color:var(--red);   font-size:0.68rem; }
 .cv-card .cv-trend-same { color:var(--text-muted); font-size:0.68rem; }
 
-/* ── SCROLLBAR ── */
+/* -- SCROLLBAR -- */
 ::-webkit-scrollbar { width:4px; height:4px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:rgba(124,77,232,0.4); border-radius:2px; }
 
-/* ── PARTICLES OVERLAY ── */
-#particle-canvas { position:fixed; inset:0; pointer-events:none; z-index:9990; }
 
-/* ── HISTORY DICE ── */
+/* -- HISTORY DICE -- */
 .history-row-dice { display:flex; gap:5px; flex-wrap:wrap; }
 .hd-item {
   width:30px; height:30px; border-radius:7px; display:flex; align-items:center; justify-content:center;
@@ -690,14 +702,14 @@ body {
 .hd-item.lose { background:rgba(239,68,68,0.2); color:var(--red); border:1px solid rgba(239,68,68,0.4); }
 .hd-item.tie  { background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); }
 
-/* ══════════════════════════════════════════
+/* ==========================================
    ENHANCED HOVER EFFECTS + THICKER UI
-══════════════════════════════════════════ */
+========================================== */
 
 /* Thicker card borders */
 .card { border-width:2px; }
 
-/* Nav buttons – punchier hover */
+/* Nav buttons - punchier hover */
 .nav-btn:hover {
   color:#fff;
   background:rgba(124,77,232,0.14);
@@ -707,7 +719,7 @@ body {
 }
 .nav-btn { transition:all 0.15s; }
 
-/* Stat cards – glow on hover */
+/* Stat cards - glow on hover */
 .stat-card:hover {
   border-color:var(--border-p);
   box-shadow:0 0 28px rgba(124,77,232,0.28), 0 8px 30px rgba(0,0,0,0.55);
@@ -715,14 +727,14 @@ body {
 }
 .stat-card { transition:all 0.18s; }
 
-/* Coin flip entries – bigger lift */
+/* Coin flip entries - bigger lift */
 .cf-entry:hover {
   border-color:var(--border-p);
   box-shadow:0 10px 40px rgba(0,0,0,0.65), 0 0 28px rgba(124,77,232,0.18);
   transform:translateY(-4px);
 }
 
-/* Join button – scale + glow */
+/* Join button - scale + glow */
 .btn-join { transition:all 0.16s; }
 .btn-join:hover {
   background:linear-gradient(135deg,var(--purple),#8b5cf6);
@@ -740,7 +752,7 @@ body {
   transform:translateY(-1px);
 }
 
-/* Primary button – bigger glow */
+/* Primary button - bigger glow */
 .btn-primary:hover {
   background:linear-gradient(135deg,#8b5cf6,#a78bfa);
   box-shadow:0 0 40px rgba(124,77,232,0.7), 0 6px 20px rgba(0,0,0,0.4);
@@ -754,7 +766,7 @@ body {
   transform:translateY(-2px);
 }
 
-/* CV cards – bigger pop */
+/* CV cards - bigger pop */
 .cv-card:hover {
   border-color:var(--border-p);
   transform:translateY(-5px) scale(1.02);
@@ -798,7 +810,7 @@ body {
 .side-pick:hover { border-color:var(--purple); background:var(--purple-dim); }
 .side-pick { transition:all 0.16s; }
 
-/* ── SIDEBAR STYLES (referenced in coinflip/older pages) ── */
+/* -- SIDEBAR STYLES (referenced in coinflip/older pages) -- */
 .sidebar {
   width:220px; flex-shrink:0;
   background:linear-gradient(180deg, var(--bg-nav) 0%, #08061a 100%);
@@ -896,9 +908,9 @@ body.sidebar-layout { flex-direction:row; overflow:hidden; }
 .btn-primary { background:linear-gradient(135deg,var(--purple),#8b5cf6); color:#fff; box-shadow:0 0 20px rgba(124,77,232,0.35); }
 .btn-primary:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
 
-/* ══════════════════════════════════════════
+/* ==========================================
    GLOBAL THICKNESS + GLOW PASS 2
-══════════════════════════════════════════ */
+========================================== */
 
 /* Root: boost glow variables */
 :root {
@@ -914,31 +926,31 @@ body.sidebar-layout { flex-direction:row; overflow:hidden; }
 /* Announce bar thicker */
 .announce-bar { border-bottom-width:2px; }
 
-/* Stat cards — bigger icon, thicker border */
+/* Stat cards  -  bigger icon, thicker border */
 .stat-card { border-width:2px; }
 .stat-card .sc-icon { border-width:2px; width:40px; height:40px; }
 
-/* CF entry — thicker border */
+/* CF entry  -  thicker border */
 .cf-entry { border-width:2px; }
 .cf-entry::before { width:4px; }
 
-/* Chat panel — thicker border */
+/* Chat panel  -  thicker border */
 .chat-panel { border-left-width:2px; }
 .chat-header { border-bottom-width:2px; }
 .chat-input-row,.chat-input-wrap { border-top-width:2px; }
 
-/* Modal box — thicker */
+/* Modal box  -  thicker */
 .modal-box { border-width:2px; }
 
-/* Dice face — thicker border */
+/* Dice face  -  thicker border */
 .dice-face { border-width:3px; }
 
-/* Roulette track — thicker */
+/* Roulette track  -  thicker */
 .rl-track-wrap { border-width:2px; }
 .rl-opt { border-width:2px; }
 .rl-opt:hover,.rl-opt.selected { border-width:2px; }
 
-/* Jackpot tape — thicker */
+/* Jackpot tape  -  thicker */
 .jp-tape-container { border-width:2px; }
 .jp-pot-display { border-width:2px; }
 
@@ -952,7 +964,7 @@ body {
     var(--bg);
 }
 
-/* Nav avatar — glows on hover */
+/* Nav avatar  -  glows on hover */
 .nav-avatar:hover { box-shadow:0 0 18px rgba(124,77,232,0.5); transform:scale(1.08); }
 .nav-avatar { transition:all 0.18s; cursor:pointer; }
 
@@ -960,7 +972,7 @@ body {
 .sort-drop:hover { border-color:var(--border-p); color:var(--text); }
 .sort-drop { transition:all 0.15s; }
 
-/* CV card — thicker top bar */
+/* CV card  -  thicker top bar */
 .cv-card::before { height:4px; }
 .cv-card { border-width:2px; }
 
@@ -981,13 +993,13 @@ body {
 /* Side picks */
 .side-pick,.side-opt { border-width:2px; }
 
-/* Bet quick buttons — bigger touch targets */
+/* Bet quick buttons  -  bigger touch targets */
 .bet-quick button { padding:8px 6px; border-width:2px; }
 
 /* Deposit/Free gem buttons on sidebar */
 .btn-free { border:2px solid transparent; }
 
-/* ═══════════ CHAT RANK + LEVEL ═══════════ */
+/* =========== CHAT RANK + LEVEL =========== */
 .cm-avatar-wrap {
   display:flex; flex-direction:column; align-items:center; gap:2px; flex-shrink:0;
 }
@@ -1011,7 +1023,7 @@ body {
 }
 .cm-rank-icon svg { display:block; }
 
-/* ═══════════ PROFILE MODAL ═══════════ */
+/* =========== PROFILE MODAL =========== */
 .prof-overlay {
   display:none; position:fixed; inset:0; z-index:9200;
   background:rgba(0,0,0,.82); backdrop-filter:blur(8px);
@@ -1109,7 +1121,7 @@ body {
 }
 .prof-tip-btn:hover { box-shadow:0 0 36px rgba(124,77,232,.7); transform:translateY(-2px); }
 
-/* ═══════════ DEPOSIT / WITHDRAW MODALS ═══════════ */
+/* =========== DEPOSIT / WITHDRAW MODALS =========== */
 .dep-overlay {
   display:none; position:fixed; inset:0; z-index:9100;
   background:rgba(0,0,0,.8); backdrop-filter:blur(7px);
@@ -1264,7 +1276,7 @@ body {
   border-radius:10px; font-size:.82rem; font-weight:700; margin-bottom:14px;
 }
 
-/* ── Withdraw inventory ── */
+/* -- Withdraw inventory -- */
 .wdr-inv-header {
   display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
 }
@@ -1311,7 +1323,7 @@ body {
   padding:10px 0 16px; line-height:1.5;
 }
 
-/* ═══════════ ITEM BUBBLES (BloxySpin style) ═══════════ */
+/* =========== ITEM BUBBLES (BloxySpin style) =========== */
 .item-bubbles {
   display:flex; align-items:center; flex-shrink:0;
 }
@@ -1335,7 +1347,7 @@ body {
   letter-spacing:-0.02em;
 }
 
-/* ═══════════ BLOXYSPIN LOBBY HEADER ═══════════ */
+/* =========== BLOXYSPIN LOBBY HEADER =========== */
 .lobby-stats-bar {
   display:flex; gap:0; margin-bottom:16px;
   background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.06);
@@ -1372,7 +1384,7 @@ body {
   cursor:pointer; display:flex; align-items:center; gap:5px;
 }
 
-/* ═══════════ BLOXYSPIN GAME ROWS ═══════════ */
+/* =========== BLOXYSPIN GAME ROWS =========== */
 .bs-row {
   display:flex; align-items:center; gap:10px;
   padding:10px 14px;
@@ -1419,7 +1431,7 @@ body {
 .cin-tier-t { background:linear-gradient(135deg,#f97316,#ea580c); color:#431407; }
 .cin-tier-h { background:linear-gradient(135deg,#1d4ed8,#1e40af); color:#bfdbfe; }
 
-/* ═══════════ NAV WALLET BUTTONS ═══════════ */
+/* =========== NAV WALLET BUTTONS =========== */
 .nav-wallet-wrap { display:flex; align-items:center; gap:6px; flex-shrink:0; }
 .nav-wallet-btn {
   display:flex; align-items:center; gap:5px;
@@ -1444,7 +1456,7 @@ body {
   padding:0 4px; margin-left:2px;
 }
 
-/* ── JOIN / CREATE OVERLAY (shared across all game pages) ── */
+/* -- JOIN / CREATE OVERLAY (shared across all game pages) -- */
 .join-overlay {
   position:fixed; inset:0; z-index:9800;
   background:rgba(2,1,14,0.85); backdrop-filter:blur(8px);
@@ -1499,11 +1511,11 @@ body {
 }
 .join-confirm:hover { transform:translateY(-2px); box-shadow:0 0 36px rgba(124,77,232,.65); }
 
-/* ══════════════════════════════════════════
+/* ==========================================
    GLOBAL HOVER + INTERACTION POLISH
-══════════════════════════════════════════ */
+========================================== */
 
-/* Sidebar nav items — lift and glow */
+/* Sidebar nav items  -  lift and glow */
 .nav-item {
   transition:all .18s cubic-bezier(.34,1.56,.64,1) !important;
 }
@@ -1518,7 +1530,7 @@ body {
   box-shadow:0 0 16px rgba(124,77,232,.28) !important;
 }
 
-/* Game rows — richer hover */
+/* Game rows  -  richer hover */
 .bs-row {
   transition:all .18s !important;
 }
@@ -1591,11 +1603,11 @@ body {
   to   { transform:scale(1) translateY(0); opacity:1; }
 }
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    COMPREHENSIVE VISUAL UPGRADE
-═══════════════════════════════════════════════════ */
+=================================================== */
 
-/* ── 1. CUSTOM SCROLLBAR ── */
+/* -- 1. CUSTOM SCROLLBAR -- */
 ::-webkit-scrollbar { width:5px; height:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb {
@@ -1605,7 +1617,7 @@ body {
 ::-webkit-scrollbar-thumb:hover { background:rgba(124,77,232,.8); }
 * { scrollbar-width:thin; scrollbar-color:rgba(124,77,232,.45) transparent; }
 
-/* ── 2. GLASS NAV WITH BACKDROP BLUR ── */
+/* -- 2. GLASS NAV WITH BACKDROP BLUR -- */
 .topnav {
   background:rgba(8,6,21,.8) !important;
   backdrop-filter:blur(22px) saturate(160%) !important;
@@ -1614,7 +1626,7 @@ body {
   box-shadow:0 1px 0 rgba(255,255,255,.05), 0 4px 32px rgba(0,0,0,.4) !important;
 }
 
-/* ── 3. ANIMATED BALANCE GLOW ── */
+/* -- 3. ANIMATED BALANCE GLOW -- */
 .nav-balance {
   background:linear-gradient(135deg,rgba(124,77,232,.22),rgba(124,77,232,.08)) !important;
   border:1px solid rgba(124,77,232,.45) !important;
@@ -1629,7 +1641,7 @@ body {
 }
 .nav-balance.updated { animation:balFlash .5s ease; }
 
-/* ── 4. BUTTON SHINE SWEEP ── */
+/* -- 4. BUTTON SHINE SWEEP -- */
 .btn-primary, .btn-create, .btn-free, .join-confirm,
 .cta-main, .gc-play, .lobby-create-btn, .bs-join,
 .rl-spin-btn, .dc-continue, .cin-continue, .dc-continue {
@@ -1651,7 +1663,7 @@ body {
   left:160%;
 }
 
-/* ── 5. GRADIENT TEXT ON BIG NUMBERS ── */
+/* -- 5. GRADIENT TEXT ON BIG NUMBERS -- */
 .sc-val[style*="green"],
 .dice-result.win,
 .rl-result-bar.win {
@@ -1669,7 +1681,7 @@ body {
   letter-spacing:-.03em;
 }
 
-/* ── 6. CARD DEPTH UPGRADE ── */
+/* -- 6. CARD DEPTH UPGRADE -- */
 .card {
   background:linear-gradient(160deg,rgba(18,15,40,.98),rgba(14,12,32,.98)) !important;
   border:1px solid rgba(255,255,255,.07) !important;
@@ -1682,7 +1694,7 @@ body {
              inset 0 1px 0 rgba(255,255,255,.07) !important;
 }
 
-/* ── 7. LOBBY ROWS — REDESIGNED ── */
+/* -- 7. LOBBY ROWS  -  REDESIGNED -- */
 .bs-row {
   background:linear-gradient(135deg,rgba(14,11,34,.9),rgba(10,8,24,.9)) !important;
   border:1px solid rgba(255,255,255,.06) !important;
@@ -1723,7 +1735,7 @@ body {
   border-color:rgba(255,255,255,.2) !important; color:#fff !important;
 }
 
-/* ── 8. CHAT IMPROVEMENTS ── */
+/* -- 8. CHAT IMPROVEMENTS -- */
 .chat-msg {
   padding:7px 12px !important;
   border-radius:8px !important;
@@ -1775,7 +1787,7 @@ body {
   color:#fff !important; box-shadow:0 0 16px rgba(124,77,232,.5) !important;
 }
 
-/* ── 9. INPUT GLOW RING ── */
+/* -- 9. INPUT GLOW RING -- */
 .bet-input-row:focus-within {
   border-color:rgba(124,77,232,.7) !important;
   box-shadow:0 0 0 3px rgba(124,77,232,.18), 0 0 16px rgba(124,77,232,.2) !important;
@@ -1787,7 +1799,7 @@ input[type="number"]:focus, input[type="text"]:focus {
   outline:none;
 }
 
-/* ── 10. SIDEBAR UPGRADE ── */
+/* -- 10. SIDEBAR UPGRADE -- */
 .sidebar {
   background:linear-gradient(180deg,rgba(10,8,22,.98) 0%,rgba(8,6,18,.98) 100%) !important;
   border-right:1px solid rgba(124,77,232,.15) !important;
@@ -1817,7 +1829,7 @@ input[type="number"]:focus, input[type="text"]:focus {
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 0 16px rgba(124,77,232,.25) !important;
 }
 
-/* ── 11. ANNOUNCE BAR TICKER ── */
+/* -- 11. ANNOUNCE BAR TICKER -- */
 .announce-bar {
   overflow:hidden !important;
   position:relative !important;
@@ -1834,7 +1846,7 @@ input[type="number"]:focus, input[type="text"]:focus {
   to   { transform:translateX(-50%); }
 }
 
-/* ── 12. STAT CARD ICON GLOW ── */
+/* -- 12. STAT CARD ICON GLOW -- */
 .stat-card .sc-icon {
   box-shadow:0 0 14px rgba(124,77,232,.3), inset 0 1px 0 rgba(255,255,255,.1) !important;
   transition:box-shadow .2s !important;
@@ -1843,7 +1855,7 @@ input[type="number"]:focus, input[type="text"]:focus {
   box-shadow:0 0 24px rgba(124,77,232,.5), inset 0 1px 0 rgba(255,255,255,.15) !important;
 }
 
-/* ── 13. LOGO GEM PULSE ── */
+/* -- 13. LOGO GEM PULSE -- */
 .logo-gem-wrap {
   animation:gemPulse 4s ease-in-out infinite !important;
 }
@@ -1852,7 +1864,7 @@ input[type="number"]:focus, input[type="text"]:focus {
   50%      { box-shadow:0 0 32px rgba(124,77,232,.9), 0 0 60px rgba(124,77,232,.35), inset 0 1px 0 rgba(255,255,255,.3); }
 }
 
-/* ── 14. BETTING QUICK BUTTONS ── */
+/* -- 14. BETTING QUICK BUTTONS -- */
 .bet-quick button {
   background:rgba(255,255,255,.05) !important;
   border:1px solid rgba(255,255,255,.08) !important;
@@ -1867,7 +1879,7 @@ input[type="number"]:focus, input[type="text"]:focus {
   box-shadow:0 0 12px rgba(124,77,232,.25) !important;
 }
 
-/* ── 15. ITEM BUBBLES ── */
+/* -- 15. ITEM BUBBLES -- */
 .item-bubble {
   transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s !important;
   border:1.5px solid rgba(255,255,255,.1) !important;
@@ -1879,7 +1891,7 @@ input[type="number"]:focus, input[type="text"]:focus {
   z-index:2; position:relative;
 }
 
-/* ── 16. TOPBAR TITLE ── */
+/* -- 16. TOPBAR TITLE -- */
 .topbar-title {
   font-size:1.1rem !important;
   font-weight:900 !important;
@@ -1888,7 +1900,7 @@ input[type="number"]:focus, input[type="text"]:focus {
   background-clip:text;
 }
 
-/* ── 17. ONLINE BADGE ── */
+/* -- 17. ONLINE BADGE -- */
 .online-badge {
   background:rgba(34,197,94,.1) !important;
   border:1px solid rgba(34,197,94,.3) !important;
@@ -1901,7 +1913,7 @@ input[type="number"]:focus, input[type="text"]:focus {
   box-shadow:0 0 8px #22c55e !important;
 }
 
-/* ── 18. LOBBY STATS BAR ── */
+/* -- 18. LOBBY STATS BAR -- */
 .lobby-stats-bar {
   background:linear-gradient(135deg,rgba(124,77,232,.08),rgba(6,182,212,.04)) !important;
   border:1px solid rgba(124,77,232,.2) !important;
@@ -1921,7 +1933,7 @@ input[type="number"]:focus, input[type="text"]:focus {
   letter-spacing:.1em !important;
 }
 
-/* ── 19. PROFILE MODAL FINAL POLISH ── */
+/* -- 19. PROFILE MODAL FINAL POLISH -- */
 .prof-card {
   box-shadow:0 0 0 1px rgba(124,77,232,.3), 0 32px 80px rgba(0,0,0,.8), 0 0 80px rgba(124,77,232,.12) !important;
 }
@@ -1933,7 +1945,7 @@ input[type="number"]:focus, input[type="text"]:focus {
 .prof-tip-btn::after { content:''; position:absolute; top:0; left:-120%; width:55%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent); transition:left .55s; pointer-events:none; }
 .prof-tip-btn:hover::after { left:160%; }
 
-/* ── 20. GAME AREA SUBTLE MESH ── */
+/* -- 20. GAME AREA SUBTLE MESH -- */
 .game-area {
   background:
     radial-gradient(ellipse 60% 40% at 20% 50%, rgba(124,77,232,.05) 0%, transparent 60%),
@@ -1941,7 +1953,7 @@ input[type="number"]:focus, input[type="text"]:focus {
     transparent;
 }
 
-/* ── FONT POLISH ── */
+/* -- FONT POLISH -- */
 body { font-feature-settings:"kern","liga","calt"; -webkit-font-smoothing:antialiased; }
 h1,h2,h3,strong,.font-heavy { letter-spacing:-.02em; }
 
@@ -1950,19 +1962,19 @@ h1,h2,h3,strong,.font-heavy { letter-spacing:-.02em; }
 .sidebar-layout > .main, .sidebar-layout > .sidebar,
 .home-root, .home-body, .lb-wrap { position:relative; z-index:1; }
 
-/* ── FOCUS VISIBLE (accessibility) ── */
+/* -- FOCUS VISIBLE (accessibility) -- */
 :focus-visible { outline:2px solid rgba(124,77,232,.7); outline-offset:2px; }
 
-/* ── SMOOTH ALL TRANSITIONS ── */
+/* -- SMOOTH ALL TRANSITIONS -- */
 a, button { transition:all .18s ease; }
 img { transition:opacity .3s ease; }
 img[src=""] { opacity:0; }
 
-/* ════════════════════════════════════════
+/* ========================================
    SITE-WIDE VISUAL OVERHAUL v2
-════════════════════════════════════════ */
+======================================== */
 
-/* ── CSS Variables upgrade ── */
+/* -- CSS Variables upgrade -- */
 :root {
   --purple:   #8b5cf6 !important;
   --purple-b: #b88fff !important;
@@ -1975,7 +1987,7 @@ img[src=""] { opacity:0; }
   --text-sub: #9590b8 !important;
 }
 
-/* ── Rich animated background ── */
+/* -- Rich animated background -- */
 body {
   background:
     radial-gradient(ellipse 80% 55% at 10% 35%,  rgba(139,92,246,.14) 0%, transparent 58%),
@@ -1985,7 +1997,7 @@ body {
     #070514 !important;
 }
 
-/* ── Game row — premium redesign ── */
+/* -- Game row  -  premium redesign -- */
 .bs-row {
   padding: 16px 18px !important;
   background: linear-gradient(135deg, rgba(16,12,38,.98) 0%, rgba(12,9,28,.98) 100%) !important;
@@ -2008,7 +2020,7 @@ body {
   letter-spacing: .02em !important;
 }
 
-/* ── Avatar circles ── */
+/* -- Avatar circles -- */
 .bs-av-you {
   background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
   box-shadow: 0 0 16px rgba(139,92,246,.5) !important;
@@ -2016,7 +2028,7 @@ body {
   font-weight: 900 !important;
 }
 
-/* ── Join + View buttons ── */
+/* -- Join + View buttons -- */
 .bs-join {
   background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
   box-shadow: 0 0 18px rgba(59,130,246,.45) !important;
@@ -2035,7 +2047,7 @@ body {
   border-color: rgba(255,255,255,.14) !important;
 }
 
-/* ── Lobby stats bar ── */
+/* -- Lobby stats bar -- */
 .lobby-stats-bar {
   background: linear-gradient(135deg, rgba(139,92,246,.1), rgba(6,182,212,.04)) !important;
   border: 1px solid rgba(139,92,246,.22) !important;
@@ -2047,7 +2059,7 @@ body {
   font-weight: 900 !important;
 }
 
-/* ── Primary button ── */
+/* -- Primary button -- */
 .btn-primary {
   background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
   box-shadow: 0 0 24px rgba(139,92,246,.45), 0 4px 14px rgba(0,0,0,.35) !important;
@@ -2062,7 +2074,7 @@ body {
   transform: translateY(-2px) !important;
 }
 
-/* ── Card base ── */
+/* -- Card base -- */
 .card {
   background: linear-gradient(155deg, rgba(17,13,43,.99), rgba(12,9,30,.99)) !important;
   border: 1px solid rgba(255,255,255,.08) !important;
@@ -2075,7 +2087,7 @@ body {
               inset 0 1px 0 rgba(255,255,255,.06) !important;
 }
 
-/* ── Nav balance ── */
+/* -- Nav balance -- */
 .nav-balance {
   background: linear-gradient(135deg, rgba(139,92,246,.24), rgba(139,92,246,.1)) !important;
   border: 1px solid rgba(139,92,246,.5) !important;
@@ -2084,7 +2096,7 @@ body {
   font-weight: 900 !important;
 }
 
-/* ── Nav buttons active state ── */
+/* -- Nav buttons active state -- */
 .nav-btn.active {
   background: linear-gradient(135deg, rgba(139,92,246,.28), rgba(139,92,246,.14)) !important;
   border-color: rgba(139,92,246,.5) !important;
@@ -2092,14 +2104,14 @@ body {
   color: #fff !important;
 }
 
-/* ── Sidebar nav item active ── */
+/* -- Sidebar nav item active -- */
 .nav-item.active {
   background: linear-gradient(135deg, rgba(139,92,246,.26), rgba(139,92,246,.1)) !important;
   border-color: rgba(139,92,246,.48) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 0 18px rgba(139,92,246,.25) !important;
 }
 
-/* ── Free balance button ── */
+/* -- Free balance button -- */
 .btn-free {
   background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
   box-shadow: 0 0 22px rgba(139,92,246,.45) !important;
@@ -2112,7 +2124,7 @@ body {
   transform: translateY(-2px) !important;
 }
 
-/* ── Chat input focus ── */
+/* -- Chat input focus -- */
 .chat-input:focus {
   border-color: rgba(139,92,246,.65) !important;
   box-shadow: 0 0 0 2px rgba(139,92,246,.22), 0 0 14px rgba(139,92,246,.18) !important;
@@ -2123,13 +2135,13 @@ body {
   box-shadow: 0 0 18px rgba(139,92,246,.55) !important;
 }
 
-/* ── Item bubbles ── */
+/* -- Item bubbles -- */
 .item-bubble:hover {
   border-color: rgba(139,92,246,.6) !important;
   box-shadow: 0 6px 20px rgba(0,0,0,.55), 0 0 14px rgba(139,92,246,.45) !important;
 }
 
-/* ── Lobby create button ── */
+/* -- Lobby create button -- */
 .lobby-create-btn {
   background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
   box-shadow: 0 0 18px rgba(59,130,246,.4) !important;
@@ -2142,20 +2154,20 @@ body {
   transform: translateY(-1px) !important;
 }
 
-/* ── Online badge ── */
+/* -- Online badge -- */
 .online-badge {
   background: rgba(34,197,94,.12) !important;
   border: 1px solid rgba(34,197,94,.32) !important;
   box-shadow: 0 0 12px rgba(34,197,94,.15) !important;
 }
 
-/* ── Toast improvements ── */
+/* -- Toast improvements -- */
 .toast { border-radius: 12px !important; backdrop-filter: blur(16px) saturate(180%) !important; }
 .toast-win  { background: rgba(34,197,94,.18) !important;  border: 1px solid rgba(34,197,94,.55) !important; box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 16px rgba(34,197,94,.2) !important; }
 .toast-lose { background: rgba(239,68,68,.18) !important;  border: 1px solid rgba(239,68,68,.55) !important; box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 16px rgba(239,68,68,.2) !important; }
 .toast-info { background: rgba(139,92,246,.18) !important; border: 1px solid rgba(139,92,246,.55) !important; box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 16px rgba(139,92,246,.2) !important; }
 
-/* ── Lobby history button ── */
+/* -- Lobby history button -- */
 .lobby-hist-btn {
   border-radius: 10px !important;
   font-weight: 800 !important;
@@ -2166,7 +2178,7 @@ body {
   color: #b88fff !important;
 }
 
-/* ── Bet quick buttons ── */
+/* -- Bet quick buttons -- */
 .bet-quick button {
   font-weight: 800 !important;
   border-radius: 8px !important;
@@ -2179,7 +2191,7 @@ body {
   box-shadow: 0 0 12px rgba(139,92,246,.25) !important;
 }
 
-/* ── Jackpot main card ── */
+/* -- Jackpot main card -- */
 .jp-main-card {
   border: 1.5px solid rgba(251,191,36,.25) !important;
   box-shadow: 0 0 60px rgba(251,191,36,.08), 0 8px 40px rgba(0,0,0,.5) !important;
@@ -2190,7 +2202,7 @@ body {
   opacity: .7 !important;
 }
 
-/* ── Jackpot player entries ── */
+/* -- Jackpot player entries -- */
 .jp-player-entry:hover {
   background: rgba(139,92,246,.08) !important;
   border-radius: 10px !important;
@@ -2200,7 +2212,7 @@ body {
   font-size: .82rem !important;
 }
 
-/* ── Profile modal upgrade ── */
+/* -- Profile modal upgrade -- */
 .prof-card { border-radius: 22px !important; }
 .prof-av-ring { box-shadow: 0 0 32px rgba(139,92,246,.65), 0 4px 24px rgba(0,0,0,.55) !important; }
 .prof-stat-box:hover { border-color: rgba(139,92,246,.4) !important; }
@@ -2214,7 +2226,7 @@ body {
   transform: translateY(-2px) !important;
 }
 
-/* ── Seed checker ── */
+/* -- Seed checker -- */
 .seed-check-btn {
   background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
   border-radius: 10px !important;
@@ -2222,7 +2234,7 @@ body {
 }
 .seed-input-field:focus { border-color: rgba(139,92,246,.65) !important; }
 
-/* ── Join confirm button ── */
+/* -- Join confirm button -- */
 .join-confirm {
   background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
   border-radius: 12px !important;
@@ -2236,7 +2248,7 @@ body {
   transform: translateY(-2px) !important;
 }
 
-/* ── Jackpot rolling button ── */
+/* -- Jackpot rolling button -- */
 .jp-rolling-btn {
   background: rgba(139,92,246,.12) !important;
   border: 1.5px solid rgba(139,92,246,.3) !important;
@@ -2244,79 +2256,79 @@ body {
   border-radius: 10px !important;
 }
 
-/* ── Cinematic result text ── */
+/* -- Cinematic result text -- */
 .cin-result.win  { text-shadow: 0 0 50px rgba(34,197,94,.8), 0 0 100px rgba(34,197,94,.4) !important; }
 .cin-result.lose { text-shadow: 0 0 50px rgba(239,68,68,.8), 0 0 100px rgba(239,68,68,.4) !important; }
 
-/* ── Input focus universal ── */
+/* -- Input focus universal -- */
 input:focus, input:focus-visible {
   outline: none !important;
   box-shadow: 0 0 0 2px rgba(139,92,246,.35) !important;
 }
 
-/* ── Topnav glass ── */
+/* -- Topnav glass -- */
 .topnav {
   background: rgba(7,5,20,.88) !important;
   border-bottom: 1px solid rgba(139,92,246,.2) !important;
   box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 4px 32px rgba(0,0,0,.45) !important;
 }
 
-/* ── Sidebar deepened ── */
+/* -- Sidebar deepened -- */
 .sidebar {
   background: linear-gradient(180deg, #08061a 0%, #06050e 100%) !important;
   border-right: 1px solid rgba(139,92,246,.18) !important;
   box-shadow: 3px 0 20px rgba(0,0,0,.45) !important;
 }
 
-/* ── Topbar ── */
+/* -- Topbar -- */
 .topbar {
   background: rgba(8,6,21,.92) !important;
   border-bottom: 1px solid rgba(139,92,246,.16) !important;
 }
 
-/* ── Live feed ── */
+/* -- Live feed -- */
 .live-feed {
   background: rgba(7,5,18,.96) !important;
   border-top: 1px solid rgba(139,92,246,.18) !important;
 }
 
-/* ── Chat panel ── */
+/* -- Chat panel -- */
 .chat-panel { background: linear-gradient(180deg, #090720 0%, #060512 100%) !important; }
 .chat-header {
   background: linear-gradient(135deg, rgba(139,92,246,.12), transparent) !important;
   border-bottom: 1px solid rgba(139,92,246,.2) !important;
 }
 
-/* ── Dice cinematic die ── */
+/* -- Dice cinematic die -- */
 .dc-die.win-die  { border-color: #fbbf24 !important; box-shadow: 0 0 40px rgba(251,191,36,.55) !important; }
 .dc-die.lose-die { border-color: #ef4444 !important; box-shadow: 0 0 24px rgba(239,68,68,.3) !important; }
 .dc-result.win  { color: #22c55e !important; text-shadow: 0 0 50px rgba(34,197,94,.8) !important; }
 .dc-result.lose { color: #ef4444 !important; text-shadow: 0 0 50px rgba(239,68,68,.8) !important; }
 
-/* ── Announce bar gradient ── */
+/* -- Announce bar gradient -- */
 .announce-bar {
   background: linear-gradient(90deg, rgba(139,92,246,.12), rgba(6,182,212,.06), rgba(139,92,246,.12)) !important;
   border-bottom: 1px solid rgba(139,92,246,.2) !important;
 }
 
-/* ── Balance flash animation ── */
+/* -- Balance flash animation -- */
 @keyframes balFlash {
   0%   { box-shadow: 0 0 20px rgba(139,92,246,.3); }
   40%  { box-shadow: 0 0 44px rgba(139,92,246,.85), 0 0 70px rgba(139,92,246,.35); }
   100% { box-shadow: 0 0 20px rgba(139,92,246,.3); }
 }
 
-/* ── Logo gem pulse ── */
+/* -- Logo gem pulse -- */
 @keyframes gemPulse {
   0%,100% { box-shadow: 0 0 22px rgba(139,92,246,.65), 0 0 44px rgba(139,92,246,.22), inset 0 1px 0 rgba(255,255,255,.22); }
   50%     { box-shadow: 0 0 38px rgba(139,92,246,.95), 0 0 70px rgba(139,92,246,.4),  inset 0 1px 0 rgba(255,255,255,.3); }
 }
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    COMPREHENSIVE UI REDESIGN PASS
-═══════════════════════════════════════════════════ */
+=================================================== */
 
-/* ── LOBBY GAME ROWS — full redesign ── */
+/* -- LOBBY GAME ROWS  -  full redesign -- */
 .bs-row {
   display:flex !important; align-items:center !important; gap:14px !important;
   padding:14px 16px !important;
@@ -2375,7 +2387,7 @@ input:focus, input:focus-visible {
 }
 .bs-view:hover { background:rgba(255,255,255,.12) !important; color:#fff !important; border-color:rgba(255,255,255,.25) !important; }
 
-/* ── ITEM BUBBLES — larger ── */
+/* -- ITEM BUBBLES  -  larger -- */
 .item-bubble {
   width:44px !important; height:44px !important;
   border-radius:11px !important;
@@ -2390,7 +2402,7 @@ input:focus, input:focus-visible {
 }
 .item-bubbles { display:flex; gap:5px; align-items:center; }
 
-/* ── LOBBY STATS BAR ── */
+/* -- LOBBY STATS BAR -- */
 .lobby-stats-bar {
   display:flex !important; gap:0 !important; padding:14px 0 12px !important;
   margin-bottom:0 !important; background:none !important;
@@ -2415,7 +2427,7 @@ input:focus, input:focus-visible {
   margin-top:3px !important;
 }
 
-/* ── LOBBY ACTIONS BAR ── */
+/* -- LOBBY ACTIONS BAR -- */
 .lobby-actions-bar {
   margin-bottom:10px !important; gap:8px !important;
 }
@@ -2440,7 +2452,7 @@ input:focus, input:focus-visible {
   border-radius:10px !important; font-weight:700 !important;
 }
 
-/* ── CARD TITLE ── */
+/* -- CARD TITLE -- */
 .card-title {
   font-size:.65rem !important;
   font-weight:800 !important;
@@ -2451,7 +2463,7 @@ input:focus, input:focus-visible {
   display:flex !important; align-items:center !important; gap:7px !important;
 }
 
-/* ── CHAT PANEL ── */
+/* -- CHAT PANEL -- */
 .chat-panel {
   background:linear-gradient(180deg,rgba(10,8,22,.98),rgba(8,6,18,.98)) !important;
 }
@@ -2474,7 +2486,7 @@ input:focus, input:focus-visible {
 .cm-text { font-size:.78rem !important; color:rgba(212,210,232,.88) !important; line-height:1.45 !important; }
 .cm-time { font-size:.58rem !important; color:var(--text-muted) !important; }
 
-/* ── SIDEBAR ── */
+/* -- SIDEBAR -- */
 .sidebar {
   background:linear-gradient(180deg,#090718 0%,#06050f 100%) !important;
   border-right:1px solid rgba(124,77,232,.2) !important;
@@ -2500,7 +2512,7 @@ input:focus, input:focus-visible {
 }
 .sidebar-footer { font-size:.58rem !important; color:rgba(78,76,106,.7) !important; }
 
-/* ── TOPBAR ── */
+/* -- TOPBAR -- */
 .topbar {
   background:rgba(9,7,24,.9) !important;
   border-bottom:1px solid rgba(124,77,232,.18) !important;
@@ -2513,7 +2525,7 @@ input:focus, input:focus-visible {
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
 
-/* ── LIVE FEED ── */
+/* -- LIVE FEED -- */
 .live-feed {
   background:rgba(8,6,20,.95) !important;
   border-top:1px solid rgba(124,77,232,.2) !important;
@@ -2527,7 +2539,7 @@ input:focus, input:focus-visible {
 .feed-ticker { font-size:.72rem !important; font-weight:600 !important; color:var(--text-sub) !important; }
 .feed-ticker span { margin-right:40px !important; }
 
-/* ── CARD base ── */
+/* -- CARD base -- */
 .card {
   border-radius:16px !important;
   border:1px solid rgba(255,255,255,.07) !important;
@@ -2536,7 +2548,7 @@ input:focus, input:focus-visible {
   padding:16px !important;
 }
 
-/* ── NAV ITEMS in sidebar ── */
+/* -- NAV ITEMS in sidebar -- */
 .nav-item {
   border-radius:10px !important; font-weight:700 !important;
   padding:9px 12px !important; font-size:.82rem !important;
@@ -2549,19 +2561,19 @@ input:focus, input:focus-visible {
   box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 0 16px rgba(124,77,232,.2) !important;
 }
 
-/* ── BADGE in dice rows ── */
+/* -- BADGE in dice rows -- */
 .bs-badge-t { border-radius:8px !important; width:auto !important; height:auto !important; padding:4px 10px !important; font-size:.64rem !important; }
 .bs-badge-h { border-radius:8px !important; width:auto !important; height:auto !important; padding:4px 10px !important; font-size:.64rem !important; }
 
-/* ── @keyframes for blink (used in activity panels) ── */
+/* -- @keyframes for blink (used in activity panels) -- */
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 @keyframes slideInMsg { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
-/* ════════════════════════════════════════════════════
-   SITE VISUAL REVAMP — calm, depth-focused aesthetics
-════════════════════════════════════════════════════ */
+/* ====================================================
+   SITE VISUAL REVAMP  -  calm, depth-focused aesthetics
+==================================================== */
 
-/* Animated body background — subtle drifting orbs */
+/* Animated body background  -  subtle drifting orbs */
 body {
   background:
     radial-gradient(ellipse 80% 50% at 15% 40%, rgba(124,77,232,.14) 0%, transparent 60%),
@@ -2571,7 +2583,7 @@ body {
     var(--bg) !important;
 }
 
-/* ── Cards: more depth and surface quality ── */
+/* -- Cards: more depth and surface quality -- */
 .card {
   background:linear-gradient(160deg,rgba(22,17,52,.98),rgba(12,9,28,.98)) !important;
   border:1px solid rgba(255,255,255,.08) !important;
@@ -2591,7 +2603,7 @@ body {
   border-bottom:1px solid rgba(255,255,255,.05) !important;
 }
 
-/* ── Sidebar: polished feel ── */
+/* -- Sidebar: polished feel -- */
 .sidebar {
   background:linear-gradient(180deg,#090620 0%,#06040f 100%) !important;
   border-right:1px solid rgba(124,77,232,.15) !important;
@@ -2645,7 +2657,7 @@ body {
   box-shadow:0 0 14px rgba(124,77,232,.15), inset 0 1px 0 rgba(255,255,255,.05) !important;
 }
 
-/* ── Topbar: glass feel ── */
+/* -- Topbar: glass feel -- */
 .topbar {
   background:rgba(9,6,22,.92) !important;
   backdrop-filter:blur(16px) !important;
@@ -2658,7 +2670,7 @@ body {
   background-clip:text !important;
 }
 
-/* ── Chat panel ── */
+/* -- Chat panel -- */
 .chat-panel {
   background:linear-gradient(180deg,#08051a 0%,#050310 100%) !important;
   border-color:rgba(124,77,232,.12) !important;
@@ -2668,12 +2680,12 @@ body {
   border-bottom:1px solid rgba(124,77,232,.12) !important;
 }
 
-/* ── Smooth interactive transitions ── */
+/* -- Smooth interactive transitions -- */
 button { transition:all .18s cubic-bezier(.34,1.56,.64,1) !important; }
 button:active { transform:scale(.97) !important; }
 a { transition:all .16s !important; }
 
-/* ── Match row hover: lift + glow instead of flat border ── */
+/* -- Match row hover: lift + glow instead of flat border -- */
 .bs-row:hover {
   transform:translateY(-2px) !important;
   box-shadow:0 8px 32px rgba(0,0,0,.6), 0 0 20px rgba(124,77,232,.14) !important;
@@ -2683,7 +2695,7 @@ a { transition:all .16s !important; }
   box-shadow:0 8px 32px rgba(0,0,0,.6), 0 0 20px rgba(245,158,11,.14) !important;
 }
 
-/* ── Lobbby stats: gradient values ── */
+/* -- Lobbby stats: gradient values -- */
 .lobby-stat-val {
   font-size:1.25rem !important; font-weight:900 !important;
   background:linear-gradient(135deg,#fff,#c4b5fd 60%,#06b6d4) !important;
@@ -2691,7 +2703,7 @@ a { transition:all .16s !important; }
   background-clip:text !important;
 }
 
-/* ── Live feed: richer ── */
+/* -- Live feed: richer -- */
 .live-feed {
   background:rgba(7,4,18,.96) !important;
   border-top:1px solid rgba(124,77,232,.14) !important;
@@ -2702,13 +2714,13 @@ a { transition:all .16s !important; }
   font-size:.6rem !important; letter-spacing:.1em !important;
 }
 
-/* ── Scrollbar: matches theme ── */
+/* -- Scrollbar: matches theme -- */
 ::-webkit-scrollbar { width:4px; height:4px; }
 ::-webkit-scrollbar-track { background:rgba(0,0,0,.2); }
 ::-webkit-scrollbar-thumb { background:rgba(124,77,232,.4); border-radius:2px; }
 ::-webkit-scrollbar-thumb:hover { background:rgba(124,77,232,.65); }
 
-/* ── Join overlay boxes: better glass ── */
+/* -- Join overlay boxes: better glass -- */
 .join-overlay { background:rgba(0,0,0,.85) !important; backdrop-filter:blur(16px) !important; }
 .join-box, .dep-card, .dep-box {
   background:linear-gradient(160deg,#120f2e,#0a0817) !important;
@@ -2716,7 +2728,7 @@ a { transition:all .16s !important; }
   box-shadow:0 0 60px rgba(124,77,232,.18), 0 32px 80px rgba(0,0,0,.7) !important;
 }
 
-/* ── Online badge in topbar ── */
+/* -- Online badge in topbar -- */
 .online-badge {
   background:rgba(34,197,94,.08) !important;
   border:1px solid rgba(34,197,94,.2) !important;
@@ -2724,7 +2736,7 @@ a { transition:all .16s !important; }
   font-size:.68rem !important; font-weight:700 !important; color:#4ade80 !important;
 }
 
-/* ── Balance display in topbar ── */
+/* -- Balance display in topbar -- */
 .topbar-balance, [data-bal] {
   font-weight:900 !important;
   background:linear-gradient(90deg,#fff,#c4b5fd) !important;
@@ -2732,3 +2744,220 @@ a { transition:all .16s !important; }
   background-clip:text !important;
 }
 
+
+/* Pet image loading shimmer */
+img[src=""], img:not([src]) {
+  background: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.1) 50%, rgba(255,255,255,.04) 75%);
+  background-size: 200% 100%;
+  animation: imgShimmer 1.4s ease-in-out infinite;
+}
+@keyframes imgShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================================
+   LOGO TRANSPARENCY + GLOW SYSTEM
+   logo.png is now RGBA — black bg removed.
+   drop-shadow respects alpha so glow wraps
+   just around the visible content.
+============================================ */
+
+/* Nav logo: purple/cyan glow halo */
+.nav-logo img {
+  filter: drop-shadow(0 0 10px rgba(124,77,232,.6))
+          drop-shadow(0 0 24px rgba(6,182,212,.2));
+  transition: filter .3s;
+}
+.nav-logo:hover img {
+  filter: drop-shadow(0 0 18px rgba(139,92,246,.9))
+          drop-shadow(0 0 40px rgba(6,182,212,.32));
+}
+
+/* Cinematic overlay + game-view logo bars */
+.cin-logo-bar img,
+.gv-logo img {
+  filter: drop-shadow(0 0 10px rgba(124,77,232,.55))
+          drop-shadow(0 0 22px rgba(6,182,212,.18));
+}
+
+/* Dice page header logo */
+.dc-logo img {
+  filter: drop-shadow(0 0 12px rgba(124,77,232,.65))
+          drop-shadow(0 0 28px rgba(139,92,246,.25)) !important;
+}
+
+/* Intro / loading screen logo (home.html already sets a filter,
+   this is a fallback for any other pages that show logo.png large) */
+#io-logo-img {
+  filter: drop-shadow(0 0 32px rgba(124,77,232,.7))
+          drop-shadow(0 0 80px rgba(6,182,212,.25))
+          drop-shadow(0 0 120px rgba(139,92,246,.15)) !important;
+}
+
+/* ============================================
+   GLASSMORPHISM CARDS
+   Semi-transparent background lets the body
+   purple gradient bleed through subtly.
+============================================ */
+.card {
+  background: linear-gradient(160deg,
+    rgba(17,13,43,.88) 0%,
+    rgba(23,18,52,.88) 100%) !important;
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+/* CV value cards */
+.cv-card {
+  background: linear-gradient(135deg,
+    rgba(17,13,43,.82) 0%,
+    rgba(23,18,52,.82) 100%) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* Lobby game rows */
+.bs-row {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* Modal boxes */
+.join-box, .dep-card, .prof-card, .modal-box, .gv-box {
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+}
+
+/* ============================================
+   ANIMATED AMBIENT BACKGROUND ORBS
+   Two slow-moving blobs that add depth.
+   z-index:-1 keeps them behind all content.
+============================================ */
+body { isolation: isolate; }
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 520px 380px at 8% 38%,  rgba(124,77,232,.13) 0%, transparent 65%),
+    radial-gradient(ellipse 400px 340px at 92% 12%,  rgba(6,182,212,.08) 0%, transparent 60%),
+    radial-gradient(ellipse 440px 500px at 55% 94%,  rgba(124,77,232,.07) 0%, transparent 62%),
+    radial-gradient(ellipse 300px 260px at 80% 65%,  rgba(244,114,182,.04) 0%, transparent 55%);
+  animation: ambientDrift 30s ease-in-out infinite alternate;
+}
+@keyframes ambientDrift {
+  0%   { opacity: .85; transform: scale(1)    translateY(0); }
+  50%  { opacity: 1;   transform: scale(1.04) translateY(-18px); }
+  100% { opacity: .9;  transform: scale(1.01) translateY(8px); }
+}
+
+/* ============================================
+   NAV BOTTOM BORDER — ANIMATED GRADIENT LINE
+============================================ */
+.topnav::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(124,77,232,.7) 20%,
+    rgba(6,182,212,.9) 50%,
+    rgba(167,139,250,.7) 80%,
+    transparent 100%);
+  background-size: 200% 100%;
+  animation: navLine 5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes navLine {
+  0%,100% { background-position: 0% 0;   opacity: .55; }
+  50%      { background-position: 100% 0; opacity: 1;   }
+}
+
+/* ============================================
+   GAME CARD ENHANCEMENTS
+   Color-coded names + persistent glow border
+============================================ */
+
+/* Card name text inherits card accent color via --gcl custom prop */
+.gc-name {
+  font-size: 1.2rem !important;
+  font-weight: 900 !important;
+  letter-spacing: -.03em !important;
+  background: linear-gradient(130deg, var(--gcl, #c4b5fd) 0%, rgba(255,255,255,.88) 70%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Persistent faint tinted border so cards feel alive even before hover */
+.gcard {
+  border-color: color-mix(in srgb, var(--gcb, rgba(124,77,232,.4)) 22%, rgba(255,255,255,.07)) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.03) !important;
+}
+.gcard:hover {
+  box-shadow: 0 12px 40px rgba(0,0,0,.55), 0 0 28px var(--gcs, rgba(124,77,232,.22)), inset 0 0 0 1px rgba(255,255,255,.06) !important;
+}
+
+/* Play button: full width, slightly taller */
+.gc-play {
+  width: 100% !important;
+  align-self: stretch !important;
+  text-align: center !important;
+  padding: 10px 20px !important;
+  font-size: .8rem !important;
+  border-radius: 10px !important;
+}
+
+/* Richer card top accent line */
+.gcard::before {
+  opacity: 1 !important;
+  height: 3px !important;
+  background: linear-gradient(90deg, transparent 0%, var(--gcb, rgba(124,77,232,.7)) 25%, var(--gcl, rgba(167,139,250,.9)) 50%, var(--gcb, rgba(124,77,232,.7)) 75%, transparent 100%) !important;
+  filter: blur(.4px);
+}
+
+/* ============================================
+   LIVE FEED: SIDE FADE + POLISH
+============================================ */
+.live-feed {
+  position: relative;
+}
+.live-feed::before,
+.live-feed::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 60px;
+  pointer-events: none;
+  z-index: 2;
+}
+.live-feed::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(7,4,18,.98), transparent);
+}
+.live-feed::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(7,4,18,.98), transparent);
+}
+
+/* ============================================
+   NAV ACTIVE BUTTON GLOW
+============================================ */
+.nav-btn.active {
+  color: #fff !important;
+  text-shadow: 0 0 12px rgba(167,139,250,.5) !important;
+}
+
+/* ============================================
+   HERO STAT BOXES: COLOR ON HOVER
+============================================ */
+.hs:hover {
+  background: rgba(124,77,232,.1) !important;
+  border-color: rgba(124,77,232,.45) !important;
+  box-shadow: 0 0 12px rgba(124,77,232,.12) !important;
+}
+.hs-val {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+}
