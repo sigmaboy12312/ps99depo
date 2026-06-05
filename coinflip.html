@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PS99 Gamble — Coin Flip</title>
+  <title>99Depo — Coin Flip</title>
   <link rel="stylesheet" href="style.css">
   <style>
     /* ── LAYOUT ── */
@@ -442,12 +442,17 @@
     #cin-overlay {
       position:fixed; inset:0; z-index:9500;
       display:none; flex-direction:column; align-items:center; justify-content:center;
-      padding:20px; background:transparent;
+      padding:20px; opacity:0;
+      background:
+        radial-gradient(ellipse 70% 55% at 50% 38%, rgba(100,30,200,0.6) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 35% at 20% 80%, rgba(200,40,130,0.2) 0%, transparent 60%),
+        radial-gradient(ellipse 45% 35% at 80% 80%, rgba(30,90,220,0.18) 0%, transparent 60%),
+        linear-gradient(170deg, #0e0820 0%, #060415 50%, #030110 100%);
     }
     #cin-overlay.open {
-      display:flex; animation:cinOpen 0.45s ease forwards;
+      display:flex; animation:cinOpen 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
     }
-    #cin-overlay.closing { animation:cinClose 0.35s ease forwards; }
+    #cin-overlay.closing { animation:cinClose 0.38s ease forwards; }
 
     .cin-logo-bar {
       font-size:1.3rem; font-weight:900; color:#fff; letter-spacing:0.1em;
@@ -632,12 +637,12 @@
     #particleCanvas { position:fixed; inset:0; pointer-events:none; z-index:9000; }
 
     @keyframes cinOpen {
-      from { background: rgba(0,0,0,0); backdrop-filter: blur(0px); }
-      to   { background: rgba(2,1,14,0.96); backdrop-filter: blur(10px); }
+      from { opacity:0; backdrop-filter:blur(0px); transform:scale(1.02); }
+      to   { opacity:1; backdrop-filter:blur(18px); transform:scale(1); }
     }
     @keyframes cinClose {
-      from { background: rgba(2,1,14,0.96); backdrop-filter: blur(10px); opacity:1; }
-      to   { background: rgba(0,0,0,0); backdrop-filter: blur(0px); opacity:0; }
+      from { opacity:1; backdrop-filter:blur(18px); }
+      to   { opacity:0; backdrop-filter:blur(0px); }
     }
     @keyframes countFlash {
       0%   { opacity:0; transform:translate(-50%,-50%) scale(2.5); }
@@ -860,7 +865,7 @@
 <aside class="sidebar">
   <div class="sidebar-logo">
     <a href="coinflip.html" class="logo-text">
-      <span class="logo-icon">&#127918;</span>PS99 Gamble
+      99DEPO
     </a>
   </div>
   <div class="sidebar-balance">
@@ -1316,49 +1321,37 @@
     const norm = ((angleDeg % 360) + 360) % 360;
     const cosA = Math.cos(norm * Math.PI / 180);
     const isHeads = cosA >= 0;
-    const scaleX = Math.max(Math.abs(cosA), 0.008);
+    const scaleX = Math.max(Math.abs(cosA), 0.012);
 
-    // Drop shadow
-    ctx.save();
-    ctx.translate(cx, H - 4);
-    ctx.scale(1, 0.18);
-    const shadowR = r * (0.3 + scaleX * 0.7);
-    const sg = ctx.createRadialGradient(0,0,0,0,0,shadowR);
-    sg.addColorStop(0, 'rgba(0,0,0,0.55)'); sg.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.beginPath(); ctx.arc(0, 0, shadowR, 0, Math.PI*2);
-    ctx.fillStyle = sg; ctx.fill();
-    ctx.restore();
+    // Always draw a solid coin base so there's never a transparent black void
+    const baseC = isHeads ? '#f97316' : '#3b82f6';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, r, r * scaleX, 0, 0, Math.PI * 2);
+    ctx.fillStyle = baseC;
+    ctx.fill();
 
-    // Draw thick 3D edge (unscaled, always behind the face)
-    const edgeThick = r * 0.18; // visible thickness
-    const edgeVis = Math.max(0, 1 - Math.abs(scaleX) * 5); // 0 when face-on, 1 when edge-on
-    if (edgeVis > 0) {
-      ctx.save();
-      const edgeH = edgeThick * 2 * edgeVis;
+    // Gold metallic edge — visible as coin turns
+    const edgeVis = Math.max(0, 1 - scaleX * 4);
+    if (edgeVis > 0.01) {
+      const edgeH = r * 0.22 * edgeVis;
       const edgeG = ctx.createLinearGradient(cx - r, cy, cx + r, cy);
-      edgeG.addColorStop(0, '#1e0040');
-      edgeG.addColorStop(0.2, '#4c1d95');
-      edgeG.addColorStop(0.5, '#ea580c');
-      edgeG.addColorStop(0.8, '#4c1d95');
-      edgeG.addColorStop(1, '#1e0040');
+      edgeG.addColorStop(0,   '#7a4800');
+      edgeG.addColorStop(0.25,'#e8960c');
+      edgeG.addColorStop(0.5, '#ffd700');
+      edgeG.addColorStop(0.75,'#e8960c');
+      edgeG.addColorStop(1,   '#7a4800');
       ctx.beginPath();
-      ctx.ellipse(cx, cy, r, edgeH, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx, cy, r, Math.max(edgeH, 2), 0, 0, Math.PI * 2);
       ctx.fillStyle = edgeG;
       ctx.fill();
-      // Highlight stripe
-      ctx.beginPath();
-      ctx.ellipse(cx, cy - edgeH * 0.3, r * 0.9, edgeH * 0.2, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,255,255,0.18)';
-      ctx.fill();
-      ctx.restore();
     }
 
+    // Draw the coin face — always, scaled by cosA
     ctx.save();
     ctx.translate(cx, cy);
     ctx.scale(scaleX, 1);
     ctx.translate(-cx, -cy);
-
-    if (scaleX > 0.05) drawCoinFace(ctx, W, H, isHeads, shimmerAngle);
+    drawCoinFace(ctx, W, H, isHeads, shimmerAngle);
     ctx.restore();
   }
 
@@ -2158,14 +2151,22 @@
 
   function runCinematicCountdown(side, won, onFlipDone) {
     const cd = document.getElementById('cin-countdown');
-    // Single "GO!" then straight into the flip
-    cd.textContent = 'GO!';
-    cd.className = 'cin-countdown flash';
-    setTimeout(() => {
-      cd.className = 'cin-countdown';
-      cd.textContent = '';
-      startCinematicFlip(side, won, onFlipDone);
-    }, 320);
+    const steps = ['3','2','1','GO!'];
+    let i = 0;
+    function next() {
+      if (i >= steps.length) {
+        cd.className = 'cin-countdown';
+        cd.textContent = '';
+        startCinematicFlip(side, won, onFlipDone);
+        return;
+      }
+      cd.textContent = steps[i];
+      cd.className = 'cin-countdown flash';
+      const hold = steps[i] === 'GO!' ? 350 : 600;
+      i++;
+      setTimeout(() => { cd.className = 'cin-countdown'; setTimeout(next, 80); }, hold);
+    }
+    next();
   }
 
   function screenFlash(cls) {
@@ -2182,7 +2183,7 @@
 
     const spins = 4 + Math.random() * 2;
     const finalDeg = (side === 'heads' ? 0 : 180) + spins * 360;
-    const duration = 1400;
+    const duration = 2600;
     const start = performance.now();
     let shimmer = 0;
 

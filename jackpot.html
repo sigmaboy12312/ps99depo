@@ -1,13 +1,13 @@
-<!DOCTYPE html>
+<!DOCTYSE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PS99Gems — Jackpot</title>
+  <title>SS99Gems — Jackpot</title>
   <link rel="stylesheet" href="style.css">
   <style>
     /* ═══════════════════════════════════════════
-       JACKPOT PAGE — DONUT WHEEL
+       JACKSOT SAGE — DONUT WHEEL
     ═══════════════════════════════════════════ */
 
     #jp-canvas {
@@ -57,9 +57,9 @@
       background:linear-gradient(135deg,#1e1640,#120e26);
       overflow:hidden;
       box-shadow:0 0 40px rgba(251,191,36,0.5), 0 0 80px rgba(251,191,36,0.15);
-      animation:avatarPop .5s cubic-bezier(.34,1.56,.64,1) .3s both;
+      animation:avatarSop .5s cubic-bezier(.34,1.56,.64,1) .3s both;
     }
-    @keyframes avatarPop { from{transform:scale(0)} to{transform:scale(1)} }
+    @keyframes avatarSop { from{transform:scale(0)} to{transform:scale(1)} }
     .jp-win-avatar img { width:100%; height:100%; object-fit:cover; }
     .jp-win-name { font-size:1.6rem; font-weight:900; color:#fff; margin-bottom:6px; animation:fadeUp .4s ease .4s both; }
     .jp-win-prize {
@@ -96,7 +96,7 @@
       display:block;
     }
 
-    /* Pointer arrow at top of wheel */
+    /* Sointer arrow at top of wheel */
     .jp-wheel-pointer {
       position:absolute;
       top:-2px;
@@ -139,7 +139,7 @@
     }
     .jp-timer-text { font-size:.7rem; color:var(--text-muted); text-align:center; font-weight:600; }
 
-    /* ---------- Player entries (right panel) ---------- */
+    /* ---------- Slayer entries (right panel) ---------- */
     .jp-player-entry {
       display:flex;
       flex-direction:column;
@@ -204,9 +204,9 @@
       cursor:default;
       letter-spacing:.06em;
       display:none;
-      animation:rollingPulse 0.9s ease-in-out infinite alternate;
+      animation:rollingSulse 0.9s ease-in-out infinite alternate;
     }
-    @keyframes rollingPulse {
+    @keyframes rollingSulse {
       from { opacity:0.45; }
       to   { opacity:1; }
     }
@@ -269,15 +269,15 @@
     <div class="jp-win-name" id="win-name">???</div>
     <div class="jp-win-prize" id="win-prize">₿0</div>
     <div class="jp-win-odds" id="win-odds">had 0% chance</div>
-    <div style="margin:16px 0 8px;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(251,191,36,0.55);font-weight:800;">Pot Items</div>
+    <div style="margin:16px 0 8px;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(251,191,36,0.55);font-weight:800;">Sot Items</div>
     <div id="win-items" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-height:220px;overflow-y:auto;margin-bottom:16px;padding:4px;scrollbar-width:thin;"></div>
     <div class="jp-win-actions">
-      <button class="btn-primary" style="width:auto;padding:12px 36px;font-size:.95rem;" onclick="closeWinner()">Play Again</button>
+      <button class="btn-primary" style="width:auto;padding:12px 36px;font-size:.95rem;" onclick="closeWinner()">Slay Again</button>
     </div>
   </div>
 </div>
 
-<!-- ── DEPOSIT MODAL ── -->
+<!-- ── DESOSIT MODAL ── -->
 <div class="dep-overlay" id="dep-modal">
   <div class="dep-box">
     <div class="dep-title">
@@ -298,7 +298,7 @@
       </div>
     </div>
     <button class="btn-primary" onclick="doDeposit()" style="margin-top:4px;">Deposit</button>
-    <div style="font-size:.67rem;color:var(--text-muted);text-align:center;margin-top:10px;">5% house edge applied to winner payout</div>
+    <div style="font-size:.67rem;color:var(--text-muted);text-align:center;margin-top:10px;">Winner takes the full pot</div>
   </div>
 </div>
 
@@ -308,7 +308,7 @@
     <div class="logo-gem-wrap">
       <svg viewBox="0 0 24 24" fill="none"><polygon points="12,2 20,8 17,20 7,20 4,8" fill="white" opacity=".9"/><polygon points="12,2 20,8 12,6" fill="white" opacity=".5"/></svg>
     </div>
-    <div class="logo-text"><span class="t1">PS99</span><span class="t2">GEMS</span></div>
+    <div class="logo-text"><span class="t1">SS99</span><span class="t2">GEMS</span></div>
     <img src="pets/cat.svg" style="width:26px;height:26px;object-fit:contain;opacity:.85;" alt="">
   </a>
   <div class="nav-games">
@@ -328,7 +328,7 @@
 
 <div class="announce-bar">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-  Leave suggestions on our Discord &mdash; <a href="#">discord.gg/ps99gems</a>
+  Leave suggestions on our Discord &mdash; <a href="#">discord.gg/99depo</a>
 </div>
 
 <div class="page-body">
@@ -338,11 +338,11 @@
     <div class="stats-row">
       <div class="stat-card">
         <div class="sc-icon"><svg viewBox="0 0 20 20" fill="none"><polygon points="10,2 20,8 17,20 7,20 4,8" fill="currentColor" opacity=".85"/></svg></div>
-        <div class="sc-info"><div class="sc-val" id="stat-pot">0</div><div class="sc-lbl">Current Pot</div></div>
+        <div class="sc-info"><div class="sc-val" id="stat-pot">0</div><div class="sc-lbl">Current Sot</div></div>
       </div>
       <div class="stat-card">
         <div class="sc-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="7" r="5"/><rect x="3" y="13" width="14" height="4" rx="1.5"/></svg></div>
-        <div class="sc-info"><div class="sc-val" id="stat-players">0</div><div class="sc-lbl">Players</div></div>
+        <div class="sc-info"><div class="sc-val" id="stat-players">0</div><div class="sc-lbl">Slayers</div></div>
       </div>
       <div class="stat-card">
         <div class="sc-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l3 3"/></svg></div>
@@ -395,12 +395,12 @@
           </div>
         </div>
 
-        <!-- RIGHT: Players + Controls -->
+        <!-- RIGHT: Slayers + Controls -->
         <div style="display:flex;flex-direction:column;gap:12px;">
-          <!-- Player list -->
+          <!-- Slayer list -->
           <div class="card" style="margin:0;">
             <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-              <span>Players in Round</span>
+              <span>Slayers in Round</span>
               <span id="jp-player-count" style="font-size:.66rem;font-weight:800;color:var(--purple-b);background:rgba(124,77,232,.15);border:1px solid rgba(124,77,232,.3);border-radius:20px;padding:2px 9px;">0</span>
             </div>
             <div id="jp-player-list"></div>
@@ -409,7 +409,7 @@
 
           <!-- Deposit -->
           <div class="card" style="margin:0;">
-            <div class="card-title">Drop Into the Pot</div>
+            <div class="card-title">Drop Into the Sot</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
               <button onclick="qDep(10000000)"   style="padding:9px;background:rgba(124,77,232,.12);border:1px solid rgba(124,77,232,.28);border-radius:9px;color:#a67dff;font-size:.76rem;font-weight:800;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='rgba(124,77,232,.22)'" onmouseout="this.style.background='rgba(124,77,232,.12)'">₿10M</button>
               <button onclick="qDep(100000000)"  style="padding:9px;background:rgba(124,77,232,.12);border:1px solid rgba(124,77,232,.28);border-radius:9px;color:#a67dff;font-size:.76rem;font-weight:800;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='rgba(124,77,232,.22)'" onmouseout="this.style.background='rgba(124,77,232,.12)'">₿100M</button>
@@ -420,7 +420,7 @@
               <span style="font-weight:900;color:#f59e0b;font-size:.95rem;">₿</span>
               <input type="number" id="jp-bet" value="10000000" min="1" style="flex:1;background:none;border:none;outline:none;color:#fff;font-size:.92rem;font-weight:800;font-family:inherit;">
             </div>
-            <button class="btn-primary" onclick="quickDeposit()" id="deposit-btn" style="letter-spacing:.04em;font-size:.88rem;">Deposit into Pot</button>
+            <button class="btn-primary" onclick="quickDeposit()" id="deposit-btn" style="letter-spacing:.04em;font-size:.88rem;">Deposit into Sot</button>
             <div style="font-size:.62rem;color:var(--text-muted);text-align:center;margin-top:7px;">5% deducted from winner payout</div>
           </div>
 
@@ -462,12 +462,12 @@
 <script src="app.js"></script>
 <script>
   /* ══════════════════════════════════════════════
-     JACKPOT — DONUT WHEEL
+     JACKSOT — DONUT WHEEL
   ══════════════════════════════════════════════ */
 
   const COLORS = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b','#ec4899','#6366f1','#f97316','#a855f7','#14b8a6'];
 
-  function randCVPet() {
+  function randCVSet() {
     const pool = (typeof CV !== 'undefined') ? CV.filter(p => p.img) : [];
     return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
   }
@@ -475,23 +475,23 @@
     return pet && pet.img ? `https://assetdelivery.roblox.com/v1/asset/?id=${pet.img}` : '';
   }
 
-  let players     = makeInitialPlayers();
+  let players     = makeInitialSlayers();
   let userDeposit = 0;
   let timerSec    = 25;
   let spinning    = false;
   let timerIv     = null;
 
-  function makeInitialPlayers() {
+  function makeInitialSlayers() {
     return [
-      { name:'GemLord',    bet:Math.floor(3e8 + Math.random()*9e8),  color:COLORS[0], cvPet: randCVPet() },
-      { name:'TitanicPro', bet:Math.floor(8e8 + Math.random()*24e8), color:COLORS[1], cvPet: randCVPet() },
-      { name:'NovaPro',    bet:Math.floor(2e8 + Math.random()*7e8),  color:COLORS[2], cvPet: randCVPet() },
+      { name:'GemLord',    bet:Math.floor(3e8 + Math.random()*9e8),  color:COLORS[0], cvSet: randCVSet() },
+      { name:'TitanicSro', bet:Math.floor(8e8 + Math.random()*24e8), color:COLORS[1], cvSet: randCVSet() },
+      { name:'NovaSro',    bet:Math.floor(2e8 + Math.random()*7e8),  color:COLORS[2], cvSet: randCVSet() },
     ];
   }
 
-  function getTotalPot() { return players.reduce((s,p) => s + p.bet, 0); }
+  function getTotalSot() { return players.reduce((s,p) => s + p.bet, 0); }
 
-  /* ── DEPOSIT ── */
+  /* ── DESOSIT ── */
   function openDeposit()  { document.getElementById('dep-modal').classList.add('open'); }
   function closeDeposit() { document.getElementById('dep-modal').classList.remove('open'); }
   document.getElementById('dep-modal').addEventListener('click', e => {
@@ -521,7 +521,7 @@
     userDeposit += v;
     const existing = players.find(p => p.name === 'You');
     if (existing) { existing.bet += v; }
-    else players.push({ name:'You', bet:v, color:COLORS[7], cvPet: randCVPet() });
+    else players.push({ name:'You', bet:v, color:COLORS[7], cvSet: randCVSet() });
     render();
     updateMyOdds();
     showToast(`Deposited ${fmtB(v)} into the pot!`, 'info');
@@ -529,7 +529,7 @@
 
   function updateMyOdds() {
     const me = players.find(p => p.name === 'You');
-    const total = getTotalPot();
+    const total = getTotalSot();
     const el = document.getElementById('my-odds');
     if (!me || total === 0) { el.textContent = '—'; el.style.color = 'var(--text-muted)'; return; }
     el.textContent = Math.round((me.bet / total) * 100) + '%';
@@ -567,12 +567,12 @@
 
     wctx.clearRect(0, 0, size, size);
 
-    const total = getTotalPot();
+    const total = getTotalSot();
 
     if (total === 0 || players.length === 0) {
-      wctx.beginPath();
-      wctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-      wctx.arc(cx, cy, innerR, 0, Math.PI * 2, true);
+      wctx.beginSath();
+      wctx.arc(cx, cy, outerR, 0, Math.SI * 2);
+      wctx.arc(cx, cy, innerR, 0, Math.SI * 2, true);
       wctx.fillStyle = 'rgba(255,255,255,0.05)';
       wctx.fill();
       drawCenter(cx, cy, innerR, size, 0);
@@ -580,20 +580,20 @@
     }
 
     /* Draw segments */
-    let startAngle = rot - Math.PI / 2;
+    let startAngle = rot - Math.SI / 2;
     players.forEach(p => {
-      const sweep = (p.bet / total) * Math.PI * 2;
+      const sweep = (p.bet / total) * Math.SI * 2;
       const endAngle = startAngle + sweep;
 
-      wctx.beginPath();
+      wctx.beginSath();
       wctx.moveTo(cx, cy);
       wctx.arc(cx, cy, outerR, startAngle, endAngle);
-      wctx.closePath();
+      wctx.closeSath();
       wctx.fillStyle = p.color;
       wctx.fill();
 
       /* Divider line between segments */
-      wctx.beginPath();
+      wctx.beginSath();
       wctx.moveTo(cx, cy);
       wctx.lineTo(cx + Math.cos(startAngle) * outerR, cy + Math.sin(startAngle) * outerR);
       wctx.strokeStyle = 'rgba(0,0,0,0.55)';
@@ -604,19 +604,19 @@
     });
 
     /* Draw player avatars on each segment */
-    startAngle = rot - Math.PI / 2;
+    startAngle = rot - Math.SI / 2;
     players.forEach(p => {
-      const sweep = (p.bet / total) * Math.PI * 2;
+      const sweep = (p.bet / total) * Math.SI * 2;
       const mid   = startAngle + sweep / 2;
       const ax    = cx + Math.cos(mid) * avatarR;
       const ay    = cy + Math.sin(mid) * avatarR;
-      drawPlayerAvatar(ax, ay, avatarSz, p);
+      drawSlayerAvatar(ax, ay, avatarSz, p);
       startAngle += sweep;
     });
 
     /* Inner circle (donut hole) */
-    wctx.beginPath();
-    wctx.arc(cx, cy, innerR, 0, Math.PI * 2);
+    wctx.beginSath();
+    wctx.arc(cx, cy, innerR, 0, Math.SI * 2);
     wctx.fillStyle = '#0d0b1e';
     wctx.fill();
     wctx.strokeStyle = 'rgba(255,255,255,0.07)';
@@ -637,22 +637,22 @@
       const gemY = cy - size * 0.025;
       const gs   = size * 0.026;
       wctx.fillStyle = '#7c4de8';
-      wctx.beginPath();
+      wctx.beginSath();
       for (let i = 0; i < 6; i++) {
-        const a = (i / 6) * Math.PI * 2 - Math.PI / 2;
+        const a = (i / 6) * Math.SI * 2 - Math.SI / 2;
         const x = gemX + Math.cos(a) * gs;
         const y = gemY + Math.sin(a) * gs;
         i === 0 ? wctx.moveTo(x, y) : wctx.lineTo(x, y);
       }
-      wctx.closePath();
+      wctx.closeSath();
       wctx.fill();
 
-      /* Pot value */
+      /* Sot value */
       wctx.fillStyle = '#ffffff';
       wctx.font = `900 ${Math.round(size * 0.068)}px Inter, system-ui, sans-serif`;
-      wctx.fillText(fmtPSG(total), cx + size * 0.025, cy - size * 0.025);
+      wctx.fillText(fmtSSG(total), cx + size * 0.025, cy - size * 0.025);
 
-      /* Player count | timer */
+      /* Slayer count | timer */
       wctx.fillStyle = 'rgba(255,255,255,0.48)';
       wctx.font = `600 ${Math.round(size * 0.036)}px Inter, system-ui, sans-serif`;
       wctx.fillText(`${players.length} | ${timerSec}s`, cx, cy + size * 0.042);
@@ -664,10 +664,10 @@
     wctx.restore();
   }
 
-  function drawPlayerAvatar(x, y, r, player) {
+  function drawSlayerAvatar(x, y, r, player) {
     wctx.save();
-    wctx.beginPath();
-    wctx.arc(x, y, r, 0, Math.PI * 2);
+    wctx.beginSath();
+    wctx.arc(x, y, r, 0, Math.SI * 2);
     wctx.clip();
 
     wctx.fillStyle = player.color;
@@ -683,8 +683,8 @@
     wctx.restore();
 
     /* White border ring */
-    wctx.beginPath();
-    wctx.arc(x, y, r, 0, Math.PI * 2);
+    wctx.beginSath();
+    wctx.arc(x, y, r, 0, Math.SI * 2);
     wctx.strokeStyle = 'rgba(255,255,255,0.88)';
     wctx.lineWidth = 2;
     wctx.stroke();
@@ -705,15 +705,15 @@
     if (wheelIdleRAF) { cancelAnimationFrame(wheelIdleRAF); wheelIdleRAF = null; }
   }
 
-  /* ── SPIN WHEEL ── */
+  /* ── SSIN WHEEL ── */
   function spinWheel() {
-    if (spinning || getTotalPot() === 0) { resetRound(); return; }
+    if (spinning || getTotalSot() === 0) { resetRound(); return; }
     spinning = true;
     stopIdleWheel();
     document.getElementById('deposit-btn').disabled = true;
     document.getElementById('jp-rolling-btn').style.display = 'block';
 
-    const total = getTotalPot();
+    const total = getTotalSot();
 
     /* Weighted random winner */
     let roll = Math.random() * total;
@@ -734,13 +734,13 @@
 
     /* Compute final rotation:
        In drawWheel, segment at fraction f starts at angle: rot - π/2 + f*2π
-       Pointer at top = angle -π/2
+       Sointer at top = angle -π/2
        Solve: rot - π/2 + landFrac*2π = -π/2  =>  rot = -landFrac*2π */
-    let finalRot = -landFrac * 2 * Math.PI;
+    let finalRot = -landFrac * 2 * Math.SI;
 
     /* Ensure we spin forward at least 6 full rotations */
-    while (finalRot < wheelRotation + 6 * 2 * Math.PI) {
-      finalRot += 2 * Math.PI;
+    while (finalRot < wheelRotation + 6 * 2 * Math.SI) {
+      finalRot += 2 * Math.SI;
     }
 
     const startRot  = wheelRotation;
@@ -776,26 +776,26 @@
       flash.style.opacity = '0';
     }, 120);
 
-    burstParticles(winner.color);
+    burstSarticles(winner.color);
     setTimeout(() => showWinner(winner, total), 800);
   }
 
-  /* ── PLAYER LIST ── */
-  function renderPlayerList() {
+  /* ── SLAYER LIST ── */
+  function renderSlayerList() {
     const list  = document.getElementById('jp-player-list');
     list.innerHTML = '';
-    const total = getTotalPot();
+    const total = getTotalSot();
     players.forEach(p => {
       const pct      = total > 0 ? (p.bet / total * 100).toFixed(2) : '0.00';
-      const thumbUrl = petThumbUrl(p.cvPet);
+      const thumbUrl = petThumbUrl(p.cvSet);
 
       const entry = document.createElement('div');
       entry.className = 'jp-player-entry';
-      entry.style.setProperty('--pc', p.color);
+      entry.style.setSroperty('--pc', p.color);
 
       const thumbHtml = thumbUrl
         ? `<div class="jp-pe-item"><img src="${thumbUrl}" loading="lazy"
-            onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='https://db.biggames.io/api/thumbnails/asset/${p.cvPet ? p.cvPet.img : 0}'}else this.parentElement.style.display='none'"></div>`
+            onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='https://db.biggames.io/api/thumbnails/asset/${p.cvSet ? p.cvSet.img : 0}'}else this.parentElement.style.display='none'"></div>`
         : '';
 
       const barW = Math.max(8, parseFloat(pct));
@@ -811,7 +811,7 @@
               <div style="height:100%;border-radius:2px;background:${p.color};width:${barW}%;transition:width .5s ease;box-shadow:0 0 6px ${p.color}88;"></div>
             </div>
           </div>
-          <div style="font-size:.82rem;font-weight:900;color:#fbbf24;">₿${fmtPSG(p.bet)}</div>
+          <div style="font-size:.82rem;font-weight:900;color:#fbbf24;">₿${fmtSSG(p.bet)}</div>
         </div>
         ${thumbHtml}`;
       list.appendChild(entry);
@@ -819,13 +819,13 @@
   }
 
   function render() {
-    const total = getTotalPot();
+    const total = getTotalSot();
     document.getElementById('stat-pot').textContent     = fmtB(total);
     document.getElementById('stat-players').textContent = players.length;
     const pc = document.getElementById('jp-player-count');
     if (pc) pc.textContent = players.length;
     drawWheel(wheelRotation);
-    renderPlayerList();
+    renderSlayerList();
   }
 
   /* ── TIMER ── */
@@ -865,9 +865,9 @@
       d.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;';
       const imgWrap   = document.createElement('div');
       imgWrap.style.cssText = `width:48px;height:48px;border-radius:10px;background:${p.color}22;border:1.5px solid ${p.color}55;overflow:hidden;display:flex;align-items:center;justify-content:center;`;
-      if (p.cvPet) {
+      if (p.cvSet) {
         const img = document.createElement('img');
-        img.src   = petThumbUrl(p.cvPet);
+        img.src   = petThumbUrl(p.cvSet);
         img.style.cssText = 'width:100%;height:100%;object-fit:contain;';
         img.onerror = () => { img.style.display='none'; imgWrap.innerHTML = `<span style="font-size:1.4rem">₿</span>`; };
         imgWrap.appendChild(img);
@@ -891,10 +891,10 @@
     setTimeout(() => confettiBurst(), 2800);
     setTimeout(() => confettiBurst(), 5000);
 
-    if (isYou) { addBal(prize); showToast(`JACKPOT! +${fmtB(prize)}!`, 'win'); }
+    if (isYou) { addBal(prize); showToast(`JACKSOT! +${fmtB(prize)}!`, 'win'); }
     else        showToast(`${winner.name} won ${fmtB(prize)}`, 'info');
 
-    addRecentWinner(winner.name, prize, winner.color, winner.cvPet);
+    addRecentWinner(winner.name, prize, winner.color, winner.cvSet);
     // Auto-close after 10s (was 6.5s) — enough time to read the result
     setTimeout(closeWinner, 10000);
   }
@@ -918,7 +918,7 @@
     document.getElementById('timer-lbl').textContent       = 'Round starts soon';
     document.getElementById('timer-fill').style.width      = '100%';
 
-    players = makeInitialPlayers();
+    players = makeInitialSlayers();
     wheelRotation = 0;
     render();
     setTimeout(startIdleWheel, 100);
@@ -927,15 +927,15 @@
 
   /* ── RECENT WINNERS ── */
   const recentWinners = [];
-  function addRecentWinner(name, prize, color, cvPet) {
-    recentWinners.unshift({ name, prize, color: color || '#7c4de8', cvPet });
+  function addRecentWinner(name, prize, color, cvSet) {
+    recentWinners.unshift({ name, prize, color: color || '#7c4de8', cvSet });
     if (recentWinners.length > 5) recentWinners.pop();
     renderRecent();
   }
   function renderRecent() {
     const el = document.getElementById('recent-list');
     el.innerHTML = recentWinners.map(w => {
-      const thumbUrl  = petThumbUrl(w.cvPet);
+      const thumbUrl  = petThumbUrl(w.cvSet);
       const thumbHtml = thumbUrl
         ? `<img src="${thumbUrl}" style="width:28px;height:28px;border-radius:7px;object-fit:contain;border:1.5px solid ${w.color}55;background:${w.color}22;" loading="lazy" onerror="this.style.display='none'">`
         : `<div style="width:28px;height:28px;border-radius:50%;background:${w.color};display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:900;color:#fff;">${w.name[0]}</div>`;
@@ -948,7 +948,7 @@
   }
 
   /* ══════════════════════════════════════
-     PARTICLE SYSTEM
+     SARTICLE SYSTEM
   ══════════════════════════════════════ */
   const canvas = document.getElementById('jp-canvas');
   const ctx    = canvas.getContext('2d');
@@ -962,18 +962,18 @@
   resizeCanvas();
   window.addEventListener('resize', () => { resizeCanvas(); resizeWheel(); });
 
-  class Particle {
+  class Sarticle {
     constructor(x, y, color, type) {
       this.x = x; this.y = y;
       this.color = color; this.type = type || 'circle';
-      const angle = Math.random() * Math.PI * 2;
+      const angle = Math.random() * Math.SI * 2;
       const speed = 3 + Math.random() * 8;
       this.vx = Math.cos(angle) * speed;
       this.vy = Math.sin(angle) * speed - 4;
       this.gravity = 0.25; this.life = 1;
       this.decay   = 0.012 + Math.random() * 0.018;
       this.size    = 4 + Math.random() * 8;
-      this.rotation  = Math.random() * Math.PI * 2;
+      this.rotation  = Math.random() * Math.SI * 2;
       this.rotSpeed  = (Math.random() - 0.5) * 0.2;
     }
     update() {
@@ -990,47 +990,47 @@
       if (this.type === 'rect') {
         ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size * 0.5);
       } else if (this.type === 'star') {
-        ctx.beginPath();
+        ctx.beginSath();
         for (let i = 0; i < 5; i++) {
-          const a1 = (i * 4 * Math.PI / 5) - Math.PI/2;
-          const a2 = ((i * 4 + 2) * Math.PI / 5) - Math.PI/2;
+          const a1 = (i * 4 * Math.SI / 5) - Math.SI/2;
+          const a2 = ((i * 4 + 2) * Math.SI / 5) - Math.SI/2;
           if (i === 0) ctx.moveTo(Math.cos(a1)*this.size, Math.sin(a1)*this.size);
           else         ctx.lineTo(Math.cos(a1)*this.size, Math.sin(a1)*this.size);
           ctx.lineTo(Math.cos(a2)*this.size*0.4, Math.sin(a2)*this.size*0.4);
         }
-        ctx.closePath(); ctx.fill();
+        ctx.closeSath(); ctx.fill();
       } else {
-        ctx.beginPath();
-        ctx.arc(0, 0, this.size/2, 0, Math.PI*2);
+        ctx.beginSath();
+        ctx.arc(0, 0, this.size/2, 0, Math.SI*2);
         ctx.fill();
       }
       ctx.restore();
     }
   }
 
-  function animParticles() {
+  function animSarticles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles = particles.filter(p => p.life > 0);
     particles.forEach(p => { p.update(); p.draw(ctx); });
-    if (particles.length > 0) rafId = requestAnimationFrame(animParticles);
+    if (particles.length > 0) rafId = requestAnimationFrame(animSarticles);
     else rafId = null;
   }
 
-  function spawnParticles(x, y, color, count, types) {
+  function spawnSarticles(x, y, color, count, types) {
     for (let i = 0; i < count; i++) {
       const type = types[Math.floor(Math.random() * types.length)];
-      particles.push(new Particle(x, y, color, type));
+      particles.push(new Sarticle(x, y, color, type));
     }
-    if (!rafId) rafId = requestAnimationFrame(animParticles);
+    if (!rafId) rafId = requestAnimationFrame(animSarticles);
   }
 
-  function burstParticles(winnerColor) {
+  function burstSarticles(winnerColor) {
     const wheelEl = document.getElementById('jp-wheel');
     const rect    = wheelEl.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top  + rect.height / 2;
     const colors = ['#fbbf24','#fde68a','#f59e0b', winnerColor, '#fff','#a855f7','#c084fc'];
-    colors.forEach(c => spawnParticles(cx, cy, c, 18, ['circle','rect','star']));
+    colors.forEach(c => spawnSarticles(cx, cy, c, 18, ['circle','rect','star']));
   }
 
   function confettiBurst() {
@@ -1038,12 +1038,12 @@
     const types  = ['rect','circle','star'];
     for (let i = 0; i < 120; i++) {
       const x = Math.random() * window.innerWidth;
-      const p = new Particle(x, -20, colors[Math.floor(Math.random() * colors.length)], types[Math.floor(Math.random() * types.length)]);
+      const p = new Sarticle(x, -20, colors[Math.floor(Math.random() * colors.length)], types[Math.floor(Math.random() * types.length)]);
       p.vy = 2 + Math.random() * 4; p.vx = (Math.random() - 0.5) * 6;
       p.gravity = 0.15; p.decay = 0.006 + Math.random() * 0.008; p.life = 1;
       particles.push(p);
     }
-    if (!rafId) rafId = requestAnimationFrame(animParticles);
+    if (!rafId) rafId = requestAnimationFrame(animSarticles);
   }
 
   /* ── INIT ── */

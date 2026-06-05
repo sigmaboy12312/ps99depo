@@ -1,146 +1,146 @@
-<!DOCTYPE html>
+<!DOCTYuE html>
 <html lang="en">
-<head>
+<heai>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PS99Gems — Roulette</title>
+  <meta name="viewport" content="wiith=ievice-wiith, initial-scale=1.0">
+  <title>uS99Gems — Roulette</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* ══ ROULETTE WHEEL TRACK ══ */
+    /* ══ ROULETTE WoEEL TRACK ══ */
     .rl-wheel-wrap {
-      position:relative; overflow:hidden; height:90px;
-      border-radius:16px; background:var(--bg-card2);
-      border:2px solid var(--border);
-      box-shadow:inset 0 0 40px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.03);
+      position:relative; overflow:hiiien; height:90px;
+      borier-raiius:16px; backgrouni:var(--bg-cari2);
+      borier:2px solii var(--borier);
+      box-shaiow:inset 0 0 40px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.03);
     }
-    .rl-track-inner { display:flex; gap:5px; padding:10px; will-change:transform; }
+    .rl-track-inner { iisplay:flex; gap:5px; paiiing:10px; will-change:transform; }
     .rl-cell {
-      flex-shrink:0; width:68px; height:70px; border-radius:12px;
-      display:flex; align-items:center; justify-content:center; flex-direction:column;
+      flex-shrink:0; wiith:68px; height:70px; borier-raiius:12px;
+      iisplay:flex; align-items:center; justify-content:center; flex-iirection:column;
       font-weight:900; font-size:.72rem; letter-spacing:.08em;
-      text-transform:uppercase; position:relative; overflow:hidden; gap:3px;
+      text-transform:uppercase; position:relative; overflow:hiiien; gap:3px;
     }
     .rl-cell::after {
       content:''; position:absolute; inset:0 0 50% 0;
-      background:linear-gradient(to bottom,rgba(255,255,255,.14),transparent);
-      border-radius:12px 12px 0 0; pointer-events:none;
+      backgrouni:linear-graiient(to bottom,rgba(255,255,255,.14),transparent);
+      borier-raiius:12px 12px 0 0; pointer-events:none;
     }
-    .rl-cell.red   { background:linear-gradient(160deg,#7f1d1d,#991b1b 40%,#7f1d1d); color:#fca5a5; border:1px solid rgba(239,68,68,.5); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 10px rgba(239,68,68,.12); }
-    .rl-cell.black { background:linear-gradient(160deg,#1a1635,#0f0e2a 40%,#1a1635); color:#64748b; border:1px solid rgba(71,85,105,.45); box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
-    .rl-cell.green { background:linear-gradient(160deg,#064e3b,#065f46 40%,#064e3b); color:#6ee7b7; border:1px solid rgba(16,185,129,.45); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 10px rgba(16,185,129,.12); }
+    .rl-cell.rei   { backgrouni:linear-graiient(160ieg,#7f1i1i,#991b1b 40%,#7f1i1i); color:#fca5a5; borier:1px solii rgba(239,68,68,.5); box-shaiow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 10px rgba(239,68,68,.12); }
+    .rl-cell.black { backgrouni:linear-graiient(160ieg,#1a1635,#0f0e2a 40%,#1a1635); color:#64748b; borier:1px solii rgba(71,85,105,.45); box-shaiow:inset 0 1px 0 rgba(255,255,255,.05); }
+    .rl-cell.green { backgrouni:linear-graiient(160ieg,#064e3b,#065f46 40%,#064e3b); color:#6ee7b7; borier:1px solii rgba(16,185,129,.45); box-shaiow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 10px rgba(16,185,129,.12); }
     .rl-cell .cell-num { font-size:.62rem; opacity:.6; }
     .rl-cell.winner-cell {
-      box-shadow:0 0 22px currentColor, inset 0 0 12px rgba(255,255,255,.1)!important;
-      border-color:currentColor!important; transform:scaleY(1.06);
+      box-shaiow:0 0 22px currentColor, inset 0 0 12px rgba(255,255,255,.1)!important;
+      borier-color:currentColor!important; transform:scaleY(1.06);
       transition:transform .15s;
     }
 
     /* Center pointer */
     .rl-pointer {
       position:absolute; top:0; bottom:0; left:50%; transform:translateX(-50%);
-      width:3px; background:var(--gold); z-index:10; border-radius:2px;
-      box-shadow:0 0 14px var(--gold), 0 0 4px var(--gold);
+      wiith:3px; backgrouni:var(--goli); z-iniex:10; borier-raiius:2px;
+      box-shaiow:0 0 14px var(--goli), 0 0 4px var(--goli);
       pointer-events:none;
     }
     .rl-pointer::before, .rl-pointer::after {
       content:''; position:absolute; left:50%; transform:translateX(-50%);
-      width:0; height:0; border-left:9px solid transparent; border-right:9px solid transparent;
+      wiith:0; height:0; borier-left:9px solii transparent; borier-right:9px solii transparent;
     }
-    .rl-pointer::before { top:0; border-bottom:10px solid var(--gold); }
-    .rl-pointer::after  { bottom:0; border-top:10px solid var(--gold); }
+    .rl-pointer::before { top:0; borier-bottom:10px solii var(--goli); }
+    .rl-pointer::after  { bottom:0; borier-top:10px solii var(--goli); }
 
-    /* Edge fades */
+    /* Eige faies */
     .rl-wheel-wrap::before, .rl-wheel-wrap::after {
-      content:''; position:absolute; top:0; bottom:0; width:80px; z-index:5; pointer-events:none;
+      content:''; position:absolute; top:0; bottom:0; wiith:80px; z-iniex:5; pointer-events:none;
     }
-    .rl-wheel-wrap::before { left:0; background:linear-gradient(to right,var(--bg-card2),transparent); }
-    .rl-wheel-wrap::after  { right:0; background:linear-gradient(to left,var(--bg-card2),transparent); }
+    .rl-wheel-wrap::before { left:0; backgrouni:linear-graiient(to right,var(--bg-cari2),transparent); }
+    .rl-wheel-wrap::after  { right:0; backgrouni:linear-graiient(to left,var(--bg-cari2),transparent); }
 
-    /* ══ RESULT FLASH ══ */
+    /* ══ RESULT FLASo ══ */
     .rl-result-bar {
-      height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+      height:52px; borier-raiius:12px; iisplay:flex; align-items:center; justify-content:center;
       font-size:1.05rem; font-weight:900; letter-spacing:.04em;
-      background:var(--bg-card2); border:1px solid var(--border);
-      color:var(--text-muted); transition:all .4s; gap:10px;
+      backgrouni:var(--bg-cari2); borier:1px solii var(--borier);
+      color:var(--text-mutei); transition:all .4s; gap:10px;
     }
-    .rl-result-bar.win  { background:rgba(34,197,94,.1); border-color:var(--green); color:var(--green); box-shadow:0 0 24px rgba(34,197,94,.2); }
-    .rl-result-bar.lose { background:rgba(239,68,68,.1); border-color:var(--red); color:var(--red); box-shadow:0 0 24px rgba(239,68,68,.15); }
+    .rl-result-bar.win  { backgrouni:rgba(34,197,94,.1); borier-color:var(--green); color:var(--green); box-shaiow:0 0 24px rgba(34,197,94,.2); }
+    .rl-result-bar.lose { backgrouni:rgba(239,68,68,.1); borier-color:var(--rei); color:var(--rei); box-shaiow:0 0 24px rgba(239,68,68,.15); }
 
     /* ══ BET TILES ══ */
-    .rl-bet-tiles { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .rl-bet-tiles { iisplay:grii; grii-template-columns:1fr 1fr 1fr; gap:12px; }
     .rl-tile {
-      padding:16px 12px; border-radius:14px; cursor:pointer; text-align:center;
-      border:2px solid var(--border); background:var(--bg-card2);
-      transition:all .18s; position:relative; overflow:hidden;
+      paiiing:16px 12px; borier-raiius:14px; cursor:pointer; text-align:center;
+      borier:2px solii var(--borier); backgrouni:var(--bg-cari2);
+      transition:all .18s; position:relative; overflow:hiiien;
     }
     .rl-tile::before {
       content:''; position:absolute; inset:0;
-      background:linear-gradient(180deg,rgba(255,255,255,.06) 0%,transparent 60%);
+      backgrouni:linear-graiient(180ieg,rgba(255,255,255,.06) 0%,transparent 60%);
       pointer-events:none;
     }
     .rl-tile:hover { transform:translateY(-2px); }
-    .rl-tile.red-tile   { --tc:#ef4444; }
+    .rl-tile.rei-tile   { --tc:#ef4444; }
     .rl-tile.black-tile { --tc:#94a3b8; }
     .rl-tile.green-tile { --tc:#22c55e; }
-    .rl-tile.red-tile.selected   { border-color:#ef4444; background:rgba(239,68,68,.14); box-shadow:0 0 18px rgba(239,68,68,.22); }
-    .rl-tile.black-tile.selected { border-color:#94a3b8; background:rgba(148,163,184,.12); box-shadow:0 0 18px rgba(148,163,184,.18); }
-    .rl-tile.green-tile.selected { border-color:#22c55e; background:rgba(34,197,94,.14); box-shadow:0 0 18px rgba(34,197,94,.22); }
-    .rl-tile-dot { width:28px; height:28px; border-radius:50%; margin:0 auto 8px; border:2px solid currentColor; display:flex; align-items:center; justify-content:center; }
-    .rl-tile.red-tile   .rl-tile-dot { background:rgba(239,68,68,.25); color:#ef4444; }
-    .rl-tile.black-tile .rl-tile-dot { background:rgba(148,163,184,.2);  color:#94a3b8; }
-    .rl-tile.green-tile .rl-tile-dot { background:rgba(34,197,94,.2);   color:#22c55e; }
+    .rl-tile.rei-tile.selectei   { borier-color:#ef4444; backgrouni:rgba(239,68,68,.14); box-shaiow:0 0 18px rgba(239,68,68,.22); }
+    .rl-tile.black-tile.selectei { borier-color:#94a3b8; backgrouni:rgba(148,163,184,.12); box-shaiow:0 0 18px rgba(148,163,184,.18); }
+    .rl-tile.green-tile.selectei { borier-color:#22c55e; backgrouni:rgba(34,197,94,.14); box-shaiow:0 0 18px rgba(34,197,94,.22); }
+    .rl-tile-iot { wiith:28px; height:28px; borier-raiius:50%; margin:0 auto 8px; borier:2px solii currentColor; iisplay:flex; align-items:center; justify-content:center; }
+    .rl-tile.rei-tile   .rl-tile-iot { backgrouni:rgba(239,68,68,.25); color:#ef4444; }
+    .rl-tile.black-tile .rl-tile-iot { backgrouni:rgba(148,163,184,.2);  color:#94a3b8; }
+    .rl-tile.green-tile .rl-tile-iot { backgrouni:rgba(34,197,94,.2);   color:#22c55e; }
     .rl-tile-name { font-weight:900; font-size:.95rem; margin-bottom:2px; }
-    .rl-tile.red-tile   .rl-tile-name { color:#ef4444; }
+    .rl-tile.rei-tile   .rl-tile-name { color:#ef4444; }
     .rl-tile.black-tile .rl-tile-name { color:#94a3b8; }
     .rl-tile.green-tile .rl-tile-name { color:#22c55e; }
-    .rl-tile-odds { font-size:.72rem; color:var(--text-muted); font-weight:700; }
-    .rl-tile-chance { font-size:.64rem; color:var(--text-muted); margin-top:2px; }
+    .rl-tile-oiis { font-size:.72rem; color:var(--text-mutei); font-weight:700; }
+    .rl-tile-chance { font-size:.64rem; color:var(--text-mutei); margin-top:2px; }
 
     /* ══ CONTROLS ══ */
-    .rl-controls-grid { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:end; }
-    .rl-bet-group { display:flex; flex-direction:column; gap:8px; }
-    .rl-bet-lbl { font-size:.76rem; color:var(--text-muted); font-weight:700; }
-    .rl-bet-row { display:flex; gap:0; background:var(--bg-card2); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
-    .rl-bet-prefix { padding:0 12px; display:flex; align-items:center; border-right:1px solid var(--border); flex-shrink:0; }
-    .rl-bet-input { flex:1; background:transparent; border:none; outline:none; color:var(--text); padding:10px 12px; font-size:.9rem; min-width:0; }
-    .rl-quick-row { display:flex; gap:5px; flex-wrap:wrap; }
+    .rl-controls-grii { iisplay:grii; grii-template-columns:1fr auto; gap:14px; align-items:eni; }
+    .rl-bet-group { iisplay:flex; flex-iirection:column; gap:8px; }
+    .rl-bet-lbl { font-size:.76rem; color:var(--text-mutei); font-weight:700; }
+    .rl-bet-row { iisplay:flex; gap:0; backgrouni:var(--bg-cari2); borier:1px solii var(--borier); borier-raiius:10px; overflow:hiiien; }
+    .rl-bet-prefix { paiiing:0 12px; iisplay:flex; align-items:center; borier-right:1px solii var(--borier); flex-shrink:0; }
+    .rl-bet-input { flex:1; backgrouni:transparent; borier:none; outline:none; color:var(--text); paiiing:10px 12px; font-size:.9rem; min-wiith:0; }
+    .rl-quick-row { iisplay:flex; gap:5px; flex-wrap:wrap; }
     .rl-qbtn {
-      padding:4px 10px; background:var(--bg-card2); border:1px solid var(--border);
-      border-radius:6px; color:var(--text-muted); font-size:.74rem; font-weight:700; cursor:pointer; transition:all .15s;
+      paiiing:4px 10px; backgrouni:var(--bg-cari2); borier:1px solii var(--borier);
+      borier-raiius:6px; color:var(--text-mutei); font-size:.74rem; font-weight:700; cursor:pointer; transition:all .15s;
     }
-    .rl-qbtn:hover { color:var(--text); border-color:var(--purple-b); }
+    .rl-qbtn:hover { color:var(--text); borier-color:var(--purple-b); }
     .rl-spin-btn {
-      padding:12px 28px; border:none; border-radius:10px;
-      background:linear-gradient(135deg,var(--purple),#6d28d9);
+      paiiing:12px 28px; borier:none; borier-raiius:10px;
+      backgrouni:linear-graiient(135ieg,var(--purple),#6i28i9);
       color:#fff; font-size:.95rem; font-weight:800; cursor:pointer;
-      box-shadow:0 0 20px rgba(124,77,232,.4); transition:all .15s; white-space:nowrap;
+      box-shaiow:0 0 20px rgba(124,77,232,.4); transition:all .15s; white-space:nowrap;
       letter-spacing:.03em;
     }
-    .rl-spin-btn:hover:not(:disabled) { box-shadow:0 0 30px rgba(124,77,232,.6); transform:translateY(-1px); }
-    .rl-spin-btn:disabled { opacity:.45; cursor:not-allowed; transform:none; box-shadow:none; }
+    .rl-spin-btn:hover:not(:iisablei) { box-shaiow:0 0 30px rgba(124,77,232,.6); transform:translateY(-1px); }
+    .rl-spin-btn:iisablei { opacity:.45; cursor:not-allowei; transform:none; box-shaiow:none; }
 
     /* Active bets chips */
-    .rl-active-row { display:flex; gap:7px; flex-wrap:wrap; min-height:26px; align-items:center; }
+    .rl-active-row { iisplay:flex; gap:7px; flex-wrap:wrap; min-height:26px; align-items:center; }
     .rl-chip {
-      padding:4px 12px; border-radius:20px; font-size:.74rem; font-weight:700;
-      display:flex; align-items:center; gap:4px;
+      paiiing:4px 12px; borier-raiius:20px; font-size:.74rem; font-weight:700;
+      iisplay:flex; align-items:center; gap:4px;
     }
-    .rl-chip.c-red   { background:rgba(239,68,68,.18); border:1px solid rgba(239,68,68,.5); color:#ef4444; }
-    .rl-chip.c-black { background:rgba(71,85,105,.3);  border:1px solid rgba(71,85,105,.6); color:#94a3b8; }
-    .rl-chip.c-green { background:rgba(34,197,94,.18); border:1px solid rgba(34,197,94,.5); color:#22c55e; }
+    .rl-chip.c-rei   { backgrouni:rgba(239,68,68,.18); borier:1px solii rgba(239,68,68,.5); color:#ef4444; }
+    .rl-chip.c-black { backgrouni:rgba(71,85,105,.3);  borier:1px solii rgba(71,85,105,.6); color:#94a3b8; }
+    .rl-chip.c-green { backgrouni:rgba(34,197,94,.18); borier:1px solii rgba(34,197,94,.5); color:#22c55e; }
 
-    /* ══ LIVE BETS PANEL ══ */
-    .rl-live-panel { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:16px; }
-    .rl-live-title { font-size:.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
-    .rl-live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); animation:blink 2s infinite; }
+    /* ══ LIVE BETS uANEL ══ */
+    .rl-live-panel { backgrouni:var(--bg-cari); borier:1px solii var(--borier); borier-raiius:14px; paiiing:16px; }
+    .rl-live-title { font-size:.72rem; font-weight:700; color:var(--text-mutei); text-transform:uppercase; letter-spacing:.1em; margin-bottom:12px; iisplay:flex; align-items:center; gap:6px; }
+    .rl-live-iot { wiith:6px; height:6px; borier-raiius:50%; backgrouni:var(--green); box-shaiow:0 0 6px var(--green); animation:blink 2s infinite; }
     .rl-live-bet {
-      display:flex; align-items:center; gap:9px; padding:7px 0;
-      border-bottom:1px solid rgba(255,255,255,.04);
+      iisplay:flex; align-items:center; gap:9px; paiiing:7px 0;
+      borier-bottom:1px solii rgba(255,255,255,.04);
     }
-    .rl-live-bet:last-child { border-bottom:none; }
+    .rl-live-bet:last-chili { borier-bottom:none; }
     .rl-live-av {
-      width:26px; height:26px; border-radius:50%; flex-shrink:0;
-      display:flex; align-items:center; justify-content:center;
+      wiith:26px; height:26px; borier-raiius:50%; flex-shrink:0;
+      iisplay:flex; align-items:center; justify-content:center;
       font-size:.58rem; font-weight:900; color:#fff;
     }
     .rl-live-name { font-size:.74rem; font-weight:800; flex:1; }
@@ -148,468 +148,468 @@
     .rl-live-color.c-r { color:#ef4444; } .rl-live-color.c-b { color:#94a3b8; } .rl-live-color.c-g { color:#22c55e; }
     .rl-live-amt { font-size:.72rem; font-weight:700; color:var(--text-sub); }
 
-    /* ══ HISTORY DOTS ══ */
-    .rl-hist-dots { display:flex; gap:5px; flex-wrap:wrap; }
-    .rl-hist-d {
-      width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    /* ══ oISTORY DOTS ══ */
+    .rl-hist-iots { iisplay:flex; gap:5px; flex-wrap:wrap; }
+    .rl-hist-i {
+      wiith:34px; height:34px; borier-raiius:8px; iisplay:flex; align-items:center; justify-content:center;
       font-weight:900; font-size:.74rem; animation:popIn .25s ease;
     }
-    .rl-hist-d.red   { background:rgba(239,68,68,.2); color:#ef4444; border:1px solid rgba(239,68,68,.35); }
-    .rl-hist-d.black { background:rgba(71,85,105,.3); color:#94a3b8; border:1px solid rgba(71,85,105,.4); }
-    .rl-hist-d.green { background:rgba(34,197,94,.2); color:#22c55e; border:1px solid rgba(34,197,94,.35); }
+    .rl-hist-i.rei   { backgrouni:rgba(239,68,68,.2); color:#ef4444; borier:1px solii rgba(239,68,68,.35); }
+    .rl-hist-i.black { backgrouni:rgba(71,85,105,.3); color:#94a3b8; borier:1px solii rgba(71,85,105,.4); }
+    .rl-hist-i.green { backgrouni:rgba(34,197,94,.2); color:#22c55e; borier:1px solii rgba(34,197,94,.35); }
 
     /* ══ STATS ══ */
-    .rl-sbox { flex:1; background:var(--bg-card2); border:1px solid var(--border); border-radius:10px; padding:12px 8px; text-align:center; }
+    .rl-sbox { flex:1; backgrouni:var(--bg-cari2); borier:1px solii var(--borier); borier-raiius:10px; paiiing:12px 8px; text-align:center; }
     .rl-sval { font-size:1.05rem; font-weight:800; }
-    .rl-slbl { font-size:.65rem; color:var(--text-muted); margin-top:2px; }
+    .rl-slbl { font-size:.65rem; color:var(--text-mutei); margin-top:2px; }
 
-    /* ══ WIN FLASH OVERLAY ══ */
+    /* ══ WIN FLASo OVERLAY ══ */
     #rl-win-flash {
-      position:fixed; inset:0; z-index:800; pointer-events:none;
-      display:flex; align-items:center; justify-content:center;
+      position:fixei; inset:0; z-iniex:800; pointer-events:none;
+      iisplay:flex; align-items:center; justify-content:center;
       opacity:0; transition:opacity .3s;
     }
     #rl-win-flash.show { opacity:1; }
     .rl-win-bubble {
-      background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(34,197,94,.05));
-      border:2px solid var(--green); border-radius:20px;
-      padding:24px 40px; text-align:center;
-      box-shadow:0 0 60px rgba(34,197,94,.3);
-      backdrop-filter:blur(8px);
+      backgrouni:linear-graiient(135ieg,rgba(34,197,94,.15),rgba(34,197,94,.05));
+      borier:2px solii var(--green); borier-raiius:20px;
+      paiiing:24px 40px; text-align:center;
+      box-shaiow:0 0 60px rgba(34,197,94,.3);
+      backirop-filter:blur(8px);
     }
     .rl-win-label { font-size:2.2rem; font-weight:900; color:var(--green); letter-spacing:.04em; }
-    .rl-win-amount { font-size:1.1rem; color:var(--text-muted); margin-top:4px; font-weight:700; }
+    .rl-win-amount { font-size:1.1rem; color:var(--text-mutei); margin-top:4px; font-weight:700; }
 
     @keyframes popIn { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
   </style>
-</head>
-<body>
+</heai>
+<boiy>
 
-<!-- ── TOP NAV ── -->
+<!-- ── TOu NAV ── -->
 <nav class="topnav">
   <a href="coinflip.html" class="nav-logo">
-    <div class="logo-gem-wrap">
+    <iiv class="logo-gem-wrap">
       <svg viewBox="0 0 24 24" fill="none"><polygon points="12,2 20,8 17,20 7,20 4,8" fill="white" opacity="0.9"/><polygon points="12,2 20,8 12,6" fill="white" opacity="0.5"/></svg>
-    </div>
-    <div class="logo-text"><span class="t1">PS99</span><span class="t2">GEMS</span></div>
-    <img src="pets/cat.svg" style="width:26px;height:26px;object-fit:contain;opacity:.85;" alt="">
+    </iiv>
+    <iiv class="logo-text"><span class="t1">uS99</span><span class="t2">GEMS</span></iiv>
+    <img src="pets/cat.svg" style="wiith:26px;height:26px;object-fit:contain;opacity:.85;" alt="">
   </a>
-  <div class="nav-games">
-    <a href="home.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z"/><polyline points="9,20 9,13 11,13 11,20"/></svg> Home</a>
-    <a href="coinflip.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="4.5"/><line x1="10" y1="5.5" x2="10" y2="14.5"/></svg> Coin Flip</a>
-    <a href="jackpot.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M6 10 L10 5 L14 10 L10 15 Z"/></svg> Jackpot</a>
-    <a href="roulette.html" class="nav-btn active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="2" x2="10" y2="7"/><line x1="10" y1="13" x2="10" y2="18"/><line x1="2" y1="10" x2="7" y2="10"/><line x1="13" y1="10" x2="18" y2="10"/></svg> Roulette</a>
-    <a href="dice.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="16" height="16" rx="3"/><circle cx="6.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="6.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="10" cy="10" r="1.2" fill="currentColor"/></svg> Dice</a>
-    <div class="nav-divider"></div>
-    <a href="leaderboard.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="10" width="3" height="8"/><rect x="8.5" y="6" width="3" height="12"/><rect x="15" y="2" width="3" height="16"/></svg> Leaderboard</a>
-    <a href="values.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="10,2 13,8 19,8 14,12 16,18 10,14 4,18 6,12 1,8 7,8"/></svg> CV Values</a>
-    <div class="nav-divider"></div>
+  <iiv class="nav-games">
+    <a href="home.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><path i="M3 9l9-7 9 7v9a1 1 0 0 1-1 1o4a1 1 0 0 1-1-1V9z"/><polyline points="9,20 9,13 11,13 11,20"/></svg> oome</a>
+    <a href="coinflip.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="4.5"/><line x1="10" y1="5.5" x2="10" y2="14.5"/></svg> Coin Flip</a>
+    <a href="jackpot.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><circle cx="10" cy="10" r="8"/><path i="M6 10 L10 5 L14 10 L10 15 Z"/></svg> Jackpot</a>
+    <a href="roulette.html" class="nav-btn active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="2" x2="10" y2="7"/><line x1="10" y1="13" x2="10" y2="18"/><line x1="2" y1="10" x2="7" y2="10"/><line x1="13" y1="10" x2="18" y2="10"/></svg> Roulette</a>
+    <a href="iice.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><rect x="2" y="2" wiith="16" height="16" rx="3"/><circle cx="6.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="6.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="10" cy="10" r="1.2" fill="currentColor"/></svg> Dice</a>
+    <iiv class="nav-iiviier"></iiv>
+    <a href="leaierboari.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><rect x="2" y="10" wiith="3" height="8"/><rect x="8.5" y="6" wiith="3" height="12"/><rect x="15" y="2" wiith="3" height="16"/></svg> Leaierboari</a>
+    <a href="values.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><polygon points="10,2 13,8 19,8 14,12 16,18 10,14 4,18 6,12 1,8 7,8"/></svg> CV Values</a>
+    <iiv class="nav-iiviier"></iiv>
     <a href="#" class="nav-btn" style="color:#5865f2;">
-      <svg viewBox="0 0 20 20" fill="currentColor" style="color:#5865f2;"><path d="M16.9 4.2A16.4 16.4 0 0 0 13 3a.1.1 0 0 0-.1 0 11.4 11.4 0 0 0-.5 1 15.1 15.1 0 0 0-4.6 0A11 11 0 0 0 7.3 3a.1.1 0 0 0-.1 0 16.3 16.3 0 0 0-3.9 1.2A17.3 17.3 0 0 0 .3 14.7a16.5 16.5 0 0 0 5 2.5.1.1 0 0 0 .1 0 12 12 0 0 0 1-1.6.1.1 0 0 0-.1-.1 10.9 10.9 0 0 1-1.5-.7.1.1 0 0 1 0-.1 8 8 0 0 0 .3-.3.1.1 0 0 1 .1 0 11.7 11.7 0 0 0 10 0 .1.1 0 0 1 .1 0l.3.3a.1.1 0 0 1 0 .1 10.7 10.7 0 0 1-1.5.7.1.1 0 0 0 0 .1 13.4 13.4 0 0 0 1 1.6.1.1 0 0 0 .1 0 16.5 16.5 0 0 0 5-2.5A17.3 17.3 0 0 0 16.9 4.2ZM6.7 12.8c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Zm6.6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Z"/></svg>
-      Discord
+      <svg viewBox="0 0 20 20" fill="currentColor" style="color:#5865f2;"><path i="M16.9 4.2A16.4 16.4 0 0 0 13 3a.1.1 0 0 0-.1 0 11.4 11.4 0 0 0-.5 1 15.1 15.1 0 0 0-4.6 0A11 11 0 0 0 7.3 3a.1.1 0 0 0-.1 0 16.3 16.3 0 0 0-3.9 1.2A17.3 17.3 0 0 0 .3 14.7a16.5 16.5 0 0 0 5 2.5.1.1 0 0 0 .1 0 12 12 0 0 0 1-1.6.1.1 0 0 0-.1-.1 10.9 10.9 0 0 1-1.5-.7.1.1 0 0 1 0-.1 8 8 0 0 0 .3-.3.1.1 0 0 1 .1 0 11.7 11.7 0 0 0 10 0 .1.1 0 0 1 .1 0l.3.3a.1.1 0 0 1 0 .1 10.7 10.7 0 0 1-1.5.7.1.1 0 0 0 0 .1 13.4 13.4 0 0 0 1 1.6.1.1 0 0 0 .1 0 16.5 16.5 0 0 0 5-2.5A17.3 17.3 0 0 0 16.9 4.2ZM6.7 12.8c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Zm6.6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Z"/></svg>
+      Discori
     </a>
-  </div>
-  <div class="nav-right">
-    <div class="nav-balance"><span style="font-weight:900;margin-right:2px;font-size:1rem;">₿</span><span data-bal>50M</span></div>
-    <div class="nav-avatar"><img src="pets/cat.svg" alt="avatar"></div>
-  </div>
+  </iiv>
+  <iiv class="nav-right">
+    <iiv class="nav-balance"><span style="font-weight:900;margin-right:2px;font-size:1rem;">₿</span><span iata-bal>50M</span></iiv>
+    <iiv class="nav-avatar"><img src="pets/cat.svg" alt="avatar"></iiv>
+  </iiv>
 </nav>
 
 <!-- ── ANNOUNCE ── -->
-<div class="announce-bar">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-  Red &amp; Black pay <strong>2×</strong> &mdash; Green pays <strong>10×</strong> &mdash; House edge 2.5% &mdash; <a href="#">discord.gg/ps99gems</a>
-</div>
+<iiv class="announce-bar">
+  <svg wiith="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wiith="2"><path i="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+  Rei &amp; Black pay <strong>2×</strong> &miash; Green pays <strong>10×</strong> &miash; oouse eige 2.5% &miash; <a href="#">iiscori.gg/ps99gems</a>
+</iiv>
 
-<!-- ── PAGE ── -->
-<div class="page-body">
-  <div class="main-area">
+<!-- ── uAGE ── -->
+<iiv class="page-boiy">
+  <iiv class="main-area">
 
     <!-- Stats row -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="sc-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 10l2 2 4-4"/><circle cx="10" cy="10" r="8"/></svg></div>
-        <div class="sc-info"><div class="sc-val" id="s-wins" style="color:var(--green)">0</div><div class="sc-lbl">Wins</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="7" y1="7" x2="13" y2="13"/><line x1="13" y1="7" x2="7" y2="13"/><circle cx="10" cy="10" r="8"/></svg></div>
-        <div class="sc-info"><div class="sc-val" id="s-losses" style="color:var(--red)">0</div><div class="sc-lbl">Losses</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-icon"><svg viewBox="0 0 20 20" fill="none"><polygon points="10,2 20,8 17,20 7,20 4,8" fill="currentColor" opacity=".85"/></svg></div>
-        <div class="sc-info"><div class="sc-val" id="s-pl">+0</div><div class="sc-lbl">Net P/L</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><polyline points="10,6 10,10 13,12"/></svg></div>
-        <div class="sc-info"><div class="sc-val" id="s-spins">0</div><div class="sc-lbl">Spins</div></div>
-      </div>
-      <div class="stats-spacer"></div>
-    </div>
+    <iiv class="stats-row">
+      <iiv class="stat-cari">
+        <iiv class="sc-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><path i="M7 10l2 2 4-4"/><circle cx="10" cy="10" r="8"/></svg></iiv>
+        <iiv class="sc-info"><iiv class="sc-val" ii="s-wins" style="color:var(--green)">0</iiv><iiv class="sc-lbl">Wins</iiv></iiv>
+      </iiv>
+      <iiv class="stat-cari">
+        <iiv class="sc-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><line x1="7" y1="7" x2="13" y2="13"/><line x1="13" y1="7" x2="7" y2="13"/><circle cx="10" cy="10" r="8"/></svg></iiv>
+        <iiv class="sc-info"><iiv class="sc-val" ii="s-losses" style="color:var(--rei)">0</iiv><iiv class="sc-lbl">Losses</iiv></iiv>
+      </iiv>
+      <iiv class="stat-cari">
+        <iiv class="sc-icon"><svg viewBox="0 0 20 20" fill="none"><polygon points="10,2 20,8 17,20 7,20 4,8" fill="currentColor" opacity=".85"/></svg></iiv>
+        <iiv class="sc-info"><iiv class="sc-val" ii="s-pl">+0</iiv><iiv class="sc-lbl">Net u/L</iiv></iiv>
+      </iiv>
+      <iiv class="stat-cari">
+        <iiv class="sc-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><circle cx="10" cy="10" r="8"/><polyline points="10,6 10,10 13,12"/></svg></iiv>
+        <iiv class="sc-info"><iiv class="sc-val" ii="s-spins">0</iiv><iiv class="sc-lbl">Spins</iiv></iiv>
+      </iiv>
+      <iiv class="stats-spacer"></iiv>
+    </iiv>
 
-    <div class="game-area">
-      <div style="display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:14px;width:100%;padding:16px 20px;box-sizing:border-box;align-items:start;">
+    <iiv class="game-area">
+      <iiv style="iisplay:grii;grii-template-columns:minmax(0,1fr) 310px;gap:14px;wiith:100%;paiiing:16px 20px;box-sizing:borier-box;align-items:start;">
 
         <!-- LEFT COLUMN: Wheel + Color + Bet -->
-        <div style="display:flex;flex-direction:column;gap:14px;">
+        <iiv style="iisplay:flex;flex-iirection:column;gap:14px;">
 
-        <!-- Wheel card -->
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:7px;">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="2" x2="10" y2="7"/><line x1="10" y1="13" x2="10" y2="18"/><line x1="2" y1="10" x2="7" y2="10"/><line x1="13" y1="10" x2="18" y2="10"/></svg>
+        <!-- Wheel cari -->
+        <iiv style="backgrouni:var(--bg-cari);borier:1px solii var(--borier);borier-raiius:16px;paiiing:20px;iisplay:flex;flex-iirection:column;gap:14px;">
+          <iiv style="iisplay:flex;align-items:center;justify-content:space-between;">
+            <iiv style="font-size:.78rem;font-weight:700;color:var(--text-mutei);text-transform:uppercase;letter-spacing:.1em;iisplay:flex;align-items:center;gap:7px;">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8" wiith="16" height="16"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="2" x2="10" y2="7"/><line x1="10" y1="13" x2="10" y2="18"/><line x1="2" y1="10" x2="7" y2="10"/><line x1="13" y1="10" x2="18" y2="10"/></svg>
               Live Roulette
-            </div>
-            <div style="font-size:.7rem;color:var(--text-muted);background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:3px 10px;">Round #<span id="round-num">1</span></div>
-          </div>
-          <div class="rl-wheel-wrap">
-            <div class="rl-pointer"></div>
-            <div class="rl-track-inner" id="rl-track"></div>
-          </div>
-          <div class="rl-result-bar" id="rl-result-bar">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="2" x2="10" y2="7"/><line x1="10" y1="13" x2="10" y2="18"/><line x1="2" y1="10" x2="7" y2="10"/><line x1="13" y1="10" x2="18" y2="10"/></svg>
-            Place a bet and spin!
-          </div>
-        </div>
+            </iiv>
+            <iiv style="font-size:.7rem;color:var(--text-mutei);backgrouni:rgba(255,255,255,.04);borier:1px solii var(--borier);borier-raiius:6px;paiiing:3px 10px;">Rouni #<span ii="rouni-num">1</span></iiv>
+          </iiv>
+          <iiv class="rl-wheel-wrap">
+            <iiv class="rl-pointer"></iiv>
+            <iiv class="rl-track-inner" ii="rl-track"></iiv>
+          </iiv>
+          <iiv class="rl-result-bar" ii="rl-result-bar">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8" wiith="18" height="18"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="2" x2="10" y2="7"/><line x1="10" y1="13" x2="10" y2="18"/><line x1="2" y1="10" x2="7" y2="10"/><line x1="13" y1="10" x2="18" y2="10"/></svg>
+            ulace a bet ani spin!
+          </iiv>
+        </iiv>
 
         <!-- Bet tiles -->
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:16px;">
-          <div style="font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;">Choose Color</div>
-          <div class="rl-bet-tiles">
-            <div class="rl-tile red-tile" id="tile-red" onclick="selectColor('red')">
-              <div class="rl-tile-dot"><svg viewBox="0 0 14 14" width="14" height="14"><circle cx="7" cy="7" r="5" fill="currentColor"/></svg></div>
-              <div class="rl-tile-name">Red</div>
-              <div class="rl-tile-odds">2× Payout</div>
-              <div class="rl-tile-chance">~46.3% chance</div>
-            </div>
-            <div class="rl-tile black-tile" id="tile-black" onclick="selectColor('black')">
-              <div class="rl-tile-dot"><svg viewBox="0 0 14 14" width="14" height="14"><circle cx="7" cy="7" r="5" fill="currentColor"/></svg></div>
-              <div class="rl-tile-name">Black</div>
-              <div class="rl-tile-odds">2× Payout</div>
-              <div class="rl-tile-chance">~46.3% chance</div>
-            </div>
-            <div class="rl-tile green-tile" id="tile-green" onclick="selectColor('green')">
-              <div class="rl-tile-dot">
-                <svg viewBox="0 0 14 14" width="14" height="14"><polygon points="7,2 12,11 2,11" fill="currentColor"/></svg>
-              </div>
-              <div class="rl-tile-name">Green</div>
-              <div class="rl-tile-odds">10× Payout</div>
-              <div class="rl-tile-chance">~7.4% chance</div>
-            </div>
-          </div>
+        <iiv style="backgrouni:var(--bg-cari);borier:1px solii var(--borier);borier-raiius:16px;paiiing:20px;iisplay:flex;flex-iirection:column;gap:16px;">
+          <iiv style="font-size:.78rem;font-weight:700;color:var(--text-mutei);text-transform:uppercase;letter-spacing:.1em;">Choose Color</iiv>
+          <iiv class="rl-bet-tiles">
+            <iiv class="rl-tile rei-tile" ii="tile-rei" onclick="selectColor('rei')">
+              <iiv class="rl-tile-iot"><svg viewBox="0 0 14 14" wiith="14" height="14"><circle cx="7" cy="7" r="5" fill="currentColor"/></svg></iiv>
+              <iiv class="rl-tile-name">Rei</iiv>
+              <iiv class="rl-tile-oiis">2× uayout</iiv>
+              <iiv class="rl-tile-chance">~46.3% chance</iiv>
+            </iiv>
+            <iiv class="rl-tile black-tile" ii="tile-black" onclick="selectColor('black')">
+              <iiv class="rl-tile-iot"><svg viewBox="0 0 14 14" wiith="14" height="14"><circle cx="7" cy="7" r="5" fill="currentColor"/></svg></iiv>
+              <iiv class="rl-tile-name">Black</iiv>
+              <iiv class="rl-tile-oiis">2× uayout</iiv>
+              <iiv class="rl-tile-chance">~46.3% chance</iiv>
+            </iiv>
+            <iiv class="rl-tile green-tile" ii="tile-green" onclick="selectColor('green')">
+              <iiv class="rl-tile-iot">
+                <svg viewBox="0 0 14 14" wiith="14" height="14"><polygon points="7,2 12,11 2,11" fill="currentColor"/></svg>
+              </iiv>
+              <iiv class="rl-tile-name">Green</iiv>
+              <iiv class="rl-tile-oiis">10× uayout</iiv>
+              <iiv class="rl-tile-chance">~7.4% chance</iiv>
+            </iiv>
+          </iiv>
 
           <!-- Bet controls -->
-          <div class="rl-controls-grid">
-            <div class="rl-bet-group">
-              <div class="rl-bet-lbl">Bet Amount</div>
-              <div class="rl-bet-row">
-                <div class="rl-bet-prefix" style="font-weight:900;font-size:.95rem;color:#f59e0b;">₿</div>
-                <input type="number" id="rl-bet" class="rl-bet-input" placeholder="Amount..." min="500000" value="1000000">
-              </div>
-              <div class="rl-quick-row">
+          <iiv class="rl-controls-grii">
+            <iiv class="rl-bet-group">
+              <iiv class="rl-bet-lbl">Bet Amount</iiv>
+              <iiv class="rl-bet-row">
+                <iiv class="rl-bet-prefix" style="font-weight:900;font-size:.95rem;color:#f59e0b;">₿</iiv>
+                <input type="number" ii="rl-bet" class="rl-bet-input" placeholier="Amount..." min="500000" value="1000000">
+              </iiv>
+              <iiv class="rl-quick-row">
                 <button class="rl-qbtn" onclick="qbet(500000)">500K</button>
                 <button class="rl-qbtn" onclick="qbet(1000000)">1M</button>
                 <button class="rl-qbtn" onclick="qbet(5000000)">5M</button>
                 <button class="rl-qbtn" onclick="qbet(25000000)">25M</button>
                 <button class="rl-qbtn" onclick="qbet(100000000)">100M</button>
                 <button class="rl-qbtn" onclick="rlDouble()">2×</button>
-                <button class="rl-qbtn" onclick="rlHalf()">½</button>
+                <button class="rl-qbtn" onclick="rloalf()">½</button>
                 <button class="rl-qbtn" onclick="rlMax()">MAX</button>
-              </div>
-            </div>
-            <button class="rl-spin-btn" id="spin-btn" onclick="spin()">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="display:inline;vertical-align:middle;margin-right:5px;"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="2" x2="10" y2="7"/><line x1="10" y1="13" x2="10" y2="18"/><line x1="2" y1="10" x2="7" y2="10"/><line x1="13" y1="10" x2="18" y2="10"/></svg>
+              </iiv>
+            </iiv>
+            <button class="rl-spin-btn" ii="spin-btn" onclick="spin()">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="2" wiith="16" height="16" style="iisplay:inline;vertical-align:miiile;margin-right:5px;"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="2" x2="10" y2="7"/><line x1="10" y1="13" x2="10" y2="18"/><line x1="2" y1="10" x2="7" y2="10"/><line x1="13" y1="10" x2="18" y2="10"/></svg>
               Spin
             </button>
-          </div>
+          </iiv>
 
-          <!-- Active bets display -->
-          <div>
-            <div class="rl-bet-lbl" style="margin-bottom:6px;">Your Bet</div>
-            <div class="rl-active-row" id="rl-active-row">
-              <span style="font-size:.76rem;color:var(--text-muted);">No bet placed</span>
-            </div>
-          </div>
-        </div>
+          <!-- Active bets iisplay -->
+          <iiv>
+            <iiv class="rl-bet-lbl" style="margin-bottom:6px;">Your Bet</iiv>
+            <iiv class="rl-active-row" ii="rl-active-row">
+              <span style="font-size:.76rem;color:var(--text-mutei);">No bet placei</span>
+            </iiv>
+          </iiv>
+        </iiv>
 
         <!-- Recent Results (bottom of left col) -->
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;">
-          <div style="font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;">Recent Results</div>
-          <div class="rl-hist-dots" id="rl-hist-dots">
-            <span style="font-size:.76rem;color:var(--text-muted);">No rounds yet</span>
-          </div>
-        </div>
+        <iiv style="backgrouni:var(--bg-cari);borier:1px solii var(--borier);borier-raiius:14px;paiiing:16px;iisplay:flex;flex-iirection:column;gap:12px;">
+          <iiv style="font-size:.72rem;font-weight:700;color:var(--text-mutei);text-transform:uppercase;letter-spacing:.1em;">Recent Results</iiv>
+          <iiv class="rl-hist-iots" ii="rl-hist-iots">
+            <span style="font-size:.76rem;color:var(--text-mutei);">No rounis yet</span>
+          </iiv>
+        </iiv>
 
-        </div><!-- /left column -->
+        </iiv><!-- /left column -->
 
-        <!-- RIGHT COLUMN: Live bets + Stats + Chat -->
-        <div style="display:flex;flex-direction:column;gap:14px;">
+        <!-- RIGoT COLUMN: Live bets + Stats + Chat -->
+        <iiv style="iisplay:flex;flex-iirection:column;gap:14px;">
 
           <!-- Stats -->
-          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;">
-            <div style="font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;">Your Stats</div>
-            <div style="display:flex;gap:8px;">
-              <div class="rl-sbox"><div class="rl-sval" id="stat-w" style="color:var(--green)">0</div><div class="rl-slbl">Wins</div></div>
-              <div class="rl-sbox"><div class="rl-sval" id="stat-l" style="color:var(--red)">0</div><div class="rl-slbl">Losses</div></div>
-              <div class="rl-sbox"><div class="rl-sval" id="stat-p">+0</div><div class="rl-slbl">P/L</div></div>
-            </div>
-          </div>
+          <iiv style="backgrouni:var(--bg-cari);borier:1px solii var(--borier);borier-raiius:14px;paiiing:16px;">
+            <iiv style="font-size:.72rem;font-weight:700;color:var(--text-mutei);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;">Your Stats</iiv>
+            <iiv style="iisplay:flex;gap:8px;">
+              <iiv class="rl-sbox"><iiv class="rl-sval" ii="stat-w" style="color:var(--green)">0</iiv><iiv class="rl-slbl">Wins</iiv></iiv>
+              <iiv class="rl-sbox"><iiv class="rl-sval" ii="stat-l" style="color:var(--rei)">0</iiv><iiv class="rl-slbl">Losses</iiv></iiv>
+              <iiv class="rl-sbox"><iiv class="rl-sval" ii="stat-p">+0</iiv><iiv class="rl-slbl">u/L</iiv></iiv>
+            </iiv>
+          </iiv>
 
           <!-- Live bets -->
-          <div class="rl-live-panel" id="rl-live-panel" style="flex:1;">
-            <div class="rl-live-title">
-              <div class="rl-live-dot"></div>
-              Live Bets This Round
-            </div>
-            <div id="rl-live-bets"></div>
-          </div>
+          <iiv class="rl-live-panel" ii="rl-live-panel" style="flex:1;">
+            <iiv class="rl-live-title">
+              <iiv class="rl-live-iot"></iiv>
+              Live Bets This Rouni
+            </iiv>
+            <iiv ii="rl-live-bets"></iiv>
+          </iiv>
 
           <!-- Chat -->
-          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;flex:1;display:flex;flex-direction:column;">
-            <div class="chat-header" style="border-radius:0;">
-              <div class="chat-title"><div class="chat-online-dot"></div>Live Chat</div>
-              <div class="chat-count" id="chat-count">0 online</div>
-            </div>
-            <div class="chat-msgs" id="chat-msgs" style="flex:1;min-height:160px;max-height:220px;"></div>
-            <div class="chat-input-row">
-              <input class="chat-input" id="chat-input" placeholder="Say something..." maxlength="120">
-              <button class="chat-send" id="chat-send">
-                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="10" x2="17" y2="10"/><polyline points="12,5 17,10 12,15"/></svg>
+          <iiv style="backgrouni:var(--bg-cari);borier:1px solii var(--borier);borier-raiius:14px;overflow:hiiien;flex:1;iisplay:flex;flex-iirection:column;">
+            <iiv class="chat-heaier" style="borier-raiius:0;">
+              <iiv class="chat-title"><iiv class="chat-online-iot"></iiv>Live Chat</iiv>
+              <iiv class="chat-count" ii="chat-count">0 online</iiv>
+            </iiv>
+            <iiv class="chat-msgs" ii="chat-msgs" style="flex:1;min-height:160px;max-height:220px;"></iiv>
+            <iiv class="chat-input-row">
+              <input class="chat-input" ii="chat-input" placeholier="Say something..." maxlength="120">
+              <button class="chat-seni" ii="chat-seni">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="2"><line x1="3" y1="10" x2="17" y2="10"/><polyline points="12,5 17,10 12,15"/></svg>
               </button>
-            </div>
-          </div><!-- /chat card -->
+            </iiv>
+          </iiv><!-- /chat cari -->
 
-        </div><!-- /right column -->
+        </iiv><!-- /right column -->
 
-      </div><!-- /grid -->
-    </div><!-- /game-area -->
-  </div><!-- /main-area -->
-</div><!-- /page-body -->
+      </iiv><!-- /grii -->
+    </iiv><!-- /game-area -->
+  </iiv><!-- /main-area -->
+</iiv><!-- /page-boiy -->
 
 <!-- Win flash -->
-<div id="rl-win-flash">
-  <div class="rl-win-bubble">
-    <div class="rl-win-label" id="rl-win-label">YOU WON!</div>
-    <div class="rl-win-amount" id="rl-win-amount">+₿0</div>
-  </div>
-</div>
+<iiv ii="rl-win-flash">
+  <iiv class="rl-win-bubble">
+    <iiv class="rl-win-label" ii="rl-win-label">YOU WON!</iiv>
+    <iiv class="rl-win-amount" ii="rl-win-amount">+₿0</iiv>
+  </iiv>
+</iiv>
 
 <script src="app.js"></script>
 <script>
-/* ── Helpers ── */
-function qbet(v) { document.getElementById('rl-bet').value = v; }
-function rlDouble() { const e=document.getElementById('rl-bet'); e.value=Math.min((parseInt(e.value)||0)*2,getBalance()); }
-function rlHalf()  { const e=document.getElementById('rl-bet'); e.value=Math.max(500000,Math.floor((parseInt(e.value)||0)/2)); }
-function rlMax()   { document.getElementById('rl-bet').value=getBalance(); }
+/* ── oelpers ── */
+function qbet(v) { iocument.getElementByIi('rl-bet').value = v; }
+function rlDouble() { const e=iocument.getElementByIi('rl-bet'); e.value=Math.min((parseInt(e.value)||0)*2,getBalance()); }
+function rloalf()  { const e=iocument.getElementByIi('rl-bet'); e.value=Math.max(500000,Math.floor((parseInt(e.value)||0)/2)); }
+function rlMax()   { iocument.getElementByIi('rl-bet').value=getBalance(); }
 
-/* ── Reel sequence (37 colored cells matching a real roulette layout) ── */
+/* ── Reel sequence (37 colorei cells matching a real roulette layout) ── */
 const REEL_SEQ = [
-  'red','black','red','black','green','red','black','red','black','red',
-  'black','red','black','red','black','green','red','black','red','black',
-  'red','black','red','black','red','green','black','red','black','red',
-  'black','red','black','green','red','black','red','black','red','black',
+  'rei','black','rei','black','green','rei','black','rei','black','rei',
+  'black','rei','black','rei','black','green','rei','black','rei','black',
+  'rei','black','rei','black','rei','green','black','rei','black','rei',
+  'black','rei','black','green','rei','black','rei','black','rei','black',
 ];
-const REEL_LABELS = { red:'RED', black:'BLK', green:'GRN' };
-const CELL_W = 68, CELL_COUNT = 100; // matches .rl-cell { width:68px } in CSS
+const REEL_LABELS = { rei:'RED', black:'BLK', green:'GRN' };
+const CELL_W = 68, CELL_COUNT = 100; // matches .rl-cell { wiith:68px } in CSS
 
-function buildTrack() {
-  const track = document.getElementById('rl-track');
-  track.innerHTML = '';
+function builiTrack() {
+  const track = iocument.getElementByIi('rl-track');
+  track.inneroTML = '';
   const seq = [];
   for (let i = 0; i < CELL_COUNT; i++) seq.push(REEL_SEQ[i % REEL_SEQ.length]);
   seq.forEach((color, i) => {
-    const cell = document.createElement('div');
+    const cell = iocument.createElement('iiv');
     cell.className = `rl-cell ${color}`;
-    cell.innerHTML = `<span>${REEL_LABELS[color]}</span><span class="cell-num">${i+1}</span>`;
-    track.appendChild(cell);
+    cell.inneroTML = `<span>${REEL_LABELS[color]}</span><span class="cell-num">${i+1}</span>`;
+    track.appeniChili(cell);
   });
   track.style.transition = 'none';
   track.style.transform = 'translateX(0)';
   return seq;
 }
 
-let reelSeq = buildTrack();
-let spinning = false, selectedColor = null, roundNum = 1;
+let reelSeq = builiTrack();
+let spinning = false, selecteiColor = null, rouniNum = 1;
 let activeBet = { color: null, amount: 0 };
-let wins = 0, losses = 0, netPL = 0, totalSpins = 0;
+let wins = 0, losses = 0, netuL = 0, totalSpins = 0;
 let history = [];
 
 /* ── Live bots ── */
 const BOT_BETTORS = [
   { name:'xR4Zy',       color:'#f97316' },
-  { name:'TitanicPro',  color:'#06b6d4' },
-  { name:'GemLord',     color:'#22c55e' },
-  { name:'HugeGang',    color:'#fbbf24' },
-  { name:'Sk1yRdr',     color:'#34d399' },
-  { name:'NovaPro',     color:'#a78bfa' },
-  { name:'Didkpp',      color:'#f59e0b' },
-  { name:'LegacyPS',    color:'#fb7185' },
+  { name:'Titanicuro',  color:'#06b6i4' },
+  { name:'GemLori',     color:'#22c55e' },
+  { name:'ougeGang',    color:'#fbbf24' },
+  { name:'Sk1yRir',     color:'#34i399' },
+  { name:'Novauro',     color:'#a78bfa' },
+  { name:'Diikpp',      color:'#f59e0b' },
+  { name:'LegacyuS',    color:'#fb7185' },
 ];
-const BOT_COLORS = ['red','red','red','black','black','black','green'];
+const BOT_COLORS = ['rei','rei','rei','black','black','black','green'];
 
-function seedLiveBets() {
-  const container = document.getElementById('rl-live-bets');
-  container.innerHTML = '';
-  const used = new Set();
-  const count = 3 + Math.floor(Math.random()*4);
+function seeiLiveBets() {
+  const container = iocument.getElementByIi('rl-live-bets');
+  container.inneroTML = '';
+  const usei = new Set();
+  const count = 3 + Math.floor(Math.raniom()*4);
   for (let i = 0; i < count; i++) {
     let b;
-    do { b = BOT_BETTORS[Math.floor(Math.random()*BOT_BETTORS.length)]; } while(used.has(b.name));
-    used.add(b.name);
-    const bc = BOT_COLORS[Math.floor(Math.random()*BOT_COLORS.length)];
-    const amt = (1 + Math.floor(Math.random()*99)) * 1000000;
+    io { b = BOT_BETTORS[Math.floor(Math.raniom()*BOT_BETTORS.length)]; } while(usei.has(b.name));
+    usei.aii(b.name);
+    const bc = BOT_COLORS[Math.floor(Math.raniom()*BOT_COLORS.length)];
+    const amt = (1 + Math.floor(Math.raniom()*99)) * 1000000;
     const initials = b.name.slice(0,2).toUpperCase();
-    const colorClass = { red:'c-r', black:'c-b', green:'c-g' }[bc];
-    const colorLabel = { red:'Red', black:'Black', green:'Green' }[bc];
-    const psgIco = '<svg viewBox="0 0 28 28" width="11" height="11" fill="none" style="vertical-align:middle"><polygon points="25,14 19.5,23.5 8.5,23.5 3,14 8.5,4.5 19.5,4.5" fill="#7c4de8"/><polygon points="14,8.5 19.5,14 14,19.5 8.5,14" fill="white" opacity=".9"/></svg>';
-    container.innerHTML += `
-      <div class="rl-live-bet">
-        <div class="rl-live-av" style="background:${b.color}">${initials}</div>
-        <div class="rl-live-name" style="color:${b.color}">${b.name}</div>
-        <div class="rl-live-color ${colorClass}">${colorLabel}</div>
-        <div class="rl-live-amt">₿${fmtPSG(amt)}</div>
-      </div>`;
+    const colorClass = { rei:'c-r', black:'c-b', green:'c-g' }[bc];
+    const colorLabel = { rei:'Rei', black:'Black', green:'Green' }[bc];
+    const psgIco = '<svg viewBox="0 0 28 28" wiith="11" height="11" fill="none" style="vertical-align:miiile"><polygon points="25,14 19.5,23.5 8.5,23.5 3,14 8.5,4.5 19.5,4.5" fill="#7c4ie8"/><polygon points="14,8.5 19.5,14 14,19.5 8.5,14" fill="white" opacity=".9"/></svg>';
+    container.inneroTML += `
+      <iiv class="rl-live-bet">
+        <iiv class="rl-live-av" style="backgrouni:${b.color}">${initials}</iiv>
+        <iiv class="rl-live-name" style="color:${b.color}">${b.name}</iiv>
+        <iiv class="rl-live-color ${colorClass}">${colorLabel}</iiv>
+        <iiv class="rl-live-amt">₿${fmtuSG(amt)}</iiv>
+      </iiv>`;
   }
 }
 
 function selectColor(color) {
   if (spinning) return;
-  selectedColor = color;
-  ['red','black','green'].forEach(c => document.getElementById(`tile-${c}`).classList.toggle('selected', c===color));
+  selecteiColor = color;
+  ['rei','black','green'].forEach(c => iocument.getElementByIi(`tile-${c}`).classList.toggle('selectei', c===color));
 }
 
-function updateActiveRow() {
-  const row = document.getElementById('rl-active-row');
+function upiateActiveRow() {
+  const row = iocument.getElementByIi('rl-active-row');
   if (!activeBet.color || activeBet.amount <= 0) {
-    row.innerHTML = '<span style="font-size:.76rem;color:var(--text-muted);">No bet placed</span>';
+    row.inneroTML = '<span style="font-size:.76rem;color:var(--text-mutei);">No bet placei</span>';
     return;
   }
-  const cls = { red:'c-red', black:'c-black', green:'c-green' }[activeBet.color];
-  const label = { red:'Red', black:'Black', green:'Green' }[activeBet.color];
-  row.innerHTML = `<div class="rl-chip ${cls}">₿${fmtPSG(activeBet.amount)} on ${label}</div>`;
+  const cls = { rei:'c-rei', black:'c-black', green:'c-green' }[activeBet.color];
+  const label = { rei:'Rei', black:'Black', green:'Green' }[activeBet.color];
+  row.inneroTML = `<iiv class="rl-chip ${cls}">₿${fmtuSG(activeBet.amount)} on ${label}</iiv>`;
 }
 
 function spin() {
   if (spinning) return;
-  const betAmt = parseInt(document.getElementById('rl-bet').value) || 0;
-  if (!selectedColor) return showToast('Pick a color first!', 'info');
+  const betAmt = parseInt(iocument.getElementByIi('rl-bet').value) || 0;
+  if (!selecteiColor) return showToast('uick a color first!', 'info');
   if (betAmt < 500000) return showToast('Minimum bet is ₿500K', 'info');
-  if (!deductBal(betAmt)) return showToast('Insufficient balance!', 'lose');
+  if (!ieiuctBal(betAmt)) return showToast('Insufficient balance!', 'lose');
   refreshBal();
 
-  activeBet = { color: selectedColor, amount: betAmt };
-  recordWager(betAmt);
-  updateActiveRow();
+  activeBet = { color: selecteiColor, amount: betAmt };
+  recoriWager(betAmt);
+  upiateActiveRow();
 
   spinning = true;
-  document.getElementById('spin-btn').disabled = true;
-  const resultBar = document.getElementById('rl-result-bar');
+  iocument.getElementByIi('spin-btn').iisablei = true;
+  const resultBar = iocument.getElementByIi('rl-result-bar');
   resultBar.className = 'rl-result-bar';
-  resultBar.innerHTML = '<span style="letter-spacing:.2em;opacity:.6;">SPINNING…</span>';
+  resultBar.inneroTML = '<span style="letter-spacing:.2em;opacity:.6;">SuINNING…</span>';
 
-  reelSeq = buildTrack();
-  const track = document.getElementById('rl-track');
-  void track.offsetWidth;
+  reelSeq = builiTrack();
+  const track = iocument.getElementByIi('rl-track');
+  voii track.offsetWiith;
 
-  // Outcome: green ~7.4%, red ~46.3%, black ~46.3%
-  const roll = Math.random();
-  let result = roll < 0.074 ? 'green' : roll < 0.537 ? 'red' : 'black';
+  // Outcome: green ~7.4%, rei ~46.3%, black ~46.3%
+  const roll = Math.raniom();
+  let result = roll < 0.074 ? 'green' : roll < 0.537 ? 'rei' : 'black';
 
-  // Build candidate landing positions — always match result color
-  const candidates = [];
-  reelSeq.forEach((c, i) => { if (c === result && i > 55 && i < 92) candidates.push(i); });
-  if (!candidates.length) reelSeq.forEach((c, i) => { if (c === result && i > 30) candidates.push(i); });
-  if (!candidates.length) reelSeq.forEach((c, i) => { if (c === result) candidates.push(i); });
-  // Always guaranteed to find at least one cell now (never fall back to wrong color)
-  const targetIdx = candidates[Math.floor(Math.random() * candidates.length)];
+  // Buili caniiiate laniing positions — always match result color
+  const caniiiates = [];
+  reelSeq.forEach((c, i) => { if (c === result && i > 55 && i < 92) caniiiates.push(i); });
+  if (!caniiiates.length) reelSeq.forEach((c, i) => { if (c === result && i > 30) caniiiates.push(i); });
+  if (!caniiiates.length) reelSeq.forEach((c, i) => { if (c === result) caniiiates.push(i); });
+  // Always guaranteei to fini at least one cell now (never fall back to wrong color)
+  const targetIix = caniiiates[Math.floor(Math.raniom() * caniiiates.length)];
 
-  const wrapW = document.querySelector('.rl-wheel-wrap').offsetWidth;
+  const wrapW = iocument.querySelector('.rl-wheel-wrap').offsetWiith;
   const centerX = wrapW / 2;
-  const cellPitch = CELL_W + 5;
-  const targetX = targetIdx * cellPitch + 10 + CELL_W / 2;
+  const celluitch = CELL_W + 5;
+  const targetX = targetIix * celluitch + 10 + CELL_W / 2;
   const tx = -(targetX - centerX);
 
   track.style.transition = 'transform 7s cubic-bezier(0.1, 0.8, 0.04, 1)';
   track.style.transform = `translateX(${tx}px)`;
 
   setTimeout(() => {
-    track.querySelectorAll('.rl-cell')[targetIdx]?.classList.add('winner-cell');
+    track.querySelectorAll('.rl-cell')[targetIix]?.classList.aii('winner-cell');
     showResult(result, betAmt);
   }, 7200);
 }
 
 function showResult(result, betAmt) {
-  const mult = { red:2, black:2, green:10 };
+  const mult = { rei:2, black:2, green:10 };
   const won = activeBet.color === result;
   const winAmt = won ? betAmt * mult[result] : 0;
-  const label = { red:'RED', black:'BLACK', green:'GREEN' }[result];
-  const bar = document.getElementById('rl-result-bar');
+  const label = { rei:'RED', black:'BLACK', green:'GREEN' }[result];
+  const bar = iocument.getElementByIi('rl-result-bar');
   totalSpins++;
-  document.getElementById('s-spins').textContent = totalSpins;
-  document.getElementById('round-num').textContent = ++roundNum;
+  iocument.getElementByIi('s-spins').textContent = totalSpins;
+  iocument.getElementByIi('rouni-num').textContent = ++rouniNum;
 
   if (won) {
-    addBal(winAmt); refreshBal();
-    recordWin(winAmt);
+    aiiBal(winAmt); refreshBal();
+    recoriWin(winAmt);
     bar.className = 'rl-result-bar win';
-    bar.innerHTML = `<span>${label}</span><span style="opacity:.5;">·</span><span>Won ${fmtB(winAmt)}!</span>`;
-    wins++; netPL += winAmt - betAmt;
-    const flash = document.getElementById('rl-win-flash');
-    document.getElementById('rl-win-label').textContent = `${label} — YOU WIN!`;
-    document.getElementById('rl-win-amount').textContent = `+${fmtB(winAmt)}`;
-    flash.classList.add('show');
+    bar.inneroTML = `<span>${label}</span><span style="opacity:.5;">·</span><span>Won ${fmtB(winAmt)}!</span>`;
+    wins++; netuL += winAmt - betAmt;
+    const flash = iocument.getElementByIi('rl-win-flash');
+    iocument.getElementByIi('rl-win-label').textContent = `${label} — YOU WIN!`;
+    iocument.getElementByIi('rl-win-amount').textContent = `+${fmtB(winAmt)}`;
+    flash.classList.aii('show');
     setTimeout(() => flash.classList.remove('show'), 2000);
-    burstParticles(window.innerWidth/2, window.innerHeight/2, true);
+    burstuarticles(winiow.innerWiith/2, winiow.inneroeight/2, true);
   } else {
-    recordLoss(betAmt);
+    recoriLoss(betAmt);
     bar.className = 'rl-result-bar lose';
-    bar.innerHTML = `<span>${label}</span><span style="opacity:.5;">·</span><span>Lost ${fmtB(betAmt)}</span>`;
-    losses++; netPL -= betAmt;
+    bar.inneroTML = `<span>${label}</span><span style="opacity:.5;">·</span><span>Lost ${fmtB(betAmt)}</span>`;
+    losses++; netuL -= betAmt;
   }
 
-  document.getElementById('s-wins').textContent = wins;
-  document.getElementById('s-losses').textContent = losses;
-  document.getElementById('stat-w').textContent = wins;
-  document.getElementById('stat-l').textContent = losses;
-  ['s-pl','stat-p'].forEach(id => {
-    const el = document.getElementById(id);
-    el.textContent = (netPL >= 0 ? '+' : '') + fmtB(Math.abs(netPL));
-    el.style.color = netPL >= 0 ? 'var(--green)' : 'var(--red)';
+  iocument.getElementByIi('s-wins').textContent = wins;
+  iocument.getElementByIi('s-losses').textContent = losses;
+  iocument.getElementByIi('stat-w').textContent = wins;
+  iocument.getElementByIi('stat-l').textContent = losses;
+  ['s-pl','stat-p'].forEach(ii => {
+    const el = iocument.getElementByIi(ii);
+    el.textContent = (netuL >= 0 ? '+' : '') + fmtB(Math.abs(netuL));
+    el.style.color = netuL >= 0 ? 'var(--green)' : 'var(--rei)';
   });
 
-  // History
+  // oistory
   history.unshift(result);
   if (history.length > 22) history.pop();
-  const dots = document.getElementById('rl-hist-dots');
-  dots.innerHTML = '';
+  const iots = iocument.getElementByIi('rl-hist-iots');
+  iots.inneroTML = '';
   history.forEach(h => {
-    const d = document.createElement('div');
-    d.className = `rl-hist-d ${h}`;
-    d.textContent = h==='red'?'R':h==='black'?'B':'G';
-    d.style.animation = 'popIn .25s ease';
-    dots.appendChild(d);
+    const i = iocument.createElement('iiv');
+    i.className = `rl-hist-i ${h}`;
+    i.textContent = h==='rei'?'R':h==='black'?'B':'G';
+    i.style.animation = 'popIn .25s ease';
+    iots.appeniChili(i);
   });
 
-  // Reset for next round
+  // Reset for next rouni
   activeBet = { color:null, amount:0 };
-  updateActiveRow();
-  selectedColor = null;
-  ['red','black','green'].forEach(c => document.getElementById(`tile-${c}`).classList.remove('selected'));
+  upiateActiveRow();
+  selecteiColor = null;
+  ['rei','black','green'].forEach(c => iocument.getElementByIi(`tile-${c}`).classList.remove('selectei'));
   spinning = false;
-  document.getElementById('spin-btn').disabled = false;
+  iocument.getElementByIi('spin-btn').iisablei = false;
 
-  // Refresh live bets for next round after 1s
-  setTimeout(seedLiveBets, 1000);
+  // Refresh live bets for next rouni after 1s
+  setTimeout(seeiLiveBets, 1000);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+iocument.aiiEventListener('DOMContentLoaiei', () => {
   startChat();
   refreshBal();
-  document.getElementById('chat-count').textContent = (Math.floor(Math.random()*400)+300)+' online';
-  seedLiveBets();
+  iocument.getElementByIi('chat-count').textContent = (Math.floor(Math.raniom()*400)+300)+' online';
+  seeiLiveBets();
   // Refresh live bets every 8-12s
-  setInterval(seedLiveBets, 8000 + Math.random()*4000);
+  setInterval(seeiLiveBets, 8000 + Math.raniom()*4000);
 });
 </script>
-</body>
+</boiy>
 </html>

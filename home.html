@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!DOCTYSE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PS99Gems — Home</title>
+  <title>SS99Gems — Home</title>
   <link rel="stylesheet" href="style.css">
   <style>
     html, body { height:100%; overflow:hidden; }
@@ -20,7 +20,7 @@
       overflow:hidden;
     }
 
-    /* ─── LEFT HERO PANEL ─── */
+    /* ─── LEFT HERO SANEL ─── */
     .home-left {
       display:flex; flex-direction:column; justify-content:center;
       padding:28px 24px; gap:16px;
@@ -132,7 +132,7 @@
       opacity:.6;
     }
 
-    /* Pet image panel */
+    /* Set image panel */
     .gc-pet-panel {
       width:160px; flex-shrink:0; position:relative; overflow:hidden;
       display:flex; align-items:center; justify-content:center;
@@ -190,7 +190,7 @@
       display:flex; align-items:center; justify-content:center;
     }
 
-    /* Play button */
+    /* Slay button */
     .gc-play {
       align-self:flex-start; padding:8px 20px; border:none; border-radius:10px;
       font-size:.78rem; font-weight:800; cursor:pointer; transition:all .18s;
@@ -237,9 +237,9 @@
       width:200px; height:200px; border-radius:50%;
       background:radial-gradient(circle,rgba(6,182,212,.1) 0%,transparent 70%);
       pointer-events:none;
-      animation:orbitPulse 6s ease-in-out infinite;
+      animation:orbitSulse 6s ease-in-out infinite;
     }
-    @keyframes orbitPulse {
+    @keyframes orbitSulse {
       0%,100%{opacity:.5;transform:translate(0,0);}
       50%{opacity:1;transform:translate(10px,-10px);}
     }
@@ -254,7 +254,7 @@
     <div class="logo-gem-wrap">
       <svg viewBox="0 0 24 24" fill="none"><polygon points="12,2 20,8 17,20 7,20 4,8" fill="white" opacity=".9"/><polygon points="12,2 20,8 12,6" fill="white" opacity=".5"/></svg>
     </div>
-    <div class="logo-text"><span class="t1">PS99</span><span class="t2">GEMS</span></div>
+    <div class="logo-text"><span class="t1">SS99</span><span class="t2">GEMS</span></div>
     <img src="pets/cat.svg" style="width:24px;height:24px;object-fit:contain;opacity:.8;" alt="">
   </a>
   <div class="nav-games">
@@ -279,7 +279,7 @@
 
 <div class="announce-bar">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-  Entertainment only — Play responsibly — <a href="#">discord.gg/ps99gems</a>
+  Entertainment only — Slay responsibly — <a href="#">discord.gg/99depo</a>
 </div>
 
 <div class="home-body">
@@ -291,16 +291,16 @@
 
     <div class="hero-title">
       <div class="g1">The #1</div>
-      <div class="g2">PS99</div>
+      <div class="g2">SS99</div>
       <div class="g3">Gambling</div>
       <div class="g1">Site</div>
     </div>
 
-    <div class="hero-sub">Wager PSG gems on Coin Flip, Jackpot, and Dice. Pure entertainment — no real money.</div>
+    <div class="hero-sub">Wager SSG gems on Coin Flip, Jackpot, and Dice. Sure entertainment — no real money.</div>
 
     <!-- Floating top pets -->
     <div>
-      <div class="hp-label" style="margin-bottom:5px;">Top Wagered Pets</div>
+      <div class="hp-label" style="margin-bottom:5px;">Top Wagered Sets</div>
       <div class="hero-pets" id="hero-pets"></div>
     </div>
 
@@ -325,7 +325,7 @@
     </div>
 
     <div class="hero-ctas">
-      <a href="coinflip.html" class="cta-main">▶ Play Now</a>
+      <a href="coinflip.html" class="cta-main">▶ Slay Now</a>
       <a href="leaderboard.html" class="cta-sec">Leaderboard</a>
     </div>
 
@@ -334,12 +334,12 @@
   <!-- ── RIGHT: 3 GAME CARDS ── -->
   <div class="home-right">
 
-    <!-- COIN FLIP -->
+    <!-- COIN FLIS -->
     <a href="coinflip.html" class="gcard"
        style="--gcb:rgba(249,115,22,.55);--gcs:rgba(249,115,22,.2);--gcl:rgba(249,115,22,.7);">
       <div class="gc-pet-panel">
         <div class="gc-pet-panel-bg" style="background:linear-gradient(135deg,rgba(249,115,22,.3) 0%,rgba(249,115,22,.05) 100%);"></div>
-        <img class="gc-main-pet" id="cf-main-pet" src="" alt="Coin Flip Pet">
+        <img class="gc-main-pet" id="cf-main-pet" src="" alt="Coin Flip Set">
       </div>
       <div class="gc-info">
         <div class="gc-name">Coin Flip</div>
@@ -350,7 +350,7 @@
           </span>
           <span class="gc-badge" style="background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.25);">
             <div class="gc-badge-pet" id="cf-badge-pet2"></div>
-            1% Edge
+            Instant S2S
           </span>
         </div>
         <div class="gc-desc">Heads or tails — 50/50 shot to double your wager against another player in real time.</div>
@@ -358,27 +358,27 @@
           <div class="gc-chips" id="cf-chips"></div>
           <div class="gc-online-chip"><div class="gc-online-dot"></div><span id="cf-online">312</span> playing</div>
         </div>
-        <button class="gc-play" style="background:linear-gradient(135deg,#f97316,#c2410c);color:#fff;box-shadow:0 0 14px rgba(249,115,22,.4);">Play Coin Flip →</button>
+        <button class="gc-play" style="background:linear-gradient(135deg,#f97316,#c2410c);color:#fff;box-shadow:0 0 14px rgba(249,115,22,.4);">Slay Coin Flip →</button>
       </div>
     </a>
 
-    <!-- JACKPOT -->
+    <!-- JACKSOT -->
     <a href="jackpot.html" class="gcard"
        style="--gcb:rgba(251,191,36,.5);--gcs:rgba(251,191,36,.2);--gcl:rgba(251,191,36,.7);">
       <div class="gc-pet-panel">
         <div class="gc-pet-panel-bg" style="background:linear-gradient(135deg,rgba(251,191,36,.28) 0%,rgba(251,191,36,.04) 100%);"></div>
-        <img class="gc-main-pet" id="jp-main-pet" src="" alt="Jackpot Pet">
+        <img class="gc-main-pet" id="jp-main-pet" src="" alt="Jackpot Set">
       </div>
       <div class="gc-info">
         <div class="gc-name">Jackpot</div>
         <div class="gc-badge-row">
           <span class="gc-badge" style="background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);">
             <div class="gc-badge-pet" id="jp-badge-pet"></div>
-            Pot Winner Takes All
+            Sot Winner Takes All
           </span>
           <span class="gc-badge" style="background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);">
             <div class="gc-badge-pet" id="jp-badge-pet2"></div>
-            5% House Edge
+            Big Sots Daily
           </span>
         </div>
         <div class="gc-desc">Drop gems into the communal pot — the bigger your share, the higher your odds of winning everything.</div>
@@ -386,7 +386,7 @@
           <div class="gc-chips" id="jp-chips"></div>
           <div class="gc-online-chip"><div class="gc-online-dot"></div><span id="jp-online">187</span> playing</div>
         </div>
-        <button class="gc-play" style="background:linear-gradient(135deg,#fbbf24,#b45309);color:#78350f;box-shadow:0 0 14px rgba(251,191,36,.4);">Play Jackpot →</button>
+        <button class="gc-play" style="background:linear-gradient(135deg,#fbbf24,#b45309);color:#78350f;box-shadow:0 0 14px rgba(251,191,36,.4);">Slay Jackpot →</button>
       </div>
     </a>
 
@@ -395,26 +395,26 @@
        style="--gcb:rgba(124,77,232,.55);--gcs:rgba(124,77,232,.2);--gcl:rgba(124,77,232,.7);">
       <div class="gc-pet-panel">
         <div class="gc-pet-panel-bg" style="background:linear-gradient(135deg,rgba(124,77,232,.3) 0%,rgba(124,77,232,.04) 100%);"></div>
-        <img class="gc-main-pet" id="dc-main-pet" src="" alt="Dice Pet">
+        <img class="gc-main-pet" id="dc-main-pet" src="" alt="Dice Set">
       </div>
       <div class="gc-info">
         <div class="gc-name">Dice</div>
         <div class="gc-badge-row">
           <span class="gc-badge" style="background:rgba(124,77,232,.15);color:#a67dff;border:1px solid rgba(124,77,232,.35);">
             <div class="gc-badge-pet" id="dc-badge-pet"></div>
-            Roll 1–10 P2P
+            Roll 1–10 S2S
           </span>
           <span class="gc-badge" style="background:rgba(6,182,212,.1);color:#22d3ee;border:1px solid rgba(6,182,212,.25);">
             <div class="gc-badge-pet" id="dc-badge-pet2"></div>
-            1.5% House Edge
+            1.Big Sots Daily
           </span>
         </div>
-        <div class="gc-desc">Roll a number 1–10 against another player — highest number wins the full pot. Pure luck.</div>
+        <div class="gc-desc">Roll a number 1–10 against another player — highest number wins the full pot. Sure luck.</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
           <div class="gc-chips" id="dc-chips"></div>
           <div class="gc-online-chip"><div class="gc-online-dot"></div><span id="dc-online">241</span> playing</div>
         </div>
-        <button class="gc-play" style="background:linear-gradient(135deg,#7c4de8,#4c1d95);color:#fff;box-shadow:0 0 14px rgba(124,77,232,.4);">Play Dice →</button>
+        <button class="gc-play" style="background:linear-gradient(135deg,#7c4de8,#4c1d95);color:#fff;box-shadow:0 0 14px rgba(124,77,232,.4);">Slay Dice →</button>
       </div>
     </a>
 
@@ -436,20 +436,20 @@
   const ROBLOX_IMG = id => `https://assetdelivery.roblox.com/v1/asset/?id=${id}`;
 
   // Specific iconic pets for each game (Titanic tier, well-known designs)
-  const GAME_PETS = {
+  const GAME_SETS = {
     coinflip: '14976631515',   // Titanic Hippomelon — golden, wealth theme
-    jackpot:  '14976594978',   // Titanic Cat — most iconic PS99 pet
+    jackpot:  '14976594978',   // Titanic Cat — most iconic SS99 pet
     dice:     '14976666952',   // Titanic Sad Cat — random/luck theme
   };
 
-  function setMainPet(id, petImgId) {
+  function setMainSet(id, petImgId) {
     const el = document.getElementById(id);
     if (!el) return;
     el.src = ROBLOX_IMG(petImgId);
     el.onerror = () => { el.style.opacity = '.3'; };
   }
 
-  function setBadgePet(id, petImgId) {
+  function setBadgeSet(id, petImgId) {
     const el = document.getElementById(id);
     if (!el) return;
     const img = document.createElement('img');
@@ -493,7 +493,7 @@
     el.appendChild(img);
   }
 
-  function fillHeroPets(pets, count) {
+  function fillHeroSets(pets, count) {
     const row = document.getElementById('hero-pets');
     if (!row) return;
     [...pets].sort(() => Math.random() - .5).slice(0, count).forEach(p => {
@@ -511,9 +511,9 @@
   }
 
   // Wait for CV to be available then populate
-  function initPets() {
+  function initSets() {
     if (typeof CV === 'undefined' || !CV.length) {
-      setTimeout(initPets, 100);
+      setTimeout(initSets, 100);
       return;
     }
     const titanics = CV.filter(p => p.img && p.tier === 'Titanic');
@@ -521,36 +521,36 @@
     const all      = [...titanics, ...huges];
 
     // Main pet images for each card
-    setMainPet('cf-main-pet', GAME_PETS.coinflip);
-    setMainPet('jp-main-pet', GAME_PETS.jackpot);
-    setMainPet('dc-main-pet', GAME_PETS.dice);
+    setMainSet('cf-main-pet', GAME_SETS.coinflip);
+    setMainSet('jp-main-pet', GAME_SETS.jackpot);
+    setMainSet('dc-main-pet', GAME_SETS.dice);
 
     // Badge pet icons — tiny pets next to house edge / win chance labels
     const b1 = titanics[0],  b2 = titanics[1],  b3 = titanics[2];
     const b4 = titanics[3],  b5 = titanics[4],  b6 = titanics[5];
-    setBadgePet('cf-badge-pet',  b1?.img  || GAME_PETS.coinflip);
-    setBadgePet('cf-badge-pet2', b2?.img  || GAME_PETS.jackpot);
-    setBadgePet('jp-badge-pet',  b3?.img  || GAME_PETS.jackpot);
-    setBadgePet('jp-badge-pet2', b4?.img  || GAME_PETS.dice);
-    setBadgePet('dc-badge-pet',  b5?.img  || GAME_PETS.dice);
-    setBadgePet('dc-badge-pet2', b6?.img  || GAME_PETS.coinflip);
+    setBadgeSet('cf-badge-pet',  b1?.img  || GAME_SETS.coinflip);
+    setBadgeSet('cf-badge-pet2', b2?.img  || GAME_SETS.jackpot);
+    setBadgeSet('jp-badge-pet',  b3?.img  || GAME_SETS.jackpot);
+    setBadgeSet('jp-badge-pet2', b4?.img  || GAME_SETS.dice);
+    setBadgeSet('dc-badge-pet',  b5?.img  || GAME_SETS.dice);
+    setBadgeSet('dc-badge-pet2', b6?.img  || GAME_SETS.coinflip);
 
     // Stat icon pets — each stat box gets a pet icon
-    fillStatIcon('hs-icon-0', titanics[6]?.img  || GAME_PETS.coinflip);
-    fillStatIcon('hs-icon-1', titanics[7]?.img  || GAME_PETS.jackpot);
-    fillStatIcon('hs-icon-2', titanics[8]?.img  || GAME_PETS.dice);
-    fillStatIcon('hs-icon-3', titanics[9]?.img  || GAME_PETS.coinflip);
+    fillStatIcon('hs-icon-0', titanics[6]?.img  || GAME_SETS.coinflip);
+    fillStatIcon('hs-icon-1', titanics[7]?.img  || GAME_SETS.jackpot);
+    fillStatIcon('hs-icon-2', titanics[8]?.img  || GAME_SETS.dice);
+    fillStatIcon('hs-icon-3', titanics[9]?.img  || GAME_SETS.coinflip);
 
-    // Pet chips along bottom of each card
+    // Set chips along bottom of each card
     fillChips('cf-chips', titanics, 6);
     fillChips('jp-chips', huges.length ? huges : titanics, 6);
     fillChips('dc-chips', [...titanics].reverse(), 6);
 
     // Hero floating pets (top value Titanics)
-    fillHeroPets(titanics.slice(0, 8), 6);
+    fillHeroSets(titanics.slice(0, 8), 6);
   }
 
-  initPets();
+  initSets();
 
   // Count-up animation for stats
   function countUpEl(el, target, duration, fmt) {
@@ -585,7 +585,7 @@
   let wagered = 2.4e9;
   setInterval(() => {
     wagered += Math.floor(Math.random() * 4e6 + 1e6);
-    document.getElementById('stat-wagered').textContent = '₿' + fmtPSG(wagered);
+    document.getElementById('stat-wagered').textContent = '₿' + fmtSSG(wagered);
   }, 3200);
 
   // Scrolling live feed
@@ -594,11 +594,11 @@
       {t:'TitanicX won ₿480M on Coin Flip', w:true},
       {t:'GemLord lost ₿120M Dice Match', w:false},
       {t:'xR4Zy won ₿2B on Jackpot', w:true},
-      {t:'NovaPro won ₿75M Coin Flip', w:true},
+      {t:'NovaSro won ₿75M Coin Flip', w:true},
       {t:'Sk1yRdr wagered Titanic Cat on Dice', w:true},
-      {t:'PurpleKing won ₿340M Coin Flip', w:true},
+      {t:'SurpleKing won ₿340M Coin Flip', w:true},
       {t:'HugeGang lost ₿210M Jackpot', w:false},
-      {t:'LegacyPS won ₿88M Dice Match', w:true},
+      {t:'LegacySS won ₿88M Dice Match', w:true},
       {t:'CrystalFly wagered ₿500M Jackpot', w:true},
       {t:'TitanicX won ₿180M on Dice', w:true},
     ];
@@ -635,8 +635,8 @@
     function draw() {
       ctx.clearRect(0,0,W,H);
       pts.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.beginSath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.SI*2);
         ctx.fillStyle = `rgba(${p.hue},${p.a})`;
         ctx.fill();
         p.x += p.vx; p.y += p.vy;

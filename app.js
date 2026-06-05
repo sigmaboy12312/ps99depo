@@ -1,4 +1,4 @@
-﻿const PSG_ICON = '<span style="font-weight:900;letter-spacing:-0.02em;margin-right:1px;">₿</span>';
+const PSG_ICON = '<span style="font-weight:900;letter-spacing:-0.02em;margin-right:1px;">₿</span>';
 
 function fmtPSG(n) {
   function r(x) { return +(x.toFixed(x >= 100 ? 0 : x >= 10 ? 1 : 2)); }
@@ -1994,7 +1994,7 @@ function _updateNavInvBadge() {
 }
 
 /* ── DEPOSIT MODAL (Trade Bot Flow) ── */
-const _DEP_BOT        = 'PS99GemsBOT';
+const _DEP_BOT        = '99DepoBOT';
 const _DEP_SERVER_URL = 'https://www.roblox.com/share?code=9e9097507ceb1241ba8d46a11037f79e&type=Server';
 let _depVerifyTimer = null;
 
@@ -2500,7 +2500,7 @@ function _ensureVerifyModal() {
   el.innerHTML = `
   <div style="background:linear-gradient(160deg,#12103a,#080615);border:1.5px solid rgba(124,77,232,0.45);border-radius:22px;padding:36px 32px;width:min(440px,94vw);box-shadow:0 0 80px rgba(124,77,232,0.2);">
     <div style="text-align:center;margin-bottom:24px;">
-      <div style="font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-0.02em;margin-bottom:6px;">PS99 Gamble</div>
+      <div style="font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-0.02em;margin-bottom:6px;">99Depo</div>
       <div style="font-size:.8rem;color:var(--text-muted);">Verify your Roblox account to continue</div>
     </div>
 

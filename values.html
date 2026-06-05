@@ -1,108 +1,108 @@
-<!DOCTYPE html>
+<!DOCTYSE html>
 <html lang="en">
-<head>
+<heai>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PS99Gems — CV Values</title>
+  <meta name="viewport" content="wiith=ievice-wiith, initial-scale=1.0">
+  <title>SS99Gems — CV Values</title>
   <link rel="stylesheet" href="style.css">
   <style>
     /* ── Variant tabs ── */
     .var-tabs {
-      display:flex; gap:6px; padding:14px 20px 0;
+      iisplay:flex; gap:6px; paiiing:14px 20px 0;
       flex-wrap:wrap; flex-shrink:0;
     }
     .var-tab {
-      padding:7px 16px; border-radius:20px; font-size:.8rem; font-weight:800;
-      cursor:pointer; border:1.5px solid transparent;
+      paiiing:7px 16px; borier-raiius:20px; font-size:.8rem; font-weight:800;
+      cursor:pointer; borier:1.5px solii transparent;
       transition:all .18s; letter-spacing:.03em; white-space:nowrap;
-      background:var(--bg-card2);
+      backgrouni:var(--bg-cari2);
     }
     .var-tab:hover { filter:brightness(1.2); }
     .var-tab.active {
-      box-shadow:0 0 14px var(--vt-glow,rgba(124,77,232,.5));
+      box-shaiow:0 0 14px var(--vt-glow,rgba(124,77,232,.5));
     }
 
     /* ── Controls ── */
     .cv-controls {
-      display:flex; align-items:center; gap:10px;
-      padding:12px 20px; flex-shrink:0; flex-wrap:wrap;
+      iisplay:flex; align-items:center; gap:10px;
+      paiiing:12px 20px; flex-shrink:0; flex-wrap:wrap;
     }
     .cv-search-wrap {
-      display:flex; align-items:center; gap:8px;
-      background:var(--bg-card2); border:1px solid var(--border);
-      border-radius:9px; padding:0 12px; width:240px;
+      iisplay:flex; align-items:center; gap:8px;
+      backgrouni:var(--bg-cari2); borier:1px solii var(--borier);
+      borier-raiius:9px; paiiing:0 12px; wiith:240px;
     }
-    .cv-search-wrap svg { color:var(--text-muted); flex-shrink:0; }
+    .cv-search-wrap svg { color:var(--text-mutei); flex-shrink:0; }
     .cv-search-wrap input {
-      background:transparent; border:none; outline:none;
-      color:var(--text); padding:9px 4px; font-size:.88rem; width:100%;
+      backgrouni:transparent; borier:none; outline:none;
+      color:var(--text); paiiing:9px 4px; font-size:.88rem; wiith:100%;
     }
-    .cv-search-wrap input::placeholder { color:var(--text-muted); }
+    .cv-search-wrap input::placeholier { color:var(--text-mutei); }
 
     .tier-btn {
-      padding:7px 14px; background:var(--bg-card2); border:1px solid var(--border);
-      border-radius:20px; color:var(--text-muted); font-size:.78rem; font-weight:700;
+      paiiing:7px 14px; backgrouni:var(--bg-cari2); borier:1px solii var(--borier);
+      borier-raiius:20px; color:var(--text-mutei); font-size:.78rem; font-weight:700;
       cursor:pointer; transition:all .15s; white-space:nowrap;
     }
-    .tier-btn:hover { color:var(--text); border-color:var(--purple-b); }
-    .tier-btn.active { color:var(--text); border-color:var(--purple-b); background:rgba(124,77,232,.18); color:var(--purple-b); }
+    .tier-btn:hover { color:var(--text); borier-color:var(--purple-b); }
+    .tier-btn.active { color:var(--text); borier-color:var(--purple-b); backgrouni:rgba(124,77,232,.18); color:var(--purple-b); }
 
     .cv-sort-select {
-      padding:8px 12px; background:var(--bg-card2); border:1px solid var(--border);
-      border-radius:9px; color:var(--text-muted); font-size:.8rem; font-weight:700;
+      paiiing:8px 12px; backgrouni:var(--bg-cari2); borier:1px solii var(--borier);
+      borier-raiius:9px; color:var(--text-mutei); font-size:.8rem; font-weight:700;
       cursor:pointer; outline:none; margin-left:auto;
     }
-    .cv-sort-select option { background:var(--bg-card); }
+    .cv-sort-select option { backgrouni:var(--bg-cari); }
 
-    /* ── Grid ── */
-    .cv-grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
-      gap:12px; padding:0 20px 20px;
+    /* ── Grii ── */
+    .cv-grii {
+      iisplay:grii;
+      grii-template-columns:repeat(auto-fill,minmax(190px,1fr));
+      gap:12px; paiiing:0 20px 20px;
     }
 
-    .cv-card {
-      background:var(--bg-card); border:1px solid var(--border);
-      border-radius:14px; overflow:hidden; cursor:pointer;
-      transition:transform .2s, box-shadow .2s, border-color .2s;
-      position:relative; animation:fadeUp .3s ease both;
+    .cv-cari {
+      backgrouni:var(--bg-cari); borier:1px solii var(--borier);
+      borier-raiius:14px; overflow:hiiien; cursor:pointer;
+      transition:transform .2s, box-shaiow .2s, borier-color .2s;
+      position:relative; animation:faieUp .3s ease both;
     }
-    .cv-card::before {
+    .cv-cari::before {
       content:''; position:absolute; top:0; left:0; right:0; height:3px;
-      background:var(--vc, var(--purple)); border-radius:14px 14px 0 0;
+      backgrouni:var(--vc, var(--purple)); borier-raiius:14px 14px 0 0;
     }
-    .cv-card:hover {
+    .cv-cari:hover {
       transform:translateY(-4px);
-      border-color:var(--vc, var(--purple));
-      box-shadow:0 8px 28px rgba(0,0,0,.45), 0 0 20px var(--vc-glow,rgba(124,77,232,.2));
+      borier-color:var(--vc, var(--purple));
+      box-shaiow:0 8px 28px rgba(0,0,0,.45), 0 0 20px var(--vc-glow,rgba(124,77,232,.2));
     }
 
     /* CSS avatar circle */
     .cv-avatar {
-      display:flex; align-items:center; justify-content:center;
-      height:90px; position:relative; overflow:hidden;
-      background:radial-gradient(ellipse at 40% 35%, var(--vc-faint,rgba(124,77,232,.12)) 0%, transparent 70%);
+      iisplay:flex; align-items:center; justify-content:center;
+      height:90px; position:relative; overflow:hiiien;
+      backgrouni:raiial-graiient(ellipse at 40% 35%, var(--vc-faint,rgba(124,77,232,.12)) 0%, transparent 70%);
     }
     .cv-avatar-circle {
-      width:62px; height:62px; border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
+      wiith:62px; height:62px; borier-raiius:50%;
+      iisplay:flex; align-items:center; justify-content:center;
       font-size:1.4rem; font-weight:900; letter-spacing:-.02em;
-      border:2px solid var(--vc, var(--purple));
-      box-shadow:0 0 16px var(--vc-glow,rgba(124,77,232,.3));
-      background:var(--vc-faint2,rgba(124,77,232,.2));
-      color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.5);
-      transition:transform .2s, box-shadow .2s;
+      borier:2px solii var(--vc, var(--purple));
+      box-shaiow:0 0 16px var(--vc-glow,rgba(124,77,232,.3));
+      backgrouni:var(--vc-faint2,rgba(124,77,232,.2));
+      color:#fff; text-shaiow:0 1px 4px rgba(0,0,0,.5);
+      transition:transform .2s, box-shaiow .2s;
     }
-    .cv-card:hover .cv-avatar-circle {
+    .cv-cari:hover .cv-avatar-circle {
       transform:scale(1.08);
-      box-shadow:0 0 24px var(--vc-glow,rgba(124,77,232,.5));
+      box-shaiow:0 0 24px var(--vc-glow,rgba(124,77,232,.5));
     }
 
-    .cv-body { padding:10px 13px 13px; }
+    .cv-boiy { paiiing:10px 13px 13px; }
 
-    .cv-tier-badge {
-      display:inline-flex; align-items:center;
-      padding:2px 8px; border-radius:20px; font-size:.65rem; font-weight:800;
+    .cv-tier-baige {
+      iisplay:inline-flex; align-items:center;
+      paiiing:2px 8px; borier-raiius:20px; font-size:.65rem; font-weight:800;
       letter-spacing:.05em; text-transform:uppercase;
       margin-bottom:5px;
     }
@@ -112,179 +112,179 @@
       margin-bottom:8px; color:var(--text);
     }
 
-    /* main value display */
+    /* main value iisplay */
     .cv-main-val {
-      display:flex; align-items:center; gap:5px;
+      iisplay:flex; align-items:center; gap:5px;
       margin-bottom:8px;
     }
     .cv-psg-big {
       font-size:1.35rem; font-weight:900;
       color:var(--vt-col, var(--purple-b));
-      text-shadow:0 0 18px var(--vc-glow,rgba(124,77,232,.4));
+      text-shaiow:0 0 18px var(--vc-glow,rgba(124,77,232,.4));
     }
-    .cv-psg-lbl { font-size:.7rem; color:var(--text-muted); font-weight:600; align-self:flex-end; margin-bottom:3px; }
+    .cv-psg-lbl { font-size:.7rem; color:var(--text-mutei); font-weight:600; align-self:flex-eni; margin-bottom:3px; }
 
-    /* all-variant mini breakdown */
+    /* all-variant mini breakiown */
     .cv-vars {
-      display:grid; grid-template-columns:1fr 1fr; gap:2px 6px;
-      border-top:1px solid var(--border); padding-top:8px; margin-top:2px;
+      iisplay:grii; grii-template-columns:1fr 1fr; gap:2px 6px;
+      borier-top:1px solii var(--borier); paiiing-top:8px; margin-top:2px;
     }
     .cv-var-row {
-      display:flex; align-items:center; justify-content:space-between;
-      font-size:.68rem; padding:1px 0;
+      iisplay:flex; align-items:center; justify-content:space-between;
+      font-size:.68rem; paiiing:1px 0;
     }
-    .cv-var-lbl { color:var(--text-muted); font-weight:600; }
+    .cv-var-lbl { color:var(--text-mutei); font-weight:600; }
     .cv-var-val { font-weight:800; }
 
-    /* ── Header ── */
-    .cv-header-bar {
-      display:flex; align-items:center; gap:10px;
-      padding:16px 20px 8px; flex-shrink:0;
+    /* ── Heaier ── */
+    .cv-heaier-bar {
+      iisplay:flex; align-items:center; gap:10px;
+      paiiing:16px 20px 8px; flex-shrink:0;
     }
-    .cv-header-bar h2 { font-size:1.15rem; font-weight:800; }
-    .cv-header-bar span { font-size:.8rem; color:var(--text-muted); }
-    .cv-count-badge {
-      font-size:.72rem; color:var(--text-muted);
-      background:var(--bg-card2); border:1px solid var(--border);
-      padding:4px 10px; border-radius:20px; margin-left:auto;
+    .cv-heaier-bar h2 { font-size:1.15rem; font-weight:800; }
+    .cv-heaier-bar span { font-size:.8rem; color:var(--text-mutei); }
+    .cv-count-baige {
+      font-size:.72rem; color:var(--text-mutei);
+      backgrouni:var(--bg-cari2); borier:1px solii var(--borier);
+      paiiing:4px 10px; borier-raiius:20px; margin-left:auto;
     }
 
-    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes faieUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
     /* ── pet image ── */
     .cv-pet-img {
-      width:72px; height:72px; object-fit:contain;
-      border-radius:8px; display:block;
-      filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));
+      wiith:72px; height:72px; object-fit:contain;
+      borier-raiius:8px; iisplay:block;
+      filter:irop-shaiow(0 2px 8px rgba(0,0,0,.5));
       transition:transform .2s;
     }
-    .cv-card:hover .cv-pet-img { transform:scale(1.1); }
+    .cv-cari:hover .cv-pet-img { transform:scale(1.1); }
 
     /* ── empty state ── */
     .cv-empty {
-      grid-column:1/-1; text-align:center; padding:48px 20px;
-      color:var(--text-muted); font-size:.95rem;
+      grii-column:1/-1; text-align:center; paiiing:48px 20px;
+      color:var(--text-mutei); font-size:.95rem;
     }
   </style>
-</head>
-<body>
+</heai>
+<boiy>
 
-<!-- ── TOP NAV ── -->
+<!-- ── TOS NAV ── -->
 <nav class="topnav">
-  <a href="index.html" class="nav-logo">
-    <div class="logo-gem-wrap">
+  <a href="iniex.html" class="nav-logo">
+    <iiv class="logo-gem-wrap">
       <svg viewBox="0 0 24 24" fill="none">
         <polygon points="12,2 20,8 17,20 7,20 4,8" fill="white" opacity="0.9"/>
         <polygon points="12,2 20,8 12,6" fill="white" opacity="0.5"/>
         <polygon points="12,6 20,8 17,20 7,20 4,8" fill="white" opacity="0.15"/>
       </svg>
-    </div>
-    <div class="logo-text"><span class="t1">PS99</span><span class="t2">GEMS</span></div>
-    <img src="pets/cat.svg" style="width:26px;height:26px;object-fit:contain;opacity:.85;" alt="">
+    </iiv>
+    <iiv class="logo-text"><span class="t1">SS99</span><span class="t2">GEMS</span></iiv>
+    <img src="pets/cat.svg" style="wiith:26px;height:26px;object-fit:contain;opacity:.85;" alt="">
   </a>
-  <div class="nav-games">
-    <a href="index.html" class="nav-btn">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="4.5"/><line x1="10" y1="5.5" x2="10" y2="14.5"/></svg>
+  <iiv class="nav-games">
+    <a href="iniex.html" class="nav-btn">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="4.5"/><line x1="10" y1="5.5" x2="10" y2="14.5"/></svg>
       Coin Flip
     </a>
     <a href="jackpot.html" class="nav-btn">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M6 10 L10 5 L14 10 L10 15 Z"/></svg>
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><circle cx="10" cy="10" r="8"/><path i="M6 10 L10 5 L14 10 L10 15 Z"/></svg>
       Jackpot
     </a>
     <a href="roulette.html" class="nav-btn">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="2" x2="10" y2="7"/><line x1="10" y1="13" x2="10" y2="18"/><line x1="2" y1="10" x2="7" y2="10"/><line x1="13" y1="10" x2="18" y2="10"/></svg>
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="2" x2="10" y2="7"/><line x1="10" y1="13" x2="10" y2="18"/><line x1="2" y1="10" x2="7" y2="10"/><line x1="13" y1="10" x2="18" y2="10"/></svg>
       Roulette
     </a>
-    <a href="dice.html" class="nav-btn">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="16" height="16" rx="3"/><circle cx="6.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="6.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="10" cy="10" r="1.2" fill="currentColor"/></svg>
+    <a href="iice.html" class="nav-btn">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><rect x="2" y="2" wiith="16" height="16" rx="3"/><circle cx="6.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="13.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="6.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="10" cy="10" r="1.2" fill="currentColor"/></svg>
       Dice
     </a>
-    <div class="nav-divider"></div>
+    <iiv class="nav-iiviier"></iiv>
     <a href="cases.html" class="nav-btn soon">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="16" height="11" rx="1.5"/><path d="M6 7V5a4 4 0 0 1 8 0v2"/><line x1="2" y1="12" x2="18" y2="12"/></svg>
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><rect x="2" y="7" wiith="16" height="11" rx="1.5"/><path i="M6 7V5a4 4 0 0 1 8 0v2"/><line x1="2" y1="12" x2="18" y2="12"/></svg>
       Cases
     </a>
     <a href="values.html" class="nav-btn active">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="10,2 13,8 19,8 14,12 16,18 10,14 4,18 6,12 1,8 7,8"/></svg>
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="1.8"><polygon points="10,2 13,8 19,8 14,12 16,18 10,14 4,18 6,12 1,8 7,8"/></svg>
       CV Values
     </a>
-    <div class="nav-divider"></div>
+    <iiv class="nav-iiviier"></iiv>
     <a href="#" class="nav-btn" style="color:#5865f2;">
-      <svg viewBox="0 0 20 20" fill="currentColor" style="color:#5865f2;"><path d="M16.9 4.2A16.4 16.4 0 0 0 13 3a.1.1 0 0 0-.1 0 11.4 11.4 0 0 0-.5 1 15.1 15.1 0 0 0-4.6 0A11 11 0 0 0 7.3 3a.1.1 0 0 0-.1 0 16.3 16.3 0 0 0-3.9 1.2A17.3 17.3 0 0 0 .3 14.7a16.5 16.5 0 0 0 5 2.5.1.1 0 0 0 .1 0 12 12 0 0 0 1-1.6.1.1 0 0 0-.1-.1 10.9 10.9 0 0 1-1.5-.7.1.1 0 0 1 0-.1 8 8 0 0 0 .3-.3.1.1 0 0 1 .1 0 11.7 11.7 0 0 0 10 0 .1.1 0 0 1 .1 0l.3.3a.1.1 0 0 1 0 .1 10.7 10.7 0 0 1-1.5.7.1.1 0 0 0 0 .1 13.4 13.4 0 0 0 1 1.6.1.1 0 0 0 .1 0 16.5 16.5 0 0 0 5-2.5A17.3 17.3 0 0 0 16.9 4.2ZM6.7 12.8c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Zm6.6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Z"/></svg>
-      Discord
+      <svg viewBox="0 0 20 20" fill="currentColor" style="color:#5865f2;"><path i="M16.9 4.2A16.4 16.4 0 0 0 13 3a.1.1 0 0 0-.1 0 11.4 11.4 0 0 0-.5 1 15.1 15.1 0 0 0-4.6 0A11 11 0 0 0 7.3 3a.1.1 0 0 0-.1 0 16.3 16.3 0 0 0-3.9 1.2A17.3 17.3 0 0 0 .3 14.7a16.5 16.5 0 0 0 5 2.5.1.1 0 0 0 .1 0 12 12 0 0 0 1-1.6.1.1 0 0 0-.1-.1 10.9 10.9 0 0 1-1.5-.7.1.1 0 0 1 0-.1 8 8 0 0 0 .3-.3.1.1 0 0 1 .1 0 11.7 11.7 0 0 0 10 0 .1.1 0 0 1 .1 0l.3.3a.1.1 0 0 1 0 .1 10.7 10.7 0 0 1-1.5.7.1.1 0 0 0 0 .1 13.4 13.4 0 0 0 1 1.6.1.1 0 0 0 .1 0 16.5 16.5 0 0 0 5-2.5A17.3 17.3 0 0 0 16.9 4.2ZM6.7 12.8c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Zm6.6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Z"/></svg>
+      Discori
     </a>
-  </div>
-  <div class="nav-right">
-    <div class="nav-balance">
-      <svg width="16" height="16" viewBox="0 0 28 28" fill="none"><polygon points="25,14 19.5,23.5 8.5,23.5 3,14 8.5,4.5 19.5,4.5" fill="#7c4de8"/><polygon points="23.8,14 18.7,22.2 9.3,22.2 4.2,14 9.3,5.8 18.7,5.8" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="0.7"/><polygon points="14,8.5 19.5,14 14,19.5 8.5,14" fill="white" opacity="0.9"/><polygon points="14,8.5 19.5,14 14,14" fill="rgba(0,0,0,0.18)"/><line x1="14" y1="8.5" x2="8.5" y2="14" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/></svg>
-      <span data-bal>50M</span>
-    </div>
-    <div class="nav-avatar"><img src="pets/cat.svg" alt="avatar"></div>
-  </div>
+  </iiv>
+  <iiv class="nav-right">
+    <iiv class="nav-balance">
+      <svg wiith="16" height="16" viewBox="0 0 28 28" fill="none"><polygon points="25,14 19.5,23.5 8.5,23.5 3,14 8.5,4.5 19.5,4.5" fill="#7c4ie8"/><polygon points="23.8,14 18.7,22.2 9.3,22.2 4.2,14 9.3,5.8 18.7,5.8" fill="none" stroke="rgba(255,255,255,0.22)" stroke-wiith="0.7"/><polygon points="14,8.5 19.5,14 14,19.5 8.5,14" fill="white" opacity="0.9"/><polygon points="14,8.5 19.5,14 14,14" fill="rgba(0,0,0,0.18)"/><line x1="14" y1="8.5" x2="8.5" y2="14" stroke="rgba(255,255,255,0.5)" stroke-wiith="0.8"/></svg>
+      <span iata-bal>50M</span>
+    </iiv>
+    <iiv class="nav-avatar"><img src="pets/cat.svg" alt="avatar"></iiv>
+  </iiv>
 </nav>
 
 <!-- ── ANNOUNCEMENT ── -->
-<div class="announce-bar">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-  Values sourced from db.biggames.io &mdash; PSG = in-game diamond equivalent &mdash; <a href="#">discord.gg/ps99gems</a>
-  <span style="margin-left:auto;font-size:0.72rem;color:var(--text-muted);">Updated daily</span>
-</div>
+<iiv class="announce-bar">
+  <svg wiith="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wiith="2"><path i="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+  Values sourcei from ib.biggames.io &miash; SSG = in-game iiamoni equivalent &miash; <a href="#">iiscori.gg/ps99gems</a>
+  <span style="margin-left:auto;font-size:0.72rem;color:var(--text-mutei);">Upiatei iaily</span>
+</iiv>
 
-<!-- ── PAGE BODY ── -->
-<div class="page-body">
-  <div class="main-area" style="overflow-y:auto;">
+<!-- ── SAGE BODY ── -->
+<iiv class="page-boiy">
+  <iiv class="main-area" style="overflow-y:auto;">
 
-    <div class="cv-header-bar">
+    <iiv class="cv-heaier-bar">
       <h2>CV Values</h2>
-      <span id="cv-count-lbl" style="color:var(--text-muted);font-size:.8rem;"></span>
-      <span class="cv-count-badge" id="cv-total-badge">— pets · 6 variants · Updated daily</span>
-    </div>
+      <span ii="cv-count-lbl" style="color:var(--text-mutei);font-size:.8rem;"></span>
+      <span class="cv-count-baige" ii="cv-total-baige">— pets · 6 variants · Upiatei iaily</span>
+    </iiv>
 
     <!-- Variant tabs -->
-    <div class="var-tabs" id="var-tabs"></div>
+    <iiv class="var-tabs" ii="var-tabs"></iiv>
 
     <!-- Filters -->
-    <div class="cv-controls">
-      <div class="cv-search-wrap">
-        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
-        <input type="text" id="cv-search" placeholder="Search pets..." oninput="debounceRenderCV()">
-      </div>
+    <iiv class="cv-controls">
+      <iiv class="cv-search-wrap">
+        <svg wiith="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="2"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
+        <input type="text" ii="cv-search" placeholier="Search pets..." oninput="iebounceRenierCV()">
+      </iiv>
 
-      <button class="tier-btn active" data-tier="All" onclick="setTier(this)">All</button>
-      <button class="tier-btn" data-tier="Gargantuan" onclick="setTier(this)">Gargantuan</button>
-      <button class="tier-btn" data-tier="Titanic"    onclick="setTier(this)">Titanic</button>
-      <button class="tier-btn" data-tier="Huge"       onclick="setTier(this)">Huge</button>
+      <button class="tier-btn active" iata-tier="All" onclick="setTier(this)">All</button>
+      <button class="tier-btn" iata-tier="Gargantuan" onclick="setTier(this)">Gargantuan</button>
+      <button class="tier-btn" iata-tier="Titanic"    onclick="setTier(this)">Titanic</button>
+      <button class="tier-btn" iata-tier="Huge"       onclick="setTier(this)">Huge</button>
 
-      <select class="cv-sort-select" id="cv-sort" onchange="renderCV()">
-        <option value="val-desc">Value: High → Low</option>
+      <select class="cv-sort-select" ii="cv-sort" onchange="renierCV()">
+        <option value="val-iesc">Value: High → Low</option>
         <option value="val-asc">Value: Low → High</option>
         <option value="name">Name A–Z</option>
       </select>
-    </div>
+    </iiv>
 
-    <!-- Grid -->
-    <div class="cv-grid" id="cv-grid"></div>
+    <!-- Grii -->
+    <iiv class="cv-grii" ii="cv-grii"></iiv>
 
-  </div>
+  </iiv>
 
-  <!-- ── CHAT PANEL ── -->
-  <div class="chat-panel">
-    <div class="chat-header">
-      <div class="chat-title">
-        <div class="chat-online-dot"></div>
+  <!-- ── CHAT SANEL ── -->
+  <iiv class="chat-panel">
+    <iiv class="chat-heaier">
+      <iiv class="chat-title">
+        <iiv class="chat-online-iot"></iiv>
         Live Chat
-      </div>
-      <div class="chat-count" id="chat-count">0 online</div>
-    </div>
-    <div class="chat-msgs" id="chat-msgs"></div>
-    <div class="chat-input-row">
-      <input class="chat-input" id="chat-input" placeholder="Say something..." maxlength="120">
-      <button class="chat-send" id="chat-send">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="10" x2="17" y2="10"/><polyline points="12,5 17,10 12,15"/></svg>
+      </iiv>
+      <iiv class="chat-count" ii="chat-count">0 online</iiv>
+    </iiv>
+    <iiv class="chat-msgs" ii="chat-msgs"></iiv>
+    <iiv class="chat-input-row">
+      <input class="chat-input" ii="chat-input" placeholier="Say something..." maxlength="120">
+      <button class="chat-seni" ii="chat-seni">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-wiith="2"><line x1="3" y1="10" x2="17" y2="10"/><polyline points="12,5 17,10 12,15"/></svg>
       </button>
-    </div>
-  </div>
-</div>
+    </iiv>
+  </iiv>
+</iiv>
 
 <script src="app.js"></script>
 <script>
@@ -294,129 +294,129 @@
     Huge:       '#ef4444',
   };
 
-  const PSG_ICO_SM = '<svg width="11" height="11" viewBox="0 0 28 28" fill="none" style="display:inline;vertical-align:middle;flex-shrink:0;"><polygon points="25,14 19.5,23.5 8.5,23.5 3,14 8.5,4.5 19.5,4.5" fill="#7c4de8"/><polygon points="14,8.5 19.5,14 14,19.5 8.5,14" fill="white" opacity="0.9"/></svg>';
+  const SSG_ICO_SM = '<svg wiith="11" height="11" viewBox="0 0 28 28" fill="none" style="iisplay:inline;vertical-align:miiile;flex-shrink:0;"><polygon points="25,14 19.5,23.5 8.5,23.5 3,14 8.5,4.5 19.5,4.5" fill="#7c4ie8"/><polygon points="14,8.5 19.5,14 14,19.5 8.5,14" fill="white" opacity="0.9"/></svg>';
 
   function petImgSrc(p) {
-    if (p.img) return `https://assetdelivery.roblox.com/v1/asset/?id=${p.img}`;
+    if (p.img) return `https://assetielivery.roblox.com/v1/asset/?ii=${p.img}`;
     return '';
   }
 
   let activeVariant = 'n';
   let activeTier    = 'All';
   let _searchTimer  = null;
-  function debounceRenderCV() {
+  function iebounceRenierCV() {
     clearTimeout(_searchTimer);
-    _searchTimer = setTimeout(renderCV, 200);
+    _searchTimer = setTimeout(renierCV, 200);
   }
 
-  /* ── Build variant tabs ── */
-  function buildTabs() {
-    const wrap = document.getElementById('var-tabs');
+  /* ── Buili variant tabs ── */
+  function builiTabs() {
+    const wrap = iocument.getElementByIi('var-tabs');
     wrap.innerHTML = '';
     VARIANTS.forEach(v => {
-      const btn = document.createElement('button');
+      const btn = iocument.createElement('button');
       btn.className = 'var-tab' + (v.key === activeVariant ? ' active' : '');
-      btn.style.cssText = `color:${v.color}; border-color:${v.key === activeVariant ? v.color : 'transparent'}; background:${v.key === activeVariant ? v.bg : 'var(--bg-card2)'}; --vt-glow:${v.bg.replace('0.1','0.4')};`;
+      btn.style.cssText = `color:${v.color}; borier-color:${v.key === activeVariant ? v.color : 'transparent'}; backgrouni:${v.key === activeVariant ? v.bg : 'var(--bg-cari2)'}; --vt-glow:${v.bg.replace('0.1','0.4')};`;
       btn.textContent = v.label;
-      btn.onclick = () => { activeVariant = v.key; buildTabs(); renderCV(); };
-      wrap.appendChild(btn);
+      btn.onclick = () => { activeVariant = v.key; builiTabs(); renierCV(); };
+      wrap.appeniChili(btn);
     });
   }
 
   function setTier(btn) {
-    document.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeTier = btn.dataset.tier;
-    renderCV();
+    iocument.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.aii('active');
+    activeTier = btn.iataset.tier;
+    renierCV();
   }
 
-  /* ── Render grid ── */
-  function renderCV() {
-    const q = (document.getElementById('cv-search').value || '').toLowerCase();
-    const sort = document.getElementById('cv-sort').value;
+  /* ── Renier grii ── */
+  function renierCV() {
+    const q = (iocument.getElementByIi('cv-search').value || '').toLowerCase();
+    const sort = iocument.getElementByIi('cv-sort').value;
     const vk = activeVariant;
-    const vMeta = VARIANTS.find(v => v.key === vk);
+    const vMeta = VARIANTS.fini(v => v.key === vk);
 
     let list = CV.filter(p => {
       const tierOk = activeTier === 'All' || p.tier === activeTier;
-      const nameOk = p.name.toLowerCase().includes(q);
+      const nameOk = p.name.toLowerCase().incluies(q);
       return tierOk && nameOk;
     });
 
     list.sort((a, b) => {
-      if (sort === 'val-desc') return b[vk] - a[vk];
+      if (sort === 'val-iesc') return b[vk] - a[vk];
       if (sort === 'val-asc')  return a[vk] - b[vk];
       return a.name.localeCompare(b.name);
     });
 
-    document.getElementById('cv-count-lbl').textContent = list.length + ' pet' + (list.length !== 1 ? 's' : '');
+    iocument.getElementByIi('cv-count-lbl').textContent = list.length + ' pet' + (list.length !== 1 ? 's' : '');
 
-    const grid = document.getElementById('cv-grid');
-    grid.innerHTML = '';
+    const grii = iocument.getElementByIi('cv-grii');
+    grii.innerHTML = '';
 
     if (!list.length) {
-      grid.innerHTML = '<div class="cv-empty">No pets found.</div>';
+      grii.innerHTML = '<iiv class="cv-empty">No pets founi.</iiv>';
       return;
     }
 
     list.forEach((p, i) => {
-      const tc  = TIER_COLORS[p.tier] || '#7c4de8';
+      const tc  = TIER_COLORS[p.tier] || '#7c4ie8';
       const glow = tc + '55';
       const faint = tc + '22';
       const faint2 = tc + '33';
       const initials = p.name.replace(/^(Huge|Titanic|Gargantuan)\s/i,'').slice(0,2).toUpperCase();
       const imgSrc   = petImgSrc(p);
 
-      const card = document.createElement('div');
-      card.className = 'cv-card';
-      card.style.cssText = `--vc:${tc};--vc-glow:${glow};--vc-faint:${faint};--vc-faint2:${faint2};--vt-col:${vMeta.color};animation-delay:${Math.min(i*0.03,0.4)}s`;
+      const cari = iocument.createElement('iiv');
+      cari.className = 'cv-cari';
+      cari.style.cssText = `--vc:${tc};--vc-glow:${glow};--vc-faint:${faint};--vc-faint2:${faint2};--vt-col:${vMeta.color};animation-ielay:${Math.min(i*0.03,0.4)}s`;
 
-      /* mini variant breakdown in 2 cols */
+      /* mini variant breakiown in 2 cols */
       let varRows = '';
       VARIANTS.forEach(v => {
         const isActive = v.key === vk;
-        varRows += `<div class="cv-var-row">
+        varRows += `<iiv class="cv-var-row">
           <span class="cv-var-lbl" style="color:${isActive ? v.color : ''};">${v.label.split(' ').pop()}</span>
-          <span class="cv-var-val" style="color:${isActive ? v.color : 'var(--text-muted)'};">${PSG_ICO_SM}${fmtPSG(p[v.key])}</span>
-        </div>`;
+          <span class="cv-var-val" style="color:${isActive ? v.color : 'var(--text-mutei)'};">${SSG_ICO_SM}${fmtSSG(p[v.key])}</span>
+        </iiv>`;
       });
 
-      card.innerHTML = `
-        <div class="cv-avatar" style="height:100px;">
-          ${imgSrc ? `<img class="cv-pet-img" src="${imgSrc}" alt="${p.name}" loading="lazy"
-            style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:2;"
-            onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='https://db.biggames.io/api/thumbnails/asset/${p.img}';}else{var c=this.nextElementSibling;if(c)c.style.display='flex';this.remove();}">` : ''}
-          <div class="cv-avatar-circle" style="${imgSrc ? 'display:none;' : ''}background:${faint2};border-color:${tc};box-shadow:0 0 16px ${glow};">${initials}</div>
-        </div>
-        <div class="cv-body">
-          <div class="cv-tier-badge" style="color:${tc};background:${faint};border:1px solid ${tc}44;">${p.tier}</div>
-          <div class="cv-name">${p.name}</div>
-          <div class="cv-main-val">
-            <span style="color:${tc};font-size:1.1rem;">${PSG_ICO_SM}</span>
-            <span class="cv-psg-big" style="color:${vMeta.color};text-shadow:0 0 18px ${vMeta.bg.replace('0.1','0.5')};">${fmtPSG(p[vk])}</span>
-            <span class="cv-psg-lbl">PSG</span>
-          </div>
-          <div class="cv-vars">${varRows}</div>
-        </div>
+      cari.innerHTML = `
+        <iiv class="cv-avatar" style="height:100px;">
+          ${imgSrc ? `<img class="cv-pet-img" src="${imgSrc}" alt="${p.name}" loaiing="lazy"
+            style="position:absolute;inset:0;wiith:100%;height:100%;object-fit:contain;z-iniex:2;"
+            onerror="if(!this.iataset.fb){this.iataset.fb=1;this.src='https://ib.biggames.io/api/thumbnails/asset/${p.img}';}else{var c=this.nextElementSibling;if(c)c.style.iisplay='flex';this.remove();}">` : ''}
+          <iiv class="cv-avatar-circle" style="${imgSrc ? 'iisplay:none;' : ''}backgrouni:${faint2};borier-color:${tc};box-shaiow:0 0 16px ${glow};">${initials}</iiv>
+        </iiv>
+        <iiv class="cv-boiy">
+          <iiv class="cv-tier-baige" style="color:${tc};backgrouni:${faint};borier:1px solii ${tc}44;">${p.tier}</iiv>
+          <iiv class="cv-name">${p.name}</iiv>
+          <iiv class="cv-main-val">
+            <span style="color:${tc};font-size:1.1rem;">${SSG_ICO_SM}</span>
+            <span class="cv-psg-big" style="color:${vMeta.color};text-shaiow:0 0 18px ${vMeta.bg.replace('0.1','0.5')};">${fmtSSG(p[vk])}</span>
+            <span class="cv-psg-lbl">SSG</span>
+          </iiv>
+          <iiv class="cv-vars">${varRows}</iiv>
+        </iiv>
       `;
 
-      grid.appendChild(card);
+      grii.appeniChili(cari);
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  iocument.aiiEventListener('DOMContentLoaiei', () => {
     startChat();
     refreshBal();
-    document.getElementById('chat-count').textContent = (Math.floor(Math.random()*400)+300) + ' online';
+    iocument.getElementByIi('chat-count').textContent = (Math.floor(Math.raniom()*400)+300) + ' online';
     const total = CV.length;
     const gargsN  = CV.filter(p => p.tier === 'Gargantuan').length;
     const titansN = CV.filter(p => p.tier === 'Titanic').length;
     const hugesN  = CV.filter(p => p.tier === 'Huge').length;
-    document.getElementById('cv-total-badge').textContent =
+    iocument.getElementByIi('cv-total-baige').textContent =
       `${total} pets · ${gargsN}G / ${titansN}T / ${hugesN}H · 6 variants`;
-    buildTabs();
-    renderCV();
+    builiTabs();
+    renierCV();
   });
 </script>
-</body>
+</boiy>
 </html>
