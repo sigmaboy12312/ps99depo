@@ -24,11 +24,9 @@ function _genVerifyPhrase() {
 
 async function _fetchRobloxAvatar(userId) {
   try {
-    const r = await fetch(
-      `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`
-    );
+    const r = await fetch(`${_SERVER_HTTP}/api/roblox-avatar/${userId}`);
     const d = await r.json();
-    return d.data?.[0]?.imageUrl || null;
+    return d.url || null;
   } catch { return null; }
 }
 
@@ -292,6 +290,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const u = currentUser();
   if (u.username && u.verified) {
     _silentLoad();
+    // Re-fetch avatar if missing (CORS used to block this, now proxied through server)
+    if (!u.avatar && u.id) {
+      _fetchRobloxAvatar(u.id).then(url => {
+        if (url) {
+          localStorage.setItem('ps99g_rblx_avatar', url);
+          _applyUserEverywhere();
+        }
+      });
+    }
   }
   // Unverified users are handled by initVerification() further below
 });

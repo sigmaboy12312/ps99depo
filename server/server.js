@@ -544,6 +544,18 @@ app.post('/api/giveaway/start', (req, res) => {
   res.json({ ok: true });
 });
 
+app.get('/api/roblox-avatar/:userId', async (req, res) => {
+  try {
+    const axios = require('axios');
+    const r = await axios.get(
+      `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${req.params.userId}&size=150x150&format=Png`,
+      { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 6000 }
+    );
+    const url = r.data?.data?.[0]?.imageUrl || null;
+    res.json({ url });
+  } catch { res.json({ url: null }); }
+});
+
 app.get('/api/admin/check/:username', (req, res) => {
   const u = req.params.username?.toLowerCase();
   res.json({ isAdmin: u === ADMIN_USER });
