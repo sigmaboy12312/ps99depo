@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>99Depo &mdash; Dice</title>
-  <link rel="stylesheet" href="style.css?v=206">
+  <link rel="stylesheet" href="style.css?v=207">
   <style>
     /*  DICE ROLL CINEMATIC  */
     #dice-cin {
@@ -438,6 +438,15 @@
     <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:7px;">Gem Denominations</div>
     <div class="gem-denom-wrap">
       <div class="gem-denom-row">
+        <div class="gem-denom-icon" style="background:rgba(74,222,128,.15);"><svg viewBox="0 0 20 20" fill="none" width="15" height="15"><polygon points="10,2 18,7 15,18 5,18 2,7" fill="#4ade80"/><polygon points="10,6 14,10 10,14 6,10" fill="white" opacity=".9"/></svg></div>
+        <div class="gem-denom-name">1B Gems</div>
+        <div class="gem-denom-val">1,000,000,000 each</div>
+        <button class="gem-qty-btn minus" onclick="dcGemChange('b',-1)">&minus;</button>
+        <span class="gem-qty-count" id="dc-gem-b-count">0</span>
+        <button class="gem-qty-btn plus"  onclick="dcGemChange('b', 1)">+</button>
+        <span class="gem-qty-sub" id="dc-gem-b-total">0</span>
+      </div>
+      <div class="gem-denom-row">
         <div class="gem-denom-icon"><svg viewBox="0 0 20 20" fill="none" width="15" height="15"><polygon points="10,2 18,7 15,18 5,18 2,7" fill="#7c4de8"/><polygon points="10,6 14,10 10,14 6,10" fill="white" opacity=".9"/></svg></div>
         <div class="gem-denom-name">100M Gems</div>
         <div class="gem-denom-val">100,000,000 each</div>
@@ -464,20 +473,6 @@
         <button class="gem-qty-btn plus"  onclick="dcGemChange('o', 1)">+</button>
         <span class="gem-qty-sub" id="dc-gem-o-total">0</span>
       </div>
-    </div>
-
-    <!-- Extra raw amount -->
-    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:7px;">Or add extra balance</div>
-    <div class="join-input-wrap" style="margin-bottom:6px;">
-      <span style="color:#f59e0b;display:flex;align-items:center;"><svg width="13" height="13" viewBox="0 0 28 28" fill="none"><polygon points="25,14 19.5,23.5 8.5,23.5 3,14 8.5,4.5 19.5,4.5" fill="#7c4de8"/><polygon points="14,8.5 19.5,14 14,19.5 8.5,14" fill="white" opacity="0.9"/></svg></span>
-      <input type="number" id="dc-create-amt" value="0" min="0" style="flex:1;background:none;border:none;outline:none;color:var(--text);font-size:1rem;font-weight:700;" oninput="dcUpdateCreateTotal()">
-    </div>
-    <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;">
-      <button onclick="dcSetBet(1000000)"   style="flex:1;padding:5px;background:rgba(124,77,232,.12);border:1px solid var(--border-p);border-radius:7px;color:var(--purple-b);font-size:.7rem;font-weight:700;cursor:pointer;">1M</button>
-      <button onclick="dcSetBet(5000000)"   style="flex:1;padding:5px;background:rgba(124,77,232,.12);border:1px solid var(--border-p);border-radius:7px;color:var(--purple-b);font-size:.7rem;font-weight:700;cursor:pointer;">5M</button>
-      <button onclick="dcSetBet(25000000)"  style="flex:1;padding:5px;background:rgba(124,77,232,.12);border:1px solid var(--border-p);border-radius:7px;color:var(--purple-b);font-size:.7rem;font-weight:700;cursor:pointer;">25M</button>
-      <button onclick="dcSetBet(100000000)" style="flex:1;padding:5px;background:rgba(124,77,232,.12);border:1px solid var(--border-p);border-radius:7px;color:var(--purple-b);font-size:.7rem;font-weight:700;cursor:pointer;">100M</button>
-      <button onclick="document.getElementById('dc-create-amt').value=getBalance();dcUpdateCreateTotal()" style="flex:1;padding:5px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:7px;color:#fbbf24;font-size:.7rem;font-weight:700;cursor:pointer;">MAX</button>
     </div>
 
     <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -655,7 +650,7 @@
 
 </div>
 
-<script src="app.js?v=206"></script>
+<script src="app.js?v=207"></script>
 <script>
   refreshBal();
 
@@ -709,8 +704,8 @@
   function randDiceFace() { return DICE_FACE_NUMS[Math.floor(Math.random()*6)]; }
 
   //  GEM DENOMINATIONS 
-  const GEM_DENOM_VALS = { h: 100000000, t: 10000000, o: 1000000 };
-  let _dcGems = { h: 0, t: 0, o: 0 };
+  const GEM_DENOM_VALS = { b: 1000000000, h: 100000000, t: 10000000, o: 1000000 };
+  let _dcGems = { b: 0, h: 0, t: 0, o: 0 };
 
   function dcGemTotal() {
     return Object.keys(_dcGems).reduce((s, k) => s + _dcGems[k] * GEM_DENOM_VALS[k], 0);
@@ -719,8 +714,7 @@
     _dcGems[key] = Math.max(0, _dcGems[key] + delta);
     const inv = getInventory();
     const itemsTotal = [..._dcCreateSelInv].reduce((s,i) => s+(inv[i]?.value||0), 0);
-    const raw = parseInt(document.getElementById('dc-create-amt')?.value||0)||0;
-    const labels = { h:'100M', t:'10M', o:'1M' };
+    const labels = { b:'1B', h:'100M', t:'10M', o:'1M' };
     Object.keys(_dcGems).forEach(k => {
       const el = document.getElementById('dc-gem-'+k+'-count');
       const tot = document.getElementById('dc-gem-'+k+'-total');
@@ -730,10 +724,11 @@
     dcUpdateCreateTotal();
   }
   function gemBreakdown(amount) {
-    const h = Math.floor(amount / 100e6);
+    const b = Math.floor(amount / 1e9);
+    const h = Math.floor((amount % 1e9) / 100e6);
     const t = Math.floor((amount % 100e6) / 10e6);
     const o = Math.floor((amount % 10e6) / 1e6);
-    return { h, t, o };
+    return { b, h, t, o };
   }
 
   let _diceSortAsc = false;
@@ -775,9 +770,10 @@
       });
       const gb = gemBreakdown(g.amount);
       const gemSvg = `<svg viewBox="0 0 12 12" width="9" height="9" fill="none"><polygon points="11,6 8.5,10 3.5,10 1,6 3.5,2 8.5,2" fill="#7c4de8"/><polygon points="6,3.5 8.5,6 6,8.5 3.5,6" fill="white" opacity=".9"/></svg>`;
+      if (gb.b) itemsBarHtml += `<div class="dc-gem-pill" style="background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.3);color:#4ade80;">${gemSvg}${gb.b}x1B</div>`;
       if (gb.h) itemsBarHtml += `<div class="dc-gem-pill">${gemSvg}${gb.h}x100M</div>`;
-      if (gb.t) itemsBarHtml += `<div class="dc-gem-pill" style="background:rgba(6,182,212,.12);border-color:rgba(6,182,212,.3);color:#22d3ee;">${gemSvg}${gb.t}x10M</div>`;
-      if (gb.o) itemsBarHtml += `<div class="dc-gem-pill" style="background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.28);color:#4ade80;">${gemSvg}${gb.o}x1M</div>`;
+      if (gb.t) itemsBarHtml += `<div class="dc-gem-pill" style="background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3);color:#f59e0b;">${gemSvg}${gb.t}x10M</div>`;
+      if (gb.o) itemsBarHtml += `<div class="dc-gem-pill" style="background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.28);color:#22d3ee;">${gemSvg}${gb.o}x1M</div>`;
 
       row.innerHTML = `
         <div class="dc-mini-dice">
@@ -867,20 +863,19 @@
 
   //  CREATE MATCH 
   let _dcCreateSelInv = new Set();
-  function dcSetBet(v) { const e=document.getElementById('dc-create-amt'); if(e){e.value=v;} dcUpdateCreateTotal(); }
+  function dcSetBet(v) {}
   function dcUpdateCreateTotal() {
     const inv=getInventory();
     const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(inv[i]?.value||0),0);
-    const raw=parseInt(document.getElementById('dc-create-amt')?.value||0)||0;
     const gemTotal=dcGemTotal();
-    const total=itemsTotal+raw+gemTotal;
+    const total=itemsTotal+gemTotal;
     const el=document.getElementById('dc-create-total');
     if(el) el.textContent=''+fmtPSG(total);
   }
   function openDiceCreate() {
     _dcCreateSelInv = new Set();
-    _dcGems = { h: 0, t: 0, o: 0 };
-    ['h','t','o'].forEach(k => {
+    _dcGems = { b: 0, h: 0, t: 0, o: 0 };
+    ['b','h','t','o'].forEach(k => {
       const c = document.getElementById('dc-gem-'+k+'-count');
       const t = document.getElementById('dc-gem-'+k+'-total');
       if (c) c.textContent = '0';
@@ -891,7 +886,7 @@
     const hint = document.getElementById('dc-create-hint');
     grid.innerHTML = '';
     if (!inv.length) {
-      hint.textContent = 'No items deposited &mdash; enter a balance amount below.';
+      hint.textContent = 'No items deposited &mdash; deposit pets to play.';
     } else {
       inv.forEach((_, idx) => _dcCreateSelInv.add(idx));
       hint.textContent = 'All items auto-selected. Click to deselect.';
@@ -919,9 +914,8 @@
   function confirmDiceCreate() {
     const inv=getInventory();
     const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(inv[i]?.value||0),0);
-    const rawBet=parseInt(document.getElementById('dc-create-amt')?.value||0)||0;
     const gemDenomTotal=dcGemTotal();
-    const bet=itemsTotal+rawBet+gemDenomTotal;
+    const bet=itemsTotal+gemDenomTotal;
     if(bet<1) return showToast('Enter a bet amount','info');
     if(!deductBal(bet)) return showToast('Not enough balance!','lose');
     closeDiceCreate();

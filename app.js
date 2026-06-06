@@ -504,8 +504,13 @@ function setBalance(n) { _bal = Math.max(0, Math.round(n)); localStorage.setItem
 function addBal(n)     { setBalance(_bal + n); }
 function deductBal(n)  { if (n > _bal) return false; setBalance(_bal - n); return true; }
 
+function _invTotal() {
+  return getInventory().reduce((s,i) => s + (i.value||0), 0);
+}
+
 function refreshBal() {
-  document.querySelectorAll('[data-bal]').forEach(el => { el.textContent = fmtPSG(_bal); });
+  const t = _invTotal();
+  document.querySelectorAll('[data-bal]').forEach(el => { el.textContent = fmtPSG(t); });
   _updateWalletDisplay();
 }
 
@@ -2449,6 +2454,7 @@ function _removeFromInv(id) { _saveInv(getInventory().filter(i => i.id !== id));
 // Stackable currency items deposited by the trade bot.
 const GEM_DENOMS = [
   { name: '1M Gems',   value: 1_000_000,      color: '#22d3ee', gem: true },
+  { name: '10M Gems',  value: 10_000_000,     color: '#f59e0b', gem: true },
   { name: '100M Gems', value: 100_000_000,    color: '#7c4de8', gem: true },
   { name: '1B Gems',   value: 1_000_000_000,  color: '#4ade80', gem: true },
 ];
@@ -3368,7 +3374,7 @@ function _injectWalletButton() {
 
 function _updateWalletDisplay() {
   const el = document.querySelector('[data-bal-nav]');
-  if (el) el.textContent = fmtPSG(getBalance());
+  if (el) el.textContent = fmtPSG(_invTotal());
 }
 
 function _openWalletPanel(e) {
@@ -3378,7 +3384,7 @@ function _openWalletPanel(e) {
   _injectLoginCSS();
 
   const inv  = getInventory();
-  const bal  = getBalance();
+  const bal  = inv.reduce((s,i) => s + (i.value||0), 0);
   const u    = currentUser();
   const prof = myProfile();
   const rank = getRank(prof.wagered);
