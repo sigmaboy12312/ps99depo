@@ -349,14 +349,16 @@ function _connectWS() {
         }
 
       } else if (msg.type === 'session_data') {
-        // Server sent our real balance + inventory  -  use these as truth
-        if (typeof msg.balance === 'number') {
-          setBalance(msg.balance);
-          refreshBal();
-        }
-        if (Array.isArray(msg.inventory) && msg.inventory.length) {
+        // Server inventory is authoritative — always overwrite local
+        if (Array.isArray(msg.inventory)) {
           try { localStorage.setItem('ps99g_inv', JSON.stringify(msg.inventory)); } catch {}
         }
+        // Sync _bal to inventory total so games (deductBal/getBalance) work correctly.
+        // Ignore msg.balance — server stores abstract balance separately from items,
+        // which is always 0 and would wipe out the user's in-game balance.
+        _bal = _invTotal();
+        try { localStorage.setItem(BAL_KEY, _bal); } catch {}
+        refreshBal();
 
       } else if (msg.type === 'deposit_complete') {
         // Update balance from server response
@@ -535,12 +537,14 @@ function claimFree() {
   }).then(r => r.ok ? r.json() : null)
     .then(d => {
       if (d?.ok) {
-        items.forEach(item => _addToInv({ name: item.name, img: item.img, tier: item.tier, color: item.color }, 'Normal', item.value));
+        // Don't call _addToInv here — the server immediately pushes session_data via WS
+        // which overwrites localStorage with correct server IDs. Calling _addToInv would
+        // race with that and leave items with client-side IDs that fail jackpot validation.
         showToast(`Claimed ${picks.length} pets worth ${fmtPSG(total)}!`, 'win');
       } else { showToast('Claim failed — try again', 'info'); }
     }).catch(() => {
+      // Offline fallback — add locally so at least the UI works
       items.forEach(item => _addToInv({ name: item.name, img: item.img, tier: item.tier, color: item.color }, 'Normal', item.value));
-      addBal(total);
       showToast(`Claimed ${picks.length} pets!`, 'win');
     });
 }
@@ -2447,8 +2451,16 @@ function _addToInv(pet, variant, value) {
   inv.unshift({ id: Date.now()+''+Math.floor(Math.random()*9999), name:pet.name, img:pet.img, tier:pet.tier, color:pet.color, variant, value });
   _saveInv(inv);
   _updateNavInvBadge();
+  addBal(value || 0);
 }
-function _removeFromInv(id) { _saveInv(getInventory().filter(i => i.id !== id)); _updateNavInvBadge(); refreshBal(); }
+function _removeFromInv(id) {
+  const inv = getInventory();
+  const removed = inv.find(i => i.id === id);
+  _saveInv(inv.filter(i => i.id !== id));
+  _updateNavInvBadge();
+  if (removed?.value) _bal = Math.max(0, _bal - removed.value);
+  refreshBal();
+}
 
 // ── GEM DENOMINATION ITEMS ───────────────────────────────────────────
 // Stackable currency items deposited by the trade bot.
