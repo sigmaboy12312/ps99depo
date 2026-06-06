@@ -411,7 +411,8 @@
   function getTotalPot() { return players.reduce((s, p) => s + p.bet, 0); }
 
   // ── Deposit ──────────────────────────────────────────────
-  let _joinSelected = new Set(); // selected item ids
+  let _joinSelected  = new Set(); // selected item ids
+  let _pendingJoinIds = new Set(); // items sent to server, waiting confirmation
 
   function openDeposit() {
     if (spinning) return showToast('Round in progress!', 'info');
@@ -427,7 +428,7 @@
   });
 
   function _renderJoinGrid() {
-    const inv   = (typeof getInventory === 'function') ? getInventory() : [];
+    const inv   = ((typeof getInventory === 'function') ? getInventory() : []).filter(i => !_pendingJoinIds.has(i.id));
     const grid  = document.getElementById('join-inv-grid');
     const empty = document.getElementById('join-empty');
     if (!inv.length) {
@@ -462,7 +463,7 @@
   }
 
   function _updateJoinTotal() {
-    const inv   = (typeof getInventory === 'function') ? getInventory() : [];
+    const inv   = ((typeof getInventory === 'function') ? getInventory() : []).filter(i => !_pendingJoinIds.has(i.id));
     const total = inv.filter(i => _joinSelected.has(i.id)).reduce((s,i) => s + (i.value||0), 0);
     document.getElementById('join-total-val').textContent = total > 0 ? fmtB(total) : '—';
     document.getElementById('join-btn').disabled = total < 1;
@@ -483,10 +484,10 @@
     if (typeof _wsConn !== 'undefined' && _wsConn && _wsConn.readyState === WebSocket.OPEN) {
       // Server mode: server verifies items, removes from DB, broadcasts state
       _wsConn.send(JSON.stringify({ type:'jackpot_join', items:selected, cvPet, displayName: me.username || 'You', avatar: localStorage.getItem('ps99g_rblx_avatar') || '' }));
-      // Remove from local inventory immediately so user can't re-deposit same items
-      selected.forEach(i => { if (typeof _removeFromInv === 'function') _removeFromInv(i.id); });
+      selected.forEach(i => _pendingJoinIds.add(i.id));
       userDeposit += totalVal;
       closeDeposit();
+      _renderJoinGrid();
       showToast(`Joining with ${fmtB(totalVal)}...`, 'info');
     } else {
       // Offline fallback
@@ -566,6 +567,15 @@
       avatar: p.avatar || '',
     }));
 
+    // Confirm pending items once server echoes us in the round
+    if (_pendingJoinIds.size) {
+      const me = (typeof currentUser === 'function') ? currentUser() : {};
+      if (me.username && (round.players || []).some(p => p.username === me.username)) {
+        _pendingJoinIds.forEach(id => { if (typeof _removeFromInv === 'function') _removeFromInv(id); });
+        _pendingJoinIds.clear();
+      }
+    }
+
     // Timer display
     if (_timerIv) { clearInterval(_timerIv); _timerIv = null; }
     if (round.status === 'countdown' && round.timerEndsAt) {
@@ -632,11 +642,8 @@
 
     } else if (msg.type === 'jackpot_error') {
       showToast(msg.msg || 'Error joining jackpot', 'info');
-      if (Array.isArray(msg.items) && msg.items.length) {
-        msg.items.forEach(item => {
-          if (typeof _addToInv === 'function') _addToInv(item, item.variant || 'Normal', item.value || 0);
-        });
-      }
+      _pendingJoinIds.clear();
+      _renderJoinGrid();
     }
   };
 

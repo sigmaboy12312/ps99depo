@@ -888,12 +888,11 @@
     if (!inv.length) {
       hint.textContent = 'No items deposited &mdash; deposit pets to play.';
     } else {
-      inv.forEach((_, idx) => _dcCreateSelInv.add(idx));
-      hint.textContent = 'All items auto-selected. Click to deselect.';
+      hint.textContent = 'Select items to include in the wager.';
       inv.forEach((item, idx) => {
         const short = (item.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
         const d = document.createElement('div');
-        d.style.cssText='background:rgba(124,77,232,.14);border:1.5px solid var(--purple);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
+        d.style.cssText='background:var(--bg-card2);border:1.5px solid var(--border);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
         d.innerHTML=`<div style="width:46px;height:46px;margin:0 auto 4px;"><img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.opacity='.3'"></div><div style="font-size:.56rem;font-weight:700;">${short}</div><div style="font-size:.58rem;color:var(--purple-b);font-weight:800;">${fmtPSG(item.value)}</div>`;
         d.onclick=()=>{
           if(_dcCreateSelInv.has(idx)){_dcCreateSelInv.delete(idx);d.style.borderColor='var(--border)';d.style.background='var(--bg-card2)';}
