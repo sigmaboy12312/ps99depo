@@ -443,10 +443,11 @@
       const imgHtml = thumb
         ? `<img src="${thumb}" style="width:52px;height:52px;object-fit:contain;" onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='https://db.biggames.io/api/thumbnails/asset/${item.img}';}else{this.style.opacity='.2';}">`
         : `<div style="width:52px;height:52px;border-radius:8px;background:${item.color||'#7c4de8'}33;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🪙</div>`;
-      return `<div class="join-item-card" id="jic-${item.id}" onclick="_toggleJoinItem('${item.id}')" style="border-color:${item.color||'rgba(255,255,255,.1)'}33;">
+      const tipData = JSON.stringify({name:item.name,value:item.value||0,img:item.img||''});
+      return `<div class="join-item-card" id="jic-${item.id}" onclick="_toggleJoinItem('${item.id}')" data-item-tip='${tipData.replace(/'/g,"&#39;")}' style="border-color:${item.color||'rgba(255,255,255,.1)'}33;">
         ${imgHtml}
-        <div style="font-size:.52rem;font-weight:800;color:#fff;margin-top:4px;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.name}</div>
-        <div style="font-size:.6rem;font-weight:900;color:#fbbf24;">${fmtB(item.value||0)}</div>
+        <div style="font-size:.52rem;font-weight:800;color:#fff;margin-top:4px;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;">${item.name}</div>
+        <div style="font-size:.6rem;font-weight:900;color:#fbbf24;pointer-events:none;">${fmtB(item.value||0)}</div>
       </div>`;
     }).join('');
     _updateJoinTotal();

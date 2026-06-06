@@ -315,6 +315,26 @@ a.nav-btn[href="values.html"]      svg { stroke:#f472b6; color:#f472b6; }
 @keyframes blink { 0%,100%{opacity:1;box-shadow:0 0 8px var(--green);} 50%{opacity:0.4;box-shadow:0 0 3px var(--green);} }
 .chat-count { font-size:0.7rem; color:var(--purple-b); font-weight:700; }
 
+/* ── ITEM HOVER TOOLTIP ── */
+.item-hover-tip {
+  position:fixed; z-index:999999; pointer-events:none;
+  background:linear-gradient(160deg,#1a1640,#0f0d22);
+  border:1.5px solid rgba(124,77,232,.55);
+  border-radius:14px; padding:10px 13px;
+  min-width:120px; max-width:160px;
+  box-shadow:0 8px 32px rgba(0,0,0,.75),0 0 20px rgba(124,77,232,.18);
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  animation:itemTipPop .13s cubic-bezier(.34,1.56,.64,1);
+}
+.item-hover-tip img {
+  width:68px; height:68px; object-fit:contain;
+  filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
+  transform:scale(1.08);
+}
+.item-hover-tip-name { font-size:.74rem; font-weight:900; color:#fff; text-align:center; line-height:1.25; }
+.item-hover-tip-val  { font-size:.68rem; font-weight:800; color:#a78bfa; }
+@keyframes itemTipPop { from{transform:scale(.82) translateY(6px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+
 /* shared class used in older html */
 .chat-header .online-dot {
   width:8px; height:8px; border-radius:50%; background:var(--green);

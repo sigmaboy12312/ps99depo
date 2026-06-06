@@ -15,7 +15,7 @@ const PORT          = process.env.PORT           || 3001;
 const SECRET        = process.env.WEBHOOK_SECRET || 'changeme123';
 const BOT_USERNAME  = process.env.BOT_USERNAME   || 'PS99GemsBOT';
 const ADMIN_USER    = (process.env.ADMIN_USERNAME || '').toLowerCase();
-const START_BAL     = 5_000_000_000;
+const START_BAL     = 0;
 
 // ── MODERATION STATE ─────────────────────────────────
 const bannedUsers  = new Set();
@@ -434,6 +434,27 @@ wss.on('connection', (ws) => {
         });
       }
 
+      if (msg.type === 'tip_player') {
+        const client = wsClients.get(wsId);
+        const senderUsername = client?.username;
+        if (!senderUsername) return;
+        const toUsername = (msg.to || '').toLowerCase();
+        if (!toUsername || toUsername === senderUsername) return;
+        const itemIds = Array.isArray(msg.itemIds) ? msg.itemIds : [];
+        if (!itemIds.length) return;
+        const senderInv  = getInventory(senderUsername);
+        const tippedItems = senderInv.filter(i => itemIds.includes(i.id));
+        if (!tippedItems.length) return;
+        tippedItems.forEach(item => removeInventoryItem(senderUsername, item.id));
+        tippedItems.forEach(item => addInventoryItem(toUsername, item));
+        const totalVal = tippedItems.reduce((s,i) => s + (i.value||0), 0);
+        pushToUser(senderUsername, { type: 'tip_sent', to: toUsername, total: totalVal,
+          inventory: getInventory(senderUsername), balance: getBalance(senderUsername) });
+        pushToUser(toUsername, { type: 'tip_received', from: senderUsername, items: tippedItems, total: totalVal,
+          inventory: getInventory(toUsername), balance: getBalance(toUsername) });
+        console.log(`[Tip] ${senderUsername} → ${toUsername}: ${tippedItems.length} items (${totalVal})`);
+      }
+
       if (msg.type === 'giveaway_enter') {
         if (!activeGiveaway) return;
         const client = wsClients.get(wsId);
@@ -468,6 +489,18 @@ wss.on('connection', (ws) => {
 
 // ── DEPOSIT INIT ─────────────────────────────────────
 // Browser calls this when user opens deposit modal → returns 6-char code
+app.post('/api/claim-free', (req, res) => {
+  const { username, items } = req.body;
+  if (!username || !Array.isArray(items) || !items.length)
+    return res.status(400).json({ error: 'missing username or items' });
+  const u = username.toLowerCase();
+  items.forEach(item => addInventoryItem(u, item));
+  const inv = getInventory(u);
+  const bal = getBalance(u);
+  pushToUser(u, { type: 'session_data', balance: bal, inventory: inv });
+  res.json({ ok: true });
+});
+
 app.post('/api/deposit/init', (req, res) => {
   const { wsId } = req.body;
   if (!wsId || !wsClients.has(wsId))

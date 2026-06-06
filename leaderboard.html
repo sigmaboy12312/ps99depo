@@ -221,33 +221,7 @@
 <script>
   refreshBal();
   const PLAYER_COLORS=["#7c4de8","#ef4444","#06b6d4","#10b981","#f59e0b","#ec4899","#6366f1","#f97316","#a855f7","#14b8a6","#3b82f6","#84cc16"];
-  const BASE_PLAYERS=[
-    {name:"Levi2legitt",wagered:344e6,profit:48.9e6},
-    {name:"MuRaTwalker22",wagered:939.6e6,profit:40.4e6},
-    {name:"0Frockko0",wagered:549.7e6,profit:31.6e6},
-    {name:"mrduperman19",wagered:106.7e6,profit:28.2e6},
-    {name:"virapofarm5",wagered:132.9e6,profit:26e6},
-    {name:"NightToLegit",wagered:261.8e6,profit:23.7e6},
-    {name:"IchDerMeister0",wagered:381.1e6,profit:21.8e6},
-    {name:"TitanicPro",wagered:220e6,profit:19.4e6},
-    {name:"GemLord",wagered:185e6,profit:17.2e6},
-    {name:"xR4Zy",wagered:140e6,profit:14.8e6},
-    {name:"Sk1yRdr",wagered:310e6,profit:12.3e6},
-    {name:"LegacyPS",wagered:95e6,profit:9.7e6},
-    {name:"HugeGang",wagered:430e6,profit:8.1e6},
-    {name:"NovaPro",wagered:72e6,profit:6.8e6},
-    {name:"PurpleKing",wagered:55e6,profit:5.5e6},
-    {name:"CrystalFly",wagered:48e6,profit:4.2e6},
-    {name:"Didkpp",wagered:290e6,profit:3.8e6},
-    {name:"carsten_forr",wagered:680e6,profit:3.1e6},
-    {name:"Yaman1233",wagered:150e6,profit:2.7e6},
-    {name:"igotbanneds",wagered:210e6,profit:1.9e6},
-    {name:"TitanicX",wagered:88e6,profit:1.4e6},
-    {name:"fish12256",wagered:316.2e6,profit:-175.8e6},
-    {name:"HugeHunter",wagered:44e6,profit:0.9e6},
-    {name:"RainbowPro",wagered:37e6,profit:0.5e6},
-    {name:"GalacticCat",wagered:29e6,profit:-0.3e6},
-  ].map((p,i)=>({...p,color:PLAYER_COLORS[i%PLAYER_COLORS.length],isBot:true}));
+  const BASE_PLAYERS = [];
 
   function buildPlayerList(){
     const prof=typeof myProfile==="function"?myProfile():null;
@@ -311,7 +285,7 @@
       row.innerHTML=
         `<div class="lb-row-rank" style="${i<3?"color:"+TROPHY_COLORS[i]+";font-weight:900;":""}">${i<3?TROPHY_SVG[i]:"#"+(i+1)}</div>`+
         `<div class="lb-row-av" style="background:linear-gradient(135deg,${p.color},${p.color}88);">${p.name[0].toUpperCase()}</div>`+
-        `<div style="flex:1;min-width:0;"><div class="lb-row-name">${p.name}${badge}</div><div class="lb-row-sub">Wagered ${fmtB(p.wagered)}</div></div>`+
+        `<div style="flex:1;min-width:0;"><div class="lb-row-name">${p.name}${badge}</div></div>`+
         `<div class="lb-row-vals"><div class="lb-row-val"><div class="lb-row-val-main" style="color:${mainColor};">${activeTab==="profit"&&p.profit>=0?"+":activeTab==="profit"&&p.profit<0?"-":""}${fmtB(Math.abs(p[field]))}</div><div class="lb-row-val-lbl">${activeTab==="profit"?"Profit":"Wagered"}</div></div></div>`;
       el.appendChild(row);
     });

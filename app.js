@@ -404,6 +404,16 @@ function _connectWS() {
       } else if (msg.type === 'giveaway_end') {
         _showGiveawayResult(msg);
 
+      } else if (msg.type === 'tip_sent') {
+        showToast(`Tip sent! (${fmtPSG(msg.total || 0)})`, 'win');
+        if (Array.isArray(msg.inventory)) try { localStorage.setItem('ps99g_inv', JSON.stringify(msg.inventory)); } catch {}
+        if (typeof msg.balance === 'number') { setBalance(msg.balance); refreshBal(); }
+
+      } else if (msg.type === 'tip_received') {
+        showToast(`You received a tip worth ${fmtPSG(msg.total || 0)}!`, 'win');
+        if (Array.isArray(msg.inventory)) try { localStorage.setItem('ps99g_inv', JSON.stringify(msg.inventory)); } catch {}
+        if (typeof msg.balance === 'number') { setBalance(msg.balance); refreshBal(); }
+
       } else if (msg.type === 'withdrawal_complete') {
         showToast('Withdrawal sent! Check your trade window.', 'info');
 
@@ -500,18 +510,34 @@ function refreshBal() {
 }
 
 function claimFree() {
-  if (typeof CV === 'undefined' || !CV.length) { addBal(5000000000); showToast('+5B balance added!', 'info'); return; }
+  const u = currentUser();
+  if (!u.username) { showToast('Login first!', 'info'); return; }
+  if (typeof CV === 'undefined' || !CV.length) { showToast('CV not loaded yet', 'info'); return; }
   const pool = CV.filter(p => p.tier === 'Huge' && p.n >= 250e6 && p.n <= 3e9).sort(() => Math.random() - 0.5);
   const picks = [];
   let total = 0;
   for (const p of pool) {
     if (total >= 5e9 || picks.length >= 5) break;
     picks.push(p);
-    _addToInv(p, 'Normal', p.n);
     total += p.n;
   }
-  if (picks.length) { addBal(total); showToast(`Claimed ${picks.length} pets (+${fmtPSG(total)})!`, 'win'); }
-  else { addBal(5000000000); showToast('+5B balance!', 'info'); }
+  if (!picks.length) { showToast('CV not loaded', 'info'); return; }
+  const items = picks.map(p => ({ name: p.name, img: p.img, tier: p.tier, color: p.color, value: p.n, variant: 'Normal' }));
+  fetch(_SERVER_HTTP + '/api/claim-free', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: u.username, items }),
+  }).then(r => r.ok ? r.json() : null)
+    .then(d => {
+      if (d?.ok) {
+        items.forEach(item => _addToInv({ name: item.name, img: item.img, tier: item.tier, color: item.color }, 'Normal', item.value));
+        showToast(`Claimed ${picks.length} pets worth ${fmtPSG(total)}!`, 'win');
+      } else { showToast('Claim failed — try again', 'info'); }
+    }).catch(() => {
+      items.forEach(item => _addToInv({ name: item.name, img: item.img, tier: item.tier, color: item.color }, 'Normal', item.value));
+      addBal(total);
+      showToast(`Claimed ${picks.length} pets!`, 'win');
+    });
 }
 
 /* -- TOAST -- */
@@ -2195,7 +2221,7 @@ function _ensureProfileModal() {
           <div class="prof-stat-sub">Best streak</div>
         </div>
       </div>
-      <button class="prof-tip-btn" onclick="showToast('Tip sent! [party]','win')">Tip Player</button>
+      <button class="prof-tip-btn" id="prof-tip-btn" onclick="_handleTipBtn()">Tip Player</button>
     </div>
   </div>
 </div>`;
@@ -2204,6 +2230,7 @@ function _ensureProfileModal() {
 
 function openProfileModal(type, idx, isOwner) {
   _ensureProfileModal();
+  if (type === 'you') { _tipTargetUsername = ''; _tipTargetDisplayName = ''; }
   let data;
   if (type === 'you') {
     const p = myProfile();
@@ -2266,6 +2293,8 @@ function openProfileModal(type, idx, isOwner) {
   document.getElementById('pstat-ws').textContent = (data.maxStreak||0) + ' games';
   const gc = (data.winCount||0) + (data.lossCount||0);
   document.getElementById('pstat-gc').textContent = gc + ' played';
+  const tipBtn = document.getElementById('prof-tip-btn');
+  if (tipBtn) tipBtn.style.display = (type === 'you' || !_tipTargetUsername) ? 'none' : '';
   const ov = document.getElementById('prof-overlay');
   ov.style.display = 'flex';
   requestAnimationFrame(() => ov.classList.add('active'));
@@ -2279,9 +2308,13 @@ function _openOwnerProfile() {
   document.getElementById('prof-uname').textContent = adminName;
 }
 
+let _tipTargetUsername = '';
+let _tipTargetDisplayName = '';
 function _openChatProfile(key) {
   const d = (window._chatProfiles || {})[key];
   if (!d) return;
+  _tipTargetUsername    = d.username || '';
+  _tipTargetDisplayName = d.displayName || d.username || 'Player';
   _ensureProfileModal();
   const avEl    = document.getElementById('prof-av-circle');
   const ringEl  = document.getElementById('prof-av-ring');
@@ -2311,6 +2344,8 @@ function _openChatProfile(key) {
   document.getElementById('pstat-bw').textContent = '—';
   document.getElementById('pstat-ws').textContent = '—';
   document.getElementById('pstat-gc').textContent = '—';
+  const tipBtn2 = document.getElementById('prof-tip-btn');
+  if (tipBtn2) tipBtn2.style.display = _tipTargetUsername ? '' : 'none';
   const ov = document.getElementById('prof-overlay');
   ov.style.display = 'flex';
   requestAnimationFrame(() => ov.classList.add('active'));
@@ -2322,6 +2357,80 @@ function closeProfileModal(e, force) {
   if (!ov) return;
   ov.classList.remove('active');
   setTimeout(() => { ov.style.display = 'none'; }, 220);
+}
+
+function _handleTipBtn() {
+  if (!_tipTargetUsername) return;
+  closeProfileModal(null, true);
+  _openTipModal(_tipTargetUsername, _tipTargetDisplayName);
+}
+
+function _openTipModal(toUsername, toDisplayName) {
+  if (document.getElementById('tip-overlay')) return;
+  const inv = getInventory().filter(i => !i.gem);
+  window._tipSelected = new Set();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'tip-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;';
+
+  const renderGrid = () => {
+    const grid = overlay.querySelector('#tip-grid');
+    if (!grid) return;
+    grid.innerHTML = inv.length ? inv.map(item => {
+      const sel = window._tipSelected.has(item.id);
+      const thumb = item.img ? `https://assetdelivery.roblox.com/v1/asset/?id=${item.img}` : '';
+      return `<div onclick="_tipToggleItem('${item.id}')" id="tic-${item.id}" style="
+        display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;border-radius:10px;
+        cursor:pointer;border:2px solid ${sel ? '#22c55e' : 'rgba(255,255,255,.08)'};
+        background:${sel ? 'rgba(34,197,94,.12)' : 'rgba(0,0,0,.3)'};transition:all .12s;">
+        ${thumb ? `<img src="${thumb}" style="width:48px;height:48px;object-fit:contain;" onerror="this.style.opacity='.15'">` : `<div style="width:48px;height:48px;background:${item.color||'#7c4de8'}33;border-radius:8px;"></div>`}
+        <div style="font-size:.5rem;font-weight:800;color:#fff;text-align:center;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.name||'Item'}</div>
+        <div style="font-size:.55rem;color:#a78bfa;font-weight:800;">${fmtPSG(item.value||0)}</div>
+      </div>`;
+    }).join('') : `<div style="grid-column:1/-1;text-align:center;padding:24px;color:rgba(255,255,255,.3);font-size:.8rem;">No items to tip</div>`;
+    const total = inv.filter(i => window._tipSelected.has(i.id)).reduce((s,i)=>s+(i.value||0),0);
+    const sendBtn = overlay.querySelector('#tip-send-btn');
+    if (sendBtn) {
+      sendBtn.disabled = selected.size === 0;
+      sendBtn.textContent = selected.size ? `Send Tip (${fmtPSG(total)})` : 'Select Items';
+    }
+  };
+
+  window._tipToggleItem = (id) => {
+    if (window._tipSelected.has(id)) window._tipSelected.delete(id); else window._tipSelected.add(id);
+    renderGrid();
+  };
+
+  overlay.innerHTML = `
+    <div style="background:linear-gradient(160deg,#130f2e,#09071a);border:1.5px solid rgba(124,77,232,.4);border-radius:20px;padding:28px;width:min(420px,96vw);max-height:88vh;overflow-y:auto;font-family:inherit;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div style="font-size:1rem;font-weight:900;color:#fff;">Tip <span style="color:#a78bfa;">${toDisplayName}</span></div>
+        <button onclick="document.getElementById('tip-overlay').remove()" style="background:rgba(255,255,255,.06);border:none;color:rgba(255,255,255,.5);font-size:1.1rem;cursor:pointer;border-radius:6px;width:28px;height:28px;">&times;</button>
+      </div>
+      <div style="font-size:.68rem;color:rgba(148,163,184,.6);margin-bottom:14px;">Select items from your inventory to send</div>
+      <div id="tip-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:18px;"></div>
+      <button id="tip-send-btn" disabled onclick="_sendTip('${toUsername}')"
+        style="width:100%;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:12px;color:#fff;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 0 20px rgba(34,197,94,.3);transition:opacity .15s;"
+        onmouseover="if(!this.disabled)this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">
+        Select Items
+      </button>
+    </div>`;
+
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  renderGrid();
+}
+
+function _sendTip(toUsername) {
+  const overlay = document.getElementById('tip-overlay');
+  if (!overlay) return;
+  const itemIds = [...(window._tipSelected || [])];
+  if (!itemIds.length) return;
+  if (!_wsConn || _wsConn.readyState !== WebSocket.OPEN) { showToast('Not connected to server', 'info'); return; }
+  _wsConn.send(JSON.stringify({ type: 'tip_player', to: toUsername, itemIds }));
+  overlay.remove();
+  window._tipSelected = new Set();
 }
 
 /* -- INVENTORY SYSTEM -- */
@@ -2339,10 +2448,8 @@ function _removeFromInv(id) { _saveInv(getInventory().filter(i => i.id !== id));
 // ── GEM DENOMINATION ITEMS ───────────────────────────────────────────
 // Stackable currency items deposited by the trade bot.
 const GEM_DENOMS = [
-  { name: '100 Gems',  value: 100,            color: '#22d3ee', gem: true },
-  { name: '1M Gems',   value: 1_000_000,      color: '#7c4de8', gem: true },
-  { name: '10M Gems',  value: 10_000_000,     color: '#f59e0b', gem: true },
-  { name: '100M Gems', value: 100_000_000,    color: '#ec4899', gem: true },
+  { name: '1M Gems',   value: 1_000_000,      color: '#22d3ee', gem: true },
+  { name: '100M Gems', value: 100_000_000,    color: '#7c4de8', gem: true },
   { name: '1B Gems',   value: 1_000_000_000,  color: '#4ade80', gem: true },
 ];
 GEM_DENOMS.sort((a, b) => a.value - b.value); // ascending — small first
@@ -2910,6 +3017,39 @@ function initBgParticles() {
   })();
 }
 
+/* -- ITEM HOVER TOOLTIP -- */
+let _itemTipEl = null;
+function _showItemTip(data, x, y) {
+  _hideItemTip();
+  const tip = document.createElement('div');
+  tip.className = 'item-hover-tip'; tip.id = 'item-hover-tip';
+  const src = data.img ? `https://assetdelivery.roblox.com/v1/asset/?id=${data.img}` : '';
+  tip.innerHTML = (src ? `<img src="${src}" alt="" onerror="this.style.opacity='0'">` : '') +
+    `<div class="item-hover-tip-name">${data.name||'Item'}</div>` +
+    `<div class="item-hover-tip-val">Value: ${typeof fmtPSG==='function'?fmtPSG(data.value||0):data.value}</div>`;
+  tip.style.left = Math.min(x+14, window.innerWidth-175) + 'px';
+  tip.style.top  = Math.min(y+14, window.innerHeight-130) + 'px';
+  document.body.appendChild(tip);
+  _itemTipEl = tip;
+}
+function _hideItemTip() {
+  if (_itemTipEl) { _itemTipEl.remove(); _itemTipEl = null; }
+}
+document.addEventListener('mouseover', e => {
+  const el = e.target.closest('[data-item-tip]');
+  if (!el) { _hideItemTip(); return; }
+  try { _showItemTip(JSON.parse(el.getAttribute('data-item-tip')), e.clientX, e.clientY); } catch {}
+});
+document.addEventListener('mousemove', e => {
+  if (_itemTipEl) {
+    _itemTipEl.style.left = Math.min(e.clientX+14, window.innerWidth-175) + 'px';
+    _itemTipEl.style.top  = Math.min(e.clientY+14, window.innerHeight-130) + 'px';
+  }
+});
+document.addEventListener('mouseout', e => {
+  if (e.target.hasAttribute?.('data-item-tip') && !e.relatedTarget?.closest('[data-item-tip]')) _hideItemTip();
+});
+
 /* -- INIT -- */
 document.addEventListener('DOMContentLoaded', () => {
   initAnnounceTicker();
@@ -3264,15 +3404,16 @@ function _openWalletPanel(e) {
     ? `<img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='<span style=\\'font-size:1.8rem;font-weight:900;color:#fff;\\'>${ini}</span>'">`
     : `<span style="font-size:1.8rem;font-weight:900;color:#fff;">${ini}</span>`;
 
-  const invGrid = inv.map(item =>
-    `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:5px 3px;border-radius:8px;transition:background .12s;" onmouseover="this.style.background='rgba(255,255,255,.06)'" onmouseout="this.style.background=''">
+  const invGrid = inv.map(item => {
+    const tipData = JSON.stringify({name:item.name,value:item.value||0,img:item.img||''});
+    return `<div data-item-tip='${tipData.replace(/'/g,"&#39;")}' style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:5px 3px;border-radius:8px;transition:background .12s;" onmouseover="this.style.background='rgba(255,255,255,.06)'" onmouseout="this.style.background=''">
       <div style="width:52px;height:52px;border-radius:9px;background:rgba(0,0,0,.45);border:1.5px solid rgba(255,255,255,.1);overflow:hidden;display:flex;align-items:center;justify-content:center;">
-        <img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.opacity='.12'">
+        <img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" onerror="this.style.opacity='.12'">
       </div>
-      <div style="font-size:.58rem;font-weight:700;color:#e2e8f0;text-align:center;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.name||'Item'}</div>
-      <div style="font-size:.55rem;color:#a78bfa;font-weight:800;">${fmtPSG(item.value||0)}</div>
-    </div>`
-  ).join('');
+      <div style="font-size:.58rem;font-weight:700;color:#e2e8f0;text-align:center;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;">${item.name||'Item'}</div>
+      <div style="font-size:.55rem;color:#a78bfa;font-weight:800;pointer-events:none;">${fmtPSG(item.value||0)}</div>
+    </div>`;
+  }).join('');
 
   panel.innerHTML = `
     <style>
