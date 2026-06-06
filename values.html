@@ -129,15 +129,21 @@
 
     /* all-variant mini breakdown */
     .cv-vars {
-      display:grid; grid-template-columns:1fr 1fr; gap:2px 6px;
-      border-top:1px solid var(--border); padding-top:8px; margin-top:2px;
+      display:grid; grid-template-columns:1fr 1fr; gap:3px 4px;
+      border-top:1px solid var(--border); padding-top:8px; margin-top:4px;
     }
     .cv-var-row {
       display:flex; align-items:center; justify-content:space-between;
-      font-size:.68rem; padding:1px 0;
+      background:rgba(255,255,255,0.03); border-radius:4px;
+      padding:2px 5px; font-size:.67rem;
+      border-left:2px solid var(--vr-c, #555);
     }
-    .cv-var-lbl { color:var(--text-muted); font-weight:600; }
-    .cv-var-val { font-weight:800; }
+    .cv-var-row.cv-var-active {
+      background:rgba(255,255,255,0.09);
+    }
+    .cv-var-lbl { color:var(--vr-c,#555); font-weight:700; letter-spacing:.01em; }
+    .cv-var-val { font-weight:800; color:var(--text-muted); }
+    .cv-var-row.cv-var-active .cv-var-val { color:var(--vr-c,#aaa); }
 
     /*  Header  */
     .cv-header-bar {
@@ -353,11 +359,12 @@
       /* mini variant breakdown in 2 cols */
       let varRows = '';
       VARIANTS.forEach(v => {
+        if (!p[v.key]) return;
         const isActive = v.key === vk;
-        varRows += `<div class="cv-var-row">
-          <span class="cv-var-lbl" style="color:${isActive ? v.color : ''};">${v.label.split(' ').pop()}</span>
-          <span class="cv-var-val" style="color:${isActive ? v.color : 'var(--text-muted)'};">${PSG_ICO_SM}${fmtPSG(p[v.key])}</span>
-        </div>`;
+        varRows += `<div class="cv-var-row${isActive ? ' cv-var-active' : ''}" style="--vr-c:${v.color}">` +
+          `<span class="cv-var-lbl">${v.short}</span>` +
+          `<span class="cv-var-val">${fmtPSG(p[v.key])}</span>` +
+          `</div>`;
       });
 
       card.innerHTML = `
