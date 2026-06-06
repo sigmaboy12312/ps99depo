@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>99Depo &mdash; Coin Flip</title>
-  <link rel="stylesheet" href="style.css?v=207">
+  <link rel="stylesheet" href="style.css?v=208">
   <style>
     /*  LAYOUT  */
     .cf-layout {
@@ -512,12 +512,38 @@
       padding:0 14px; flex-shrink:0; position:relative;
     }
     #cin-coin {
-      display:block;
-      filter:drop-shadow(0 0 0px rgba(0,0,0,0));
+      display:inline-block;
       transition:filter 0.3s;
     }
-    #cin-coin.glowing {
-      filter:drop-shadow(0 0 24px rgba(249,115,22,0.7)) drop-shadow(0 0 48px rgba(249,115,22,0.3));
+    #cin-coin.coin-paused #cin-coin-inner {
+      filter: drop-shadow(0 0 24px rgba(255,195,40,.95)) drop-shadow(0 0 60px rgba(255,170,20,.55));
+    }
+    @keyframes starburstAnim {
+      0%   { opacity:0; transform:scale(.4) rotate(0deg); }
+      18%  { opacity:1; transform:scale(1.12) rotate(10deg); }
+      65%  { opacity:.85; transform:scale(1.0) rotate(-6deg); }
+      100% { opacity:0; transform:scale(1.35) rotate(8deg); }
+    }
+    #cin-starburst.active {
+      animation:starburstAnim 1s ease-out forwards;
+      background:
+        radial-gradient(circle, rgba(255,245,80,.9) 0%, rgba(255,210,50,.45) 28%, rgba(255,180,20,.1) 58%, transparent 72%),
+        conic-gradient(from 0deg,
+          transparent 0deg, rgba(255,245,100,.55) 5deg, transparent 10deg,
+          transparent 25deg, rgba(255,245,100,.55) 30deg, transparent 35deg,
+          transparent 50deg, rgba(255,245,100,.55) 55deg, transparent 60deg,
+          transparent 75deg, rgba(255,245,100,.55) 80deg, transparent 85deg,
+          transparent 100deg, rgba(255,245,100,.55) 105deg, transparent 110deg,
+          transparent 125deg, rgba(255,245,100,.55) 130deg, transparent 135deg,
+          transparent 150deg, rgba(255,245,100,.55) 155deg, transparent 160deg,
+          transparent 175deg, rgba(255,245,100,.55) 180deg, transparent 185deg,
+          transparent 200deg, rgba(255,245,100,.55) 205deg, transparent 210deg,
+          transparent 225deg, rgba(255,245,100,.55) 230deg, transparent 235deg,
+          transparent 250deg, rgba(255,245,100,.55) 255deg, transparent 260deg,
+          transparent 275deg, rgba(255,245,100,.55) 280deg, transparent 285deg,
+          transparent 300deg, rgba(255,245,100,.55) 305deg, transparent 310deg,
+          transparent 325deg, rgba(255,245,100,.55) 330deg, transparent 335deg,
+          transparent 350deg, rgba(255,245,100,.55) 355deg, transparent 360deg);
     }
     .cin-glow-ring {
       position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
@@ -827,7 +853,13 @@
       <div style="position:relative;">
         <div class="cin-glow-ring" id="cin-glow-ring"></div>
         <div class="cin-countdown" id="cin-countdown"></div>
-        <canvas id="cin-coin" width="170" height="170"></canvas>
+        <div id="cin-coin" style="width:192px;height:192px;position:relative;perspective:800px;display:inline-block;z-index:10;">
+          <div id="cin-coin-inner" style="width:192px;height:192px;transform-style:preserve-3d;position:relative;transform:rotateY(0deg);">
+            <div id="cin-f-heads" style="position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;background:radial-gradient(circle at 36% 30%,#fffce0 0%,#ffe040 18%,#e8a800 48%,#c07000 72%,#6b3a00 100%);box-shadow:inset -6px -9px 18px rgba(0,0,0,.45),0 0 0 8px #9a6010,0 12px 40px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:5.6rem;font-weight:900;font-family:'Arial Black',Arial,sans-serif;color:rgba(60,20,0,.52);text-shadow:2px 3px 0 rgba(255,240,100,.42),-1px -1px 0 rgba(0,0,0,.12);">H</div>
+            <div id="cin-f-tails" style="position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;transform:rotateY(180deg);background:radial-gradient(circle at 36% 30%,#daf6ff 0%,#48b0ff 18%,#0e52cc 48%,#0a2a80 72%,#040f40 100%);box-shadow:inset -6px -9px 18px rgba(0,0,0,.45),0 0 0 8px #1040a0,0 12px 40px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:5.6rem;font-weight:900;font-family:'Arial Black',Arial,sans-serif;color:rgba(0,10,60,.52);text-shadow:2px 3px 0 rgba(100,190,255,.42),-1px -1px 0 rgba(0,0,0,.12);">T</div>
+          </div>
+          <div id="cin-starburst" style="position:absolute;inset:-38px;pointer-events:none;opacity:0;border-radius:50%;"></div>
+        </div>
       </div>
       <div class="cin-seed-hash" id="cin-seed-hash">#loading...</div>
     </div>
@@ -1157,7 +1189,7 @@
 </div>
 
 
-<script src="app.js?v=207"></script>
+<script src="app.js?v=208"></script>
 <script>
   //  Initial balance display 
   refreshBal();
@@ -2236,6 +2268,9 @@
     document.getElementById('cin-countdown').className = 'cin-countdown';
     document.getElementById('cin-countdown').textContent = '';
     document.getElementById('cin-coin').style.filter = '';
+    document.getElementById('cin-coin').classList.remove('coin-paused');
+    const _ci = document.getElementById('cin-coin-inner'); if (_ci) _ci.style.transform = 'rotateY(0deg)';
+    const _sb = document.getElementById('cin-starburst'); if (_sb) _sb.classList.remove('active');
     document.getElementById('cin-you-col').className = 'cin-player-col';
     document.getElementById('cin-opp-col').className = 'cin-player-col';
 
@@ -2270,7 +2305,6 @@
 
     overlay.style.cssText = 'display:flex;opacity:1;';
     overlay.className = 'open';
-    setTimeout(() => renderCoin(document.getElementById('cin-coin'), 0, 0), 16);
   }
 
   function revealCinematicOpponent(oppName, oppPet, oppSide, oppBet) {
@@ -2401,64 +2435,49 @@
   }
 
   function startCinematicFlip(side, won, onDone) {
-    const canvas = document.getElementById('cin-coin');
-    canvas.classList.add('glowing');
+    const coinEl    = document.getElementById('cin-coin');
+    const coinInner = document.getElementById('cin-coin-inner');
+    if (!coinInner) { onDone(); return; }
+    if (cinFlipAF) { cancelAnimationFrame(cinFlipAF); cinFlipAF = null; }
+
+    coinEl.style.filter = '';
+    coinEl.classList.remove('coin-paused');
     document.getElementById('cin-glow-ring').classList.add('active');
 
-    const spins   = 5 + Math.floor(Math.random() * 3);
-    const landAng = side === 'heads' ? 0 : 180;
-    // Pause 22 degrees before landing â€” stays on the correct face, no face-swap bug
-    const preStop  = 22;
-    const pauseDeg = spins * 360 + landAng - preStop;
+    const spins      = 5 + Math.floor(Math.random() * 3);
+    const finalAngle = (side === 'heads' ? 0 : 180) + spins * 360;
+    const spinDur    = 2700;
+    const pauseDur   = 1900;
+    const spinStart  = performance.now();
 
-    const spinDur  = 2500;
-    const pauseDur = 1200;
-    const landDur  = 650;
+    function easeOutSpin(t) { return 1 - Math.pow(1 - t, 2.8); }
 
-    let shimmer = 0, phase = 0, pauseStart = 0, landStart = 0;
-    const start = performance.now();
+    cinFlipAF = requestAnimationFrame(function spinTick(now) {
+      const t = Math.min((now - spinStart) / spinDur, 1);
+      coinInner.style.transform = `rotateY(${easeOutSpin(t) * finalAngle}deg)`;
+      const blur = Math.max(0, (1 - t * 1.6)) * 5;
+      coinEl.style.filter = blur > 0.2 ? `blur(${blur.toFixed(1)}px)` : '';
 
-    function tick(now) {
-      shimmer += 0.032;
-
-      if (phase === 0) {
-        const t = Math.min((now - start) / spinDur, 1);
-        const e = 1 - Math.pow(1 - t, 2.6);
-        const angle = e * pauseDeg;
-        // CSS blur peaks early (fast spin) and fades as coin decelerates
-        const blurAmt = Math.max(0, (1 - t * 1.5)) * 3.2;
-        canvas.style.filter = `blur(${blurAmt.toFixed(2)}px) drop-shadow(0 0 22px rgba(249,115,22,.55))`;
-        renderCoin(canvas, angle, shimmer);
-        if (t >= 1) {
-          canvas.style.filter = 'drop-shadow(0 0 24px rgba(249,115,22,.7)) drop-shadow(0 0 48px rgba(249,115,22,.3))';
-          phase = 1; pauseStart = now;
-          playCrownSound();
-          shakeCinematic(6, 320);
-        }
-      } else if (phase === 1) {
-        // Steady hold â€” no wobble, shine sweeps across
-        const el = now - pauseStart;
-        const sp = Math.min(el / pauseDur, 1);
-        renderCoinHoverShine(canvas, pauseDeg, shimmer, sp);
-        if (el >= pauseDur) { phase = 2; landStart = now; }
+      if (t < 1) {
+        cinFlipAF = requestAnimationFrame(spinTick);
       } else {
-        // Short settle â€” preStop degrees max so face never crosses to opposite
-        const t = Math.min((now - landStart) / landDur, 1);
-        const e = 1 - Math.pow(1 - t, 4);
-        renderCoin(canvas, pauseDeg + e * preStop, shimmer);
-        if (t >= 1) {
-          canvas.style.filter = '';
-          renderCoin(canvas, landAng, shimmer);
-          canvas.classList.remove('glowing');
+        cinFlipAF = null;
+        coinEl.style.filter = '';
+        coinEl.classList.add('coin-paused');
+        playCrownSound();
+        shakeCinematic(6, 320);
+
+        const sb = document.getElementById('cin-starburst');
+        if (sb) { sb.classList.remove('active'); void sb.offsetWidth; sb.classList.add('active'); }
+
+        setTimeout(() => {
+          coinEl.classList.remove('coin-paused');
           document.getElementById('cin-glow-ring').classList.remove('active');
           screenFlash(won ? 'flash-gold' : 'flash-red');
           onDone();
-          return;
-        }
+        }, pauseDur);
       }
-      cinFlipAF = requestAnimationFrame(tick);
-    }
-    cinFlipAF = requestAnimationFrame(tick);
+    });
   }
 
   function showCinematicResult(won, bet, winningSide) {

@@ -2448,7 +2448,7 @@ function _addToInv(pet, variant, value) {
   _saveInv(inv);
   _updateNavInvBadge();
 }
-function _removeFromInv(id) { _saveInv(getInventory().filter(i => i.id !== id)); _updateNavInvBadge(); }
+function _removeFromInv(id) { _saveInv(getInventory().filter(i => i.id !== id)); _updateNavInvBadge(); refreshBal(); }
 
 // ── GEM DENOMINATION ITEMS ───────────────────────────────────────────
 // Stackable currency items deposited by the trade bot.
@@ -2460,8 +2460,35 @@ const GEM_DENOMS = [
 ];
 GEM_DENOMS.sort((a, b) => a.value - b.value); // ascending — small first
 
-function _gemSVG(color) {
-  return `<svg viewBox="0 0 28 28" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><polygon points="14,2 26,10 26,18 14,26 2,18 2,10" fill="${color}"/><polygon points="14,2 26,10 14,14" fill="rgba(255,255,255,.3)"/><polygon points="14,14 26,18 14,26 2,18" fill="rgba(0,0,0,.22)"/><polygon points="14,14 2,10 14,2" fill="rgba(255,255,255,.1)"/><circle cx="14" cy="13" r="3" fill="rgba(255,255,255,.35)"/></svg>`;
+function _gemSVG(colorOrName) {
+  const isBag = colorOrName === '100M Gems' || colorOrName === '1B Gems';
+  const isGreen = colorOrName === '1B Gems';
+  if (isBag) {
+    const body = isGreen ? '#5ee85e' : '#50d4f8';
+    const neck = isGreen ? '#30c030' : '#28b0dc';
+    const gem1 = isGreen ? '#0a6020' : '#0060a8';
+    const gem2 = isGreen ? '#085018' : '#0050a0';
+    return `<svg viewBox="0 0 28 28" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="14" cy="19.5" rx="9.5" ry="7.5" fill="${body}"/>
+      <rect x="11" y="10" width="6" height="6" rx="2.5" fill="${neck}"/>
+      <ellipse cx="14" cy="9.5" rx="5" ry="2.8" fill="#ff45a8"/>
+      <polygon points="9.5,18.5 11.5,15.5 13.5,18.5" fill="${gem1}" opacity=".9"/>
+      <polygon points="13,21 15,18 17,21" fill="${gem2}" opacity=".9"/>
+      <ellipse cx="10" cy="16.5" rx="2.2" ry="1.4" fill="white" opacity=".3" transform="rotate(-25,10,16.5)"/>
+    </svg>`;
+  }
+  const isTenM = colorOrName === '10M Gems';
+  const c = colorOrName.startsWith('#') ? colorOrName : (isTenM ? '#f59e0b' : '#22d3ee');
+  const hi = isTenM ? 'rgba(255,240,150,.5)' : 'rgba(200,250,255,.5)';
+  return `<svg viewBox="0 0 28 28" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14 2 L25 10.5 L20.5 25 L7.5 25 L3 10.5 Z" fill="#0a1428"/>
+    <path d="M14 3.5 L23.5 11 L19.5 24 L8.5 24 L4.5 11 Z" fill="${c}"/>
+    <path d="M14 3.5 L23.5 11 L14 14.5 Z" fill="white" opacity=".38"/>
+    <path d="M14 3.5 L4.5 11 L14 14.5 Z" fill="white" opacity=".18"/>
+    <path d="M14 14.5 L8.5 24 L19.5 24 Z" fill="rgba(0,0,0,.28)"/>
+    <path d="M10.5 5 L14 3.5 L14 8.5 Z" fill="white" opacity=".5"/>
+    ${isTenM ? '<circle cx="20" cy="8" r="2" fill="#fff" opacity=".7"/><circle cx="22" cy="11" r="1.2" fill="#fff" opacity=".4"/>' : ''}
+  </svg>`;
 }
 
 function _countGems(inv) {
@@ -2496,7 +2523,7 @@ function buildGemPicker(container, inv, onChange) {
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px 10px;margin-bottom:5px;';
     row.innerHTML = `
-      <div style="width:32px;height:32px;flex-shrink:0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.3);padding:3px;">${_gemSVG(gem.color)}</div>
+      <div style="width:32px;height:32px;flex-shrink:0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.3);padding:3px;">${_gemSVG(gem.name)}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-size:.72rem;font-weight:800;color:#fff;">${gem.name}</div>
         <div style="font-size:.58rem;color:var(--text-muted);">Owned: <b style="color:${gem.color};">${owned.toLocaleString()}</b></div>

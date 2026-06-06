@@ -273,7 +273,11 @@ wss.on('connection', (ws) => {
         newItems.forEach(item => removeInventoryItem(username, item.id));
 
         const actualValue = newItems.reduce((s,i) => s + (i.value||0), 0);
-        if (actualValue <= 0) return;
+        if (actualValue <= 0) {
+          // Items weren't in server DB — refund originals to client
+          pushToUser(username, { type: 'jackpot_error', msg: 'Items not found — please re-claim your pets first.', items });
+          return;
+        }
 
         const color    = JP_COLORS[jpRound.players.length % JP_COLORS.length];
         const existing = jpRound.players.find(p => p.username === username);
