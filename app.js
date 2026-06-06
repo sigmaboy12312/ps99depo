@@ -487,7 +487,7 @@ async function _fetchDepositCode() {
 
 /* -- BALANCE -- */
 const BAL_KEY = 'ps99g_bal';
-let _bal = parseInt(localStorage.getItem(BAL_KEY)) || 5000000000; // 50M PSG start
+let _bal = parseInt(localStorage.getItem(BAL_KEY)) || 0;
 
 function getBalance()  { return _bal; }
 function setBalance(n) { _bal = Math.max(0, Math.round(n)); localStorage.setItem(BAL_KEY, _bal); refreshBal(); }
@@ -499,7 +499,20 @@ function refreshBal() {
   _updateWalletDisplay();
 }
 
-function claimFree() { addBal(2500000000); showToast('+2.5B claimed!', 'info'); }
+function claimFree() {
+  if (typeof CV === 'undefined' || !CV.length) { addBal(5000000000); showToast('+5B balance added!', 'info'); return; }
+  const pool = CV.filter(p => p.tier === 'Huge' && p.n >= 250e6 && p.n <= 3e9).sort(() => Math.random() - 0.5);
+  const picks = [];
+  let total = 0;
+  for (const p of pool) {
+    if (total >= 5e9 || picks.length >= 5) break;
+    picks.push(p);
+    _addToInv(p, 'Normal', p.n);
+    total += p.n;
+  }
+  if (picks.length) { addBal(total); showToast(`Claimed ${picks.length} pets (+${fmtPSG(total)})!`, 'win'); }
+  else { addBal(5000000000); showToast('+5B balance!', 'info'); }
+}
 
 /* -- TOAST -- */
 function showToast(msg, type = 'info') {
@@ -2930,36 +2943,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.querySelectorAll('[data-free]').forEach(b => b.addEventListener('click', claimFree));
 
-  // Seed the chat with some recent bot messages so it's never empty
-  if (document.getElementById('chat-msgs')) {
-    const BOT_MSGS = [
-      { displayName:'xR4Zy',       color:'#7c4de8', text:'anyone got a titanic to flip??' },
-      { displayName:'GemLord',     color:'#ef4444', text:'just won 450M on jackpot lets goooo' },
-      { displayName:'NovaPro',     color:'#06b6d4', text:'dice is too luck based lol' },
-      { displayName:'TitanicPro',  color:'#f59e0b', text:'bro i lost 1B in a row im done' },
-      { displayName:'Sk1yRdr',     color:'#ec4899', text:'coinflip is the most fair game here' },
-      { displayName:'LegacyPS',    color:'#10b981', text:'wagered 500M today already' },
-    ];
-    BOT_MSGS.forEach((m, i) => {
-      setTimeout(() => {
-        _renderChatMsg({ username: m.displayName.toLowerCase(), displayName: m.displayName,
-          avatar:'', text: m.text, ts: Date.now() - (BOT_MSGS.length - i) * 90000 }, false);
-      }, 400 + i * 200);
-    });
-    // Keep new bot messages trickling in every 15-40s
-    function _scheduleNextBot() {
-      const delay = 15000 + Math.random() * 25000;
-      setTimeout(() => {
-        const m = BOT_MSGS[Math.floor(Math.random() * BOT_MSGS.length)];
-        const extras = ['anyone wanna flip?','gg','lets go!','rng is rigged lol','just deposited','who wants to dice?','JACKPOT IS LIVE'];
-        _renderChatMsg({ username: m.displayName.toLowerCase(), displayName: m.displayName,
-          avatar:'', text: extras[Math.floor(Math.random() * extras.length)], ts: Date.now() }, false);
-        _scheduleNextBot();
-      }, delay);
-    }
-    _scheduleNextBot();
-  }
-
+  // Restore chat history from previous pages
+  _loadChatHistory();
 
 });
 
@@ -3013,11 +2998,30 @@ function _applyAdminBadge() {
 
 let _chatAdminName = localStorage.getItem('ps99g_admin_name') || 'Owner';
 
+const _CHAT_HIST_KEY = 'ps99g_chat_hist';
+function _saveChatMsg(msg) {
+  try {
+    const hist = JSON.parse(localStorage.getItem(_CHAT_HIST_KEY) || '[]');
+    hist.push({ username: msg.username || '', displayName: msg.displayName || '', avatar: msg.avatar || '', text: msg.text || '', ts: msg.ts || Date.now(), isAdmin: msg.isAdmin || false });
+    if (hist.length > 30) hist.splice(0, hist.length - 30);
+    localStorage.setItem(_CHAT_HIST_KEY, JSON.stringify(hist));
+  } catch {}
+}
+function _loadChatHistory() {
+  const wrap = document.getElementById('chat-msgs');
+  if (!wrap) return;
+  try {
+    const hist = JSON.parse(localStorage.getItem(_CHAT_HIST_KEY) || '[]');
+    hist.forEach(msg => _renderChatMsg({ ...msg, _noSave: true }, false));
+  } catch {}
+}
+
 function _renderChatMsg(msg, isMe) {
   const wrap = document.getElementById('chat-msgs');
   if (!wrap) return;
   const u = currentUser();
   isMe = isMe || (msg.username && msg.username === u.username);
+  if (!msg._noSave && !msg.isSystem && msg.username !== '__system') _saveChatMsg(msg);
 
   // System messages
   if (msg.isSystem || msg.username === '__system') {
