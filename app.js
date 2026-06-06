@@ -2254,6 +2254,43 @@ function _openOwnerProfile() {
   document.getElementById('prof-uname').textContent = adminName;
 }
 
+function _openChatProfile(key) {
+  const d = (window._chatProfiles || {})[key];
+  if (!d) return;
+  _ensureProfileModal();
+  const avEl    = document.getElementById('prof-av-circle');
+  const ringEl  = document.getElementById('prof-av-ring');
+  const hdrEl   = document.getElementById('prof-header-bg');
+  const rankPill = document.getElementById('prof-rank-pill');
+  const initials = (d.displayName || '?').slice(0,2).toUpperCase();
+  if (d.avatarUrl) {
+    avEl.style.cssText = 'background:rgba(0,0,0,.4);overflow:hidden;';
+    avEl.innerHTML = `<img src="${d.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${initials}';this.parentElement.style.cssText='background:linear-gradient(135deg,#1e1645,#120e2a);'">`;
+  } else {
+    avEl.style.cssText = 'background:linear-gradient(135deg,#1e1645,#120e2a);';
+    avEl.textContent = initials;
+  }
+  const color = '#4338ca';
+  if (ringEl) ringEl.style.background = `linear-gradient(135deg,${color},${color}88)`;
+  if (hdrEl)  hdrEl.style.background  = `linear-gradient(135deg,${color}55 0%,${color}22 50%,transparent 100%),linear-gradient(135deg,#3b0764,#6d28d9)`;
+  const rank = getRank(0);
+  rankPill.innerHTML = `${rank.icon}&nbsp;${rank.name.toUpperCase()}`;
+  rankPill.style.cssText = `color:${rank.color};border-color:${rank.color};background:${rank.bg}`;
+  document.getElementById('prof-lv-pill').textContent = 'LVL 1';
+  document.getElementById('prof-lv-pill').style.cssText = '';
+  document.getElementById('prof-uname').textContent = d.displayName || d.username || '?';
+  document.getElementById('prof-id-pill').textContent = d.username ? '@' + d.username : '';
+  document.getElementById('pstat-w').textContent  = '—';
+  const pEl = document.getElementById('pstat-p'); pEl.textContent = '—'; pEl.style.color = '';
+  document.getElementById('pstat-wr').textContent = '—';
+  document.getElementById('pstat-bw').textContent = '—';
+  document.getElementById('pstat-ws').textContent = '—';
+  document.getElementById('pstat-gc').textContent = '—';
+  const ov = document.getElementById('prof-overlay');
+  ov.style.display = 'flex';
+  requestAnimationFrame(() => ov.classList.add('active'));
+}
+
 function closeProfileModal(e, force) {
   if (e && e.target !== document.getElementById('prof-overlay') && !force) return;
   const ov = document.getElementById('prof-overlay');
@@ -2991,9 +3028,16 @@ function _renderChatMsg(msg, isMe) {
     ? 'background:linear-gradient(135deg,rgba(245,158,11,.07),rgba(180,83,9,.04));border-left:2px solid rgba(245,158,11,.45);'
     : '';
 
+  // Store profile data so onclick can look it up without URL-encoding issues
+  window._chatProfiles = window._chatProfiles || {};
+  const _profileKey = msg.username || ('u' + Date.now());
+  window._chatProfiles[_profileKey] = { displayName: name, avatarUrl: msgAvatar, username: msg.username };
+
   const avatarClick = isAdminMsg
     ? `onclick="_openOwnerProfile()" style="cursor:pointer;"`
-    : isMe ? '' : '';
+    : isMe
+    ? `onclick="openProfileModal('you',0)" style="cursor:pointer;"`
+    : `onclick="_openChatProfile('${_profileKey}')" style="cursor:pointer;"`;
 
   const div = document.createElement('div');
   div.className = 'chat-msg';

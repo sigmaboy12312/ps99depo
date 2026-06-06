@@ -481,7 +481,7 @@
 
     if (typeof _wsConn !== 'undefined' && _wsConn && _wsConn.readyState === WebSocket.OPEN) {
       // Server mode: server verifies items, removes from DB, broadcasts state
-      _wsConn.send(JSON.stringify({ type:'jackpot_join', items:selected, cvPet, displayName: me.username || 'You' }));
+      _wsConn.send(JSON.stringify({ type:'jackpot_join', items:selected, cvPet, displayName: me.username || 'You', avatar: localStorage.getItem('ps99g_rblx_avatar') || '' }));
       userDeposit += totalVal;
       closeDeposit();
       showToast(`Joining with ${fmtB(totalVal)}...`, 'info');
@@ -537,8 +537,11 @@
       const petHtml  = thumbUrl
         ? `<div class="jp-wr-pet"><img src="${thumbUrl}" loading="lazy" onerror="this.style.display='none'"></div>`
         : `<div class="jp-wr-pet" style="display:flex;align-items:center;justify-content:center;font-size:1rem;">🪙</div>`;
+      const wrAvInner = p.avatar
+        ? `<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='${p.name[0].toUpperCase()}';">`
+        : p.name[0].toUpperCase();
       return `<div class="jp-wager-row">
-        <div class="jp-wr-avatar" style="background:${p.color};">${p.name[0].toUpperCase()}</div>
+        <div class="jp-wr-avatar" style="background:${p.color};overflow:hidden;padding:0;">${wrAvInner}</div>
         ${petHtml}
         <div class="jp-wr-name">${p.name}</div>
         <div class="jp-wr-pct">${pct}%</div>
@@ -552,11 +555,12 @@
   function applyServerState(round) {
     // Update local players from server
     players = (round.players || []).map(p => ({
-      name:  p.displayName || p.username,
-      bet:   p.bet,
-      color: p.color,
-      cvPet: p.cvPet || null,
-      items: p.items || [],
+      name:   p.displayName || p.username,
+      bet:    p.bet,
+      color:  p.color,
+      cvPet:  p.cvPet || null,
+      items:  p.items || [],
+      avatar: p.avatar || '',
     }));
 
     // Timer display
@@ -616,6 +620,13 @@
       });
       showToast(`JACKPOT! Won ${msg.items?.length||0} items (${fmtB(msg.prize||0)})!`, 'win');
 
+    } else if (msg.type === 'jackpot_refund') {
+      // Nobody else joined — add items back to local inventory
+      (msg.items || []).forEach(item => {
+        if (typeof _addToInv === 'function') _addToInv(item, item.variant || 'Normal', item.value || 0);
+      });
+      showToast('No other players joined — items returned to your inventory.', 'info');
+
     } else if (msg.type === 'jackpot_error') {
       showToast(msg.msg || 'Error joining jackpot', 'info');
     }
@@ -642,9 +653,12 @@
     let html = '';
     for (let lap = 0; lap < 12; lap++) {
       players.forEach((p, i) => {
-        const pct = (p.bet / total * 100).toFixed(1);
+        const pct    = (p.bet / total * 100).toFixed(1);
+        const avInner = p.avatar
+          ? `<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='<span style=\\'font-size:1.5rem;font-weight:900;color:#fff;\\'>${p.name[0].toUpperCase()}</span>'">`
+          : `<span style="font-size:1.5rem;font-weight:900;color:#fff;">${p.name[0].toUpperCase()}</span>`;
         html += `<div class="jp-tape-seg" style="width:${widths[i]}px;background-color:${p.color}bb;">
-          <div class="jp-tape-av" style="background:${p.color};box-shadow:0 0 22px ${p.color}cc;">${p.name[0].toUpperCase()}</div>
+          <div class="jp-tape-av" style="background:${p.color};box-shadow:0 0 22px ${p.color}cc;overflow:hidden;padding:0;">${avInner}</div>
           <div class="jp-tape-name">${p.name}</div>
           <div class="jp-tape-pct">${pct}%</div>
         </div>`;

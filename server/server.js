@@ -144,18 +144,31 @@ function broadcastOnlineCount() {
 }
 
 // ── JACKPOT STATE ────────────────────────────────────
-const JP_COLORS   = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b','#ec4899','#6366f1','#f97316','#a855f7','#14b8a6'];
-const JP_TIMER_MS = 30000;
-const TAX_USER    = 'vexyboiog';
+const JP_COLORS      = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b','#ec4899','#6366f1','#f97316','#a855f7','#14b8a6'];
+const JP_TIMER_MS    = 30000;
+const JP_SOLO_WAIT   = 60000; // refund if no 2nd player joins within 60s
+const TAX_USER       = 'vexyboiog';
 
-let jpRound = _newJpRound();
+let jpRound     = _newJpRound();
+let jpSoloTimer = null;
+
 function _newJpRound() {
   return { id: crypto.randomBytes(4).toString('hex'), players: [], status: 'waiting', timerEndsAt: null, winner: null, _ref: null };
 }
 function _jpPub() { const { _ref, ...pub } = jpRound; return pub; }
 function jpBroadcast() { broadcastAll({ type: 'jackpot_state', round: _jpPub() }); }
 
+function jpRefundAll() {
+  for (const p of jpRound.players) {
+    (p.items || []).forEach(item => addInventoryItem(p.username, item));
+    pushToUser(p.username, { type: 'jackpot_refund', items: p.items || [] });
+  }
+  console.log(`[Jackpot] Round refunded — not enough players`);
+  jpReset();
+}
+
 function jpStartCountdown() {
+  if (jpSoloTimer) { clearTimeout(jpSoloTimer); jpSoloTimer = null; }
   if (jpRound.status !== 'waiting') return;
   jpRound.status      = 'countdown';
   jpRound.timerEndsAt = Date.now() + JP_TIMER_MS;
@@ -168,7 +181,7 @@ function jpSpin() {
   jpRound.status = 'spinning';
   const players = jpRound.players;
   const total   = players.reduce((s,p) => s + p.bet, 0);
-  if (!total) { jpReset(); return; }
+  if (!total || players.length < 2) { jpRefundAll(); return; }
   let roll = Math.random() * total, winner = players[players.length - 1];
   for (const p of players) { roll -= p.bet; if (roll <= 0) { winner = p; break; } }
   jpRound.winner = winner;
@@ -209,6 +222,7 @@ function jpDistribute() {
 
 function jpReset() {
   if (jpRound._ref) clearTimeout(jpRound._ref);
+  if (jpSoloTimer) { clearTimeout(jpSoloTimer); jpSoloTimer = null; }
   setTimeout(() => { jpRound = _newJpRound(); jpBroadcast(); }, 8000);
 }
 
@@ -258,15 +272,24 @@ wss.on('connection', (ws) => {
         const color    = JP_COLORS[jpRound.players.length % JP_COLORS.length];
         const existing = jpRound.players.find(p => p.username === username);
         if (existing) {
-          existing.bet  += actualValue;
-          existing.items = (existing.items||[]).concat(validItems);
-          existing.cvPet = msg.cvPet || existing.cvPet;
+          existing.bet   += actualValue;
+          existing.items  = (existing.items||[]).concat(items);
+          existing.cvPet  = msg.cvPet || existing.cvPet;
+          existing.avatar = msg.avatar || existing.avatar;
         } else {
-          jpRound.players.push({ username, displayName: msg.displayName || username, bet: actualValue, color, items: validItems, cvPet: msg.cvPet || null });
+          jpRound.players.push({ username, displayName: msg.displayName || username, bet: actualValue, color, items, cvPet: msg.cvPet || null, avatar: msg.avatar || '' });
         }
 
         jpBroadcast();
-        if (jpRound.players.length >= 2 && jpRound.status === 'waiting') jpStartCountdown();
+        if (jpRound.players.length >= 2 && jpRound.status === 'waiting') {
+          jpStartCountdown();
+        } else if (jpRound.players.length === 1 && jpRound.status === 'waiting') {
+          // Start solo wait — refund if nobody else joins in time
+          if (jpSoloTimer) clearTimeout(jpSoloTimer);
+          jpSoloTimer = setTimeout(() => {
+            if (jpRound.status === 'waiting' && jpRound.players.length < 2) jpRefundAll();
+          }, JP_SOLO_WAIT);
+        }
       }
 
       if (msg.type === 'game_create' && msg.gameId && typeof msg.amount === 'number') {
