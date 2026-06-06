@@ -1108,7 +1108,7 @@
     }
 
     // Build opp items from oppPet if no items provided
-    let _oppItems = (oppItems && oppItems.length) ? oppItems : (oppPet && oppPet.img ? [oppPet] : null);
+    let _oppItems = (oppItems && oppItems.length) ? oppItems : (oppPet && oppPet.img ? [{ name: oppPet.name, img: oppPet.img, value: oppPet.n || oppPet.value || 0 }] : null);
     buildItems('dc-items-you-list', 'dc-items-you-total', youItems, youBet);
     buildItems('dc-items-opp-list', 'dc-items-opp-total', _oppItems, oppBet);
 

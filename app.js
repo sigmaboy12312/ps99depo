@@ -2473,7 +2473,7 @@ const GEM_DENOMS = [
 GEM_DENOMS.sort((a, b) => a.value - b.value); // ascending — small first
 
 function _gemSVG(colorOrName) {
-  const isBag = colorOrName === '100M Gems' || colorOrName === '1B Gems';
+  const isBag = colorOrName === '1B Gems';
   const isGreen = colorOrName === '1B Gems';
   if (isBag) {
     const body = isGreen ? '#5ee85e' : '#50d4f8';
@@ -2489,9 +2489,10 @@ function _gemSVG(colorOrName) {
       <ellipse cx="10" cy="16.5" rx="2.2" ry="1.4" fill="white" opacity=".3" transform="rotate(-25,10,16.5)"/>
     </svg>`;
   }
-  const isTenM = colorOrName === '10M Gems';
-  const c = colorOrName.startsWith('#') ? colorOrName : (isTenM ? '#f59e0b' : '#22d3ee');
-  const hi = isTenM ? 'rgba(255,240,150,.5)' : 'rgba(200,250,255,.5)';
+  const colorMap = { '1M Gems': '#22d3ee', '10M Gems': '#f59e0b', '100M Gems': '#a855f7' };
+  const c  = colorOrName.startsWith('#') ? colorOrName : (colorMap[colorOrName] || '#22d3ee');
+  const hiMap = { '10M Gems': 'rgba(255,240,150,.5)', '100M Gems': 'rgba(220,180,255,.5)' };
+  const hi = hiMap[colorOrName] || 'rgba(200,250,255,.5)';
   return `<svg viewBox="0 0 28 28" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
     <path d="M14 2 L25 10.5 L20.5 25 L7.5 25 L3 10.5 Z" fill="#0a1428"/>
     <path d="M14 3.5 L23.5 11 L19.5 24 L8.5 24 L4.5 11 Z" fill="${c}"/>
@@ -2499,7 +2500,7 @@ function _gemSVG(colorOrName) {
     <path d="M14 3.5 L4.5 11 L14 14.5 Z" fill="white" opacity=".18"/>
     <path d="M14 14.5 L8.5 24 L19.5 24 Z" fill="rgba(0,0,0,.28)"/>
     <path d="M10.5 5 L14 3.5 L14 8.5 Z" fill="white" opacity=".5"/>
-    ${isTenM ? '<circle cx="20" cy="8" r="2" fill="#fff" opacity=".7"/><circle cx="22" cy="11" r="1.2" fill="#fff" opacity=".4"/>' : ''}
+    ${colorOrName === '10M Gems' ? '<circle cx="20" cy="8" r="2" fill="#fff" opacity=".7"/><circle cx="22" cy="11" r="1.2" fill="#fff" opacity=".4"/>' : ''}
   </svg>`;
 }
 
@@ -2927,7 +2928,7 @@ function _renderWdrInv() {
       row.id = rowId;
       row.style.cssText = 'display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.25);border:1.5px solid rgba(255,255,255,.07);border-radius:10px;padding:9px 12px;margin-bottom:5px;cursor:pointer;transition:border-color .15s;';
       row.innerHTML = `
-        <div style="width:34px;height:34px;flex-shrink:0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.3);padding:2px;">${_gemSVG(gem.color)}</div>
+        <div style="width:34px;height:34px;flex-shrink:0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.3);padding:2px;">${_gemSVG(gem.name)}</div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:.78rem;font-weight:800;color:#fff;">${gem.name}</div>
           <div style="font-size:.62rem;font-weight:700;" style="color:${gem.color};">×${qty.toLocaleString()} &mdash; ${fmtPSG(qty * gem.value)} total</div>
