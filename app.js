@@ -3033,18 +3033,16 @@ function _renderChatMsg(msg, isMe) {
   const _profileKey = msg.username || ('u' + Date.now());
   window._chatProfiles[_profileKey] = { displayName: name, avatarUrl: msgAvatar, username: msg.username };
 
-  const avatarClick = isAdminMsg
-    ? `onclick="_openOwnerProfile()" style="cursor:pointer;"`
-    : isMe
-    ? `onclick="openProfileModal('you',0)" style="cursor:pointer;"`
-    : `onclick="_openChatProfile('${_profileKey}')" style="cursor:pointer;"`;
+  const avatarOnclick = isAdminMsg ? `onclick="_openOwnerProfile()"`
+    : isMe ? `onclick="openProfileModal('you',0)"`
+    : `onclick="_openChatProfile('${_profileKey}')"`;
 
   const div = document.createElement('div');
   div.className = 'chat-msg';
   div.style.cssText = 'animation:slideInMsg .2s ease forwards;' + msgBg;
   div.innerHTML = `
     <div class="cm-avatar-wrap">
-      <div class="cm-av-circle" ${avatarClick} style="background:${circleBg};overflow:hidden;${isAdminMsg?'box-shadow:0 0 12px rgba(245,158,11,.5);':''}">${avatarHtml}</div>
+      <div class="cm-av-circle" ${avatarOnclick} style="cursor:pointer;background:${circleBg};overflow:hidden;${isAdminMsg?'box-shadow:0 0 12px rgba(245,158,11,.5);':''}">${avatarHtml}</div>
     </div>
     <div class="cm-body">
       <div class="cm-meta">
