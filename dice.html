@@ -19,10 +19,11 @@
     @keyframes cinOpen { from{opacity:0} to{opacity:1} }
     .dc-logo { display:flex; align-items:center; justify-content:center; }
     .dc-logo img { height:38px; object-fit:contain;  filter:drop-shadow(0 0 12px rgba(124,77,232,.6)); }
-    .dc-players { display:flex; align-items:center; gap:32px; }
-    .dc-player { display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; transition:all .5s; }
-    .dc-player.winner .dc-circle { border-color:#fbbf24; box-shadow:0 0 28px rgba(251,191,36,.5); }
+    .dc-battle-row { display:flex; align-items:center; justify-content:center; gap:18px; }
+    .dc-player { display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; transition:all .5s; }
+    .dc-player.winner .dc-circle { border-color:#22c55e; box-shadow:0 0 32px rgba(34,197,94,.65); }
     .dc-player.loser { opacity:.3; filter:grayscale(.6); }
+    .dc-pct { display:none; }
     .dc-circle {
       width:64px; height:64px; border-radius:50%;
       border:3px solid rgba(124,77,232,.5);
@@ -239,7 +240,7 @@
       border: 3px solid rgba(139,92,246,.4) !important;
       box-shadow: 0 0 20px rgba(139,92,246,.2) !important;
     }
-    .dc-player.winner .dc-circle { border-color:#fbbf24 !important; box-shadow:0 0 36px rgba(251,191,36,.6) !important; }
+    .dc-player.winner .dc-circle { border-color:#22c55e !important; box-shadow:0 0 36px rgba(34,197,94,.7) !important; }
     .dc-result { font-size:2.2rem !important; }
     .dc-result.win  { color:#22c55e !important; text-shadow:0 0 50px rgba(34,197,94,.9),0 0 100px rgba(34,197,94,.4) !important; }
     .dc-result.lose { color:#ef4444 !important; text-shadow:0 0 50px rgba(239,68,68,.9),0 0 100px rgba(239,68,68,.4) !important; }
@@ -332,27 +333,21 @@
 <!-- DICE CINEMATIC -->
 <div id="dice-cin">
   <div class="dc-logo"><img src="logo.png" alt="99DEPO" onerror="this.outerHTML='<span style=&quot;color:#f472b6;font-weight:900;font-size:1.2rem;&quot;>99<span style=&quot;color:#e879f9;&quot;>DEPO</span></span>'"></div>
-  <div class="dc-players">
+  <div class="dc-battle-row">
     <div class="dc-player" id="dc-you-col">
       <div class="dc-circle" id="dc-you-av">Y</div>
       <div class="dc-name" id="dc-you-name">You</div>
-      <div class="dc-pct" id="dc-you-bet">&mdash;</div>
     </div>
-    <div class="dc-vs">VS</div>
+    <div class="dc-die" id="dc-die-you">?</div>
+    <div class="dc-vs-die">VS</div>
+    <div class="dc-die" id="dc-die-opp">?</div>
     <div class="dc-player" id="dc-opp-col">
       <div class="dc-circle opp" id="dc-opp-av">?</div>
       <div class="dc-name" id="dc-opp-name">???</div>
-      <div class="dc-pct" id="dc-opp-bet">&mdash;</div>
     </div>
   </div>
 
   <div class="dc-items-bar" id="dc-items-bar"></div>
-
-  <div class="dc-dice-row">
-    <div class="dc-die" id="dc-die-you">?</div>
-    <div class="dc-vs-die">VS</div>
-    <div class="dc-die" id="dc-die-opp">?</div>
-  </div>
 
   <div class="dc-seed" id="dc-seed">#loading...</div>
   <div class="dc-result" id="dc-result"></div>
@@ -984,13 +979,17 @@
   //  DICE CINEMATIC 
   function runDiceGame(youName, youBet, oppName, oppBet, oppPet, youPet) {
     const cin = document.getElementById('dice-cin');
-    document.getElementById('dc-you-av').textContent = youName[0].toUpperCase();
+    const _dcYouAv = document.getElementById('dc-you-av');
+    const _dcYouAvUrl = typeof currentUser === 'function' ? currentUser().avatar : '';
+    if (_dcYouAvUrl) {
+      _dcYouAv.innerHTML = `<img src="${_dcYouAvUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${youName[0].toUpperCase()}'">`;
+    } else {
+      _dcYouAv.textContent = youName[0].toUpperCase();
+    }
     document.getElementById('dc-you-name').textContent = youName;
-    document.getElementById('dc-you-bet').textContent = '' + fmtPSG(youBet);
     document.getElementById('dc-opp-av').textContent = oppName[0].toUpperCase();
     document.getElementById('dc-opp-av').style.background = 'linear-gradient(135deg,#ef4444,#b91c1c)';
     document.getElementById('dc-opp-name').textContent = oppName;
-    document.getElementById('dc-opp-bet').textContent = '' + fmtPSG(oppBet);
     document.getElementById('dc-you-col').className = 'dc-player';
     document.getElementById('dc-opp-col').className = 'dc-player';
     document.getElementById('dc-result').className = 'dc-result';

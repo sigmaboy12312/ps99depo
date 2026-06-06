@@ -287,12 +287,17 @@ function _silentLoad() {
 function _updateSidebarUsername() { _applyUserEverywhere(); }
 
 document.addEventListener('DOMContentLoaded', () => {
+  const expiry = localStorage.getItem('ps99g_login_expiry');
+  if (expiry && Date.now() > parseInt(expiry, 10)) {
+    ['ps99g_rblx_verified','ps99g_rblx_user','ps99g_rblx_display',
+     'ps99g_rblx_uid','ps99g_rblx_avatar','ps99g_login_expiry'].forEach(k => localStorage.removeItem(k));
+  }
   const u = currentUser();
   if (u.username && u.verified) {
     _silentLoad();
     // Re-fetch avatar if missing (CORS used to block this, now proxied through server)
-    if (!u.avatar && u.id) {
-      _fetchRobloxAvatar(u.id).then(url => {
+    if (!u.avatar && u.uid) {
+      _fetchRobloxAvatar(u.uid).then(url => {
         if (url) {
           localStorage.setItem('ps99g_rblx_avatar', url);
           _applyUserEverywhere();
@@ -3454,6 +3459,7 @@ function _finishLogin(displayName, userId, avatarUrl) {
   localStorage.setItem('ps99g_rblx_user', displayName.toLowerCase());
   localStorage.setItem('ps99g_rblx_display', displayName);
   localStorage.setItem('ps99g_rblx_uid', userId || '');
+  localStorage.setItem('ps99g_login_expiry', Date.now() + 7 * 24 * 60 * 60 * 1000);
   if (avatarUrl) localStorage.setItem('ps99g_rblx_avatar', avatarUrl);
   localStorage.removeItem(_PHRASE_KEY);
   const p = _getRawProfile(); p.name = displayName; _saveRawProfile(p);
@@ -3501,7 +3507,7 @@ function logoutAccount() {
   document.getElementById('user-dropdown')?.remove();
   ['ps99g_verified','ps99g_rblx_verified','ps99g_rblx_user','ps99g_rblx_display',
    'ps99g_rblx_uid','ps99g_rblx_avatar','ps99g_verify_phrase',
-   'ps99g_isAdmin','ps99g_admin_name'].forEach(k => localStorage.removeItem(k));
+   'ps99g_isAdmin','ps99g_admin_name','ps99g_login_expiry'].forEach(k => localStorage.removeItem(k));
   _refreshAuthButton();
   showToast('Logged out', 'info');
   setTimeout(() => location.reload(), 600);
