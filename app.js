@@ -2829,7 +2829,20 @@ function _wdrSubmit() {
   if (!uname) return showToast('Enter your Roblox username!', 'info');
   document.getElementById('wdr-s1').style.display = 'none';
   document.getElementById('wdr-s2').style.display = 'block';
-  _wdrSelected.forEach(id => _removeFromInv(id));
+
+  // Capture item IDs before clearing selection
+  const itemIds = Array.from(_wdrSelected);
+  const username = localStorage.getItem('ps99g_rblx_user') || '';
+
+  // Tell server to remove items from DB and queue the withdrawal
+  fetch(_SERVER_HTTP + '/api/withdraw/request', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, itemIds, gems: 0 }),
+  }).catch(() => {});
+
+  // Remove from local inventory immediately
+  itemIds.forEach(id => _removeFromInv(id));
   _wdrSelected.clear();
   setTimeout(() => { document.getElementById('wdr-s2').style.display='none'; document.getElementById('wdr-s3').style.display='block'; }, 2200);
 }

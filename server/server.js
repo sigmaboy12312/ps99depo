@@ -261,23 +261,29 @@ wss.on('connection', (ws) => {
         const items = Array.isArray(msg.items) ? msg.items : [];
         if (!items.length) return;
 
-        // Remove items from server DB if they exist there (best-effort; client items may be locally seeded)
+        // Remove items from server DB — only accept items actually in the server's inventory
         const serverInv     = getInventory(username);
         const serverItemIds = new Set(serverInv.map(i => i.id));
-        items.forEach(item => { if (serverItemIds.has(item.id)) removeInventoryItem(username, item.id); });
+        // Deduplicate: only allow items that are currently in server inventory (prevents re-deposit of same item)
+        const validItems = items.filter(item => serverItemIds.has(item.id));
+        // Also deduplicate against items already in this round from this player
+        const existing0 = jpRound.players.find(p => p.username === username);
+        const alreadyIn = new Set((existing0?.items || []).map(i => i.id));
+        const newItems  = validItems.filter(item => !alreadyIn.has(item.id));
+        newItems.forEach(item => removeInventoryItem(username, item.id));
 
-        const actualValue = items.reduce((s,i) => s + (i.value||0), 0);
+        const actualValue = newItems.reduce((s,i) => s + (i.value||0), 0);
         if (actualValue <= 0) return;
 
         const color    = JP_COLORS[jpRound.players.length % JP_COLORS.length];
         const existing = jpRound.players.find(p => p.username === username);
         if (existing) {
           existing.bet   += actualValue;
-          existing.items  = (existing.items||[]).concat(items);
+          existing.items  = (existing.items||[]).concat(newItems);
           existing.cvPet  = msg.cvPet || existing.cvPet;
           existing.avatar = msg.avatar || existing.avatar;
         } else {
-          jpRound.players.push({ username, displayName: msg.displayName || username, bet: actualValue, color, items, cvPet: msg.cvPet || null, avatar: msg.avatar || '' });
+          jpRound.players.push({ username, displayName: msg.displayName || username, bet: actualValue, color, items: newItems, cvPet: msg.cvPet || null, avatar: msg.avatar || '' });
         }
 
         jpBroadcast();

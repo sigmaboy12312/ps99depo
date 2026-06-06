@@ -482,6 +482,8 @@
     if (typeof _wsConn !== 'undefined' && _wsConn && _wsConn.readyState === WebSocket.OPEN) {
       // Server mode: server verifies items, removes from DB, broadcasts state
       _wsConn.send(JSON.stringify({ type:'jackpot_join', items:selected, cvPet, displayName: me.username || 'You', avatar: localStorage.getItem('ps99g_rblx_avatar') || '' }));
+      // Remove from local inventory immediately so user can't re-deposit same items
+      selected.forEach(i => { if (typeof _removeFromInv === 'function') _removeFromInv(i.id); });
       userDeposit += totalVal;
       closeDeposit();
       showToast(`Joining with ${fmtB(totalVal)}...`, 'info');
@@ -765,10 +767,27 @@
     const color = winner.color || '#fbbf24';
 
     const avatarEl = document.getElementById('win-avatar');
-    document.getElementById('win-initial').textContent = (winner.name||'?')[0].toUpperCase();
     avatarEl.style.background  = `linear-gradient(135deg,${color}cc,${color}44)`;
     avatarEl.style.borderColor = color;
     avatarEl.style.boxShadow   = `0 0 40px ${color}88,0 0 80px ${color}33`;
+
+    // Show avatar image if available
+    const me = typeof currentUser === 'function' ? currentUser() : {};
+    const isMe = winner.name === (me.displayName || me.username);
+    const avatarUrl = winner.avatar || (isMe ? me.avatar : '');
+    avatarEl.innerHTML = '';
+    if (avatarUrl) {
+      const img = document.createElement('img');
+      img.src = avatarUrl;
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+      img.onerror = function() { this.remove(); const s=document.createElement('span'); s.style.cssText='font-size:2.5rem;font-weight:900;color:#fff;'; s.textContent=(winner.name||'?')[0].toUpperCase(); avatarEl.appendChild(s); };
+      avatarEl.appendChild(img);
+    } else {
+      const s = document.createElement('span');
+      s.style.cssText = 'font-size:2.5rem;font-weight:900;color:#fff;';
+      s.textContent = (winner.name||'?')[0].toUpperCase();
+      avatarEl.appendChild(s);
+    }
     document.getElementById('win-name').textContent = winner.name + ' wins!';
     document.getElementById('win-prize').innerHTML  = fmtB(prize);
     document.getElementById('win-odds').textContent = `had ${pct}% chance`;
