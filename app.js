@@ -342,10 +342,17 @@ function _connectWS() {
 
       if (msg.type === 'connected') {
         _wsId = msg.wsId;
-        // Identify ourselves so server can load our real balance
         const savedUser = localStorage.getItem('ps99g_rblx_user');
         if (savedUser) {
           _wsConn.send(JSON.stringify({ type: 'identify', username: savedUser }));
+          // Push our local stats so other players can view our profile
+          const _sp = myProfile();
+          _wsConn.send(JSON.stringify({ type: 'profile_update',
+            wagered: _sp.wagered||0, won: _sp.won||0, lost: _sp.lost||0,
+            winCount: _sp.winCount||0, lossCount: _sp.lossCount||0,
+            bestWin: _sp.bestWin||0, maxStreak: _sp.maxStreak||0, level: _sp.level||1,
+            displayName: _sp.name || savedUser,
+            avatar: localStorage.getItem('ps99g_rblx_avatar') || '' }));
         }
 
       } else if (msg.type === 'session_data') {
@@ -409,15 +416,18 @@ function _connectWS() {
       } else if (msg.type === 'tip_sent') {
         showToast(`Tip sent! (${fmtPSG(msg.total || 0)})`, 'win');
         if (Array.isArray(msg.inventory)) try { localStorage.setItem('ps99g_inv', JSON.stringify(msg.inventory)); } catch {}
-        if (typeof msg.balance === 'number') { setBalance(msg.balance); refreshBal(); }
+        _bal = _invTotal(); try { localStorage.setItem(BAL_KEY, _bal); } catch {} refreshBal();
 
       } else if (msg.type === 'tip_received') {
         showToast(`You received a tip worth ${fmtPSG(msg.total || 0)}!`, 'win');
         if (Array.isArray(msg.inventory)) try { localStorage.setItem('ps99g_inv', JSON.stringify(msg.inventory)); } catch {}
-        if (typeof msg.balance === 'number') { setBalance(msg.balance); refreshBal(); }
+        _bal = _invTotal(); try { localStorage.setItem(BAL_KEY, _bal); } catch {} refreshBal();
 
       } else if (msg.type === 'withdrawal_complete') {
         showToast('Withdrawal sent! Check your trade window.', 'info');
+
+      } else if (msg.type === 'profile_data') {
+        _handleProfileData(msg);
 
       } else if (msg.type === 'games_update') {
         if (typeof _handleServerGames === 'function') _handleServerGames(msg.games || []);
@@ -643,6 +653,7 @@ function recordWin(amount) {
   p.maxStreak = Math.max(p.maxStreak||0, p.streak);
   p.bestWin = Math.max(p.bestWin||0, amount);
   _saveRawProfile(p);
+  _pushProfileToServer();
 }
 function recordLoss(amount) {
   const p = _getRawProfile();
@@ -651,6 +662,19 @@ function recordLoss(amount) {
   p.lossCount = (p.lossCount||0) + 1;
   p.streak = 0;
   _saveRawProfile(p);
+  _pushProfileToServer();
+}
+function _pushProfileToServer() {
+  try {
+    if (typeof _wsConn === 'undefined' || !_wsConn || _wsConn.readyState !== WebSocket.OPEN) return;
+    const sp = myProfile();
+    _wsConn.send(JSON.stringify({ type: 'profile_update',
+      wagered: sp.wagered||0, won: sp.won||0, lost: sp.lost||0,
+      winCount: sp.winCount||0, lossCount: sp.lossCount||0,
+      bestWin: sp.bestWin||0, maxStreak: sp.maxStreak||0, level: sp.level||1,
+      displayName: sp.name || localStorage.getItem('ps99g_rblx_user') || '',
+      avatar: localStorage.getItem('ps99g_rblx_avatar') || '' }));
+  } catch {}
 }
 
 const CV = [
@@ -2340,24 +2364,62 @@ function _openChatProfile(key) {
   const color = '#4338ca';
   if (ringEl) ringEl.style.background = `linear-gradient(135deg,${color},${color}88)`;
   if (hdrEl)  hdrEl.style.background  = `linear-gradient(135deg,${color}55 0%,${color}22 50%,transparent 100%),linear-gradient(135deg,#3b0764,#6d28d9)`;
-  const rank = getRank(0);
-  rankPill.innerHTML = `${rank.icon}&nbsp;${rank.name.toUpperCase()}`;
-  rankPill.style.cssText = `color:${rank.color};border-color:${rank.color};background:${rank.bg}`;
   document.getElementById('prof-lv-pill').textContent = 'LVL 1';
   document.getElementById('prof-lv-pill').style.cssText = '';
   document.getElementById('prof-uname').textContent = d.displayName || d.username || '?';
   document.getElementById('prof-id-pill').textContent = d.username ? '@' + d.username : '';
-  document.getElementById('pstat-w').textContent  = '—';
-  const pEl = document.getElementById('pstat-p'); pEl.textContent = '—'; pEl.style.color = '';
-  document.getElementById('pstat-wr').textContent = '—';
-  document.getElementById('pstat-bw').textContent = '—';
-  document.getElementById('pstat-ws').textContent = '—';
-  document.getElementById('pstat-gc').textContent = '—';
+  // Show loading state while we fetch real stats
+  ['pstat-w','pstat-p','pstat-wr','pstat-bw','pstat-ws','pstat-gc'].forEach(id => {
+    const el = document.getElementById(id); if (el) { el.textContent = '…'; el.style.color = ''; }
+  });
+  const rank0 = getRank(0);
+  rankPill.innerHTML = `${rank0.icon}&nbsp;${rank0.name.toUpperCase()}`;
+  rankPill.style.cssText = `color:${rank0.color};border-color:${rank0.color};background:${rank0.bg}`;
   const tipBtn2 = document.getElementById('prof-tip-btn');
   if (tipBtn2) tipBtn2.style.display = _tipTargetUsername ? '' : 'none';
   const ov = document.getElementById('prof-overlay');
   ov.style.display = 'flex';
   requestAnimationFrame(() => ov.classList.add('active'));
+  // Request real stats from server
+  if (_tipTargetUsername && typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
+    _wsConn.send(JSON.stringify({ type: 'profile_request', username: _tipTargetUsername }));
+  }
+}
+
+function _handleProfileData(msg) {
+  const ov = document.getElementById('prof-overlay');
+  if (!ov || !ov.classList.contains('active')) return; // modal closed
+  if (!msg.profile) {
+    ['pstat-w','pstat-p','pstat-wr','pstat-bw','pstat-ws','pstat-gc'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = '—';
+    });
+    return;
+  }
+  const p = msg.profile;
+  const rank = getRank(p.wagered || 0);
+  const rankPill = document.getElementById('prof-rank-pill');
+  if (rankPill) { rankPill.innerHTML = `${rank.icon}&nbsp;${rank.name.toUpperCase()}`; rankPill.style.cssText = `color:${rank.color};border-color:${rank.color};background:${rank.bg}`; }
+  const lvl = p.level || Math.max(1, Math.floor((p.wagered||0) / 1e9) + 1);
+  const lvlPill = document.getElementById('prof-lv-pill');
+  if (lvlPill) { lvlPill.textContent = `LVL ${lvl}`; lvlPill.style.cssText = ''; }
+  const gc = (p.winCount||0) + (p.lossCount||0);
+  const wr = gc > 0 ? Math.round((p.winCount||0)/gc*100) : 0;
+  const profit = (p.won||0) - (p.lost||0);
+  document.getElementById('pstat-gc').textContent = gc + ' played';
+  document.getElementById('pstat-wr').textContent = wr + '%';
+  document.getElementById('pstat-w').textContent  = fmtB(p.wagered||0);
+  document.getElementById('pstat-bw').textContent = fmtB(p.bestWin||0);
+  document.getElementById('pstat-ws').textContent = (p.maxStreak||0) + ' games';
+  const pEl = document.getElementById('pstat-p');
+  if (pEl) { pEl.textContent = (profit>=0?'+':'-') + fmtB(Math.abs(profit)); pEl.style.color = profit>=0?'var(--green)':'var(--red)'; }
+  if (p.avatar) {
+    const avEl = document.getElementById('prof-av-circle');
+    if (avEl && !avEl.querySelector('img')) {
+      const initials = (p.displayName||'?').slice(0,2).toUpperCase();
+      avEl.style.cssText = 'background:rgba(0,0,0,.4);overflow:hidden;';
+      avEl.innerHTML = `<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${initials}';this.parentElement.style.cssText='background:linear-gradient(135deg,#1e1645,#120e2a);'">`;
+    }
+  }
 }
 
 function closeProfileModal(e, force) {

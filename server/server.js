@@ -98,6 +98,17 @@ function removeInventoryItem(username, id) {
   saveDB(db);
 }
 
+function saveProfile(username, stats) {
+  const db = loadDB();
+  if (!db.profiles) db.profiles = {};
+  db.profiles[username] = { ...stats, updatedAt: Date.now() };
+  saveDB(db);
+}
+function getProfile(username) {
+  const db = loadDB();
+  return (db.profiles || {})[username] || null;
+}
+
 // ── MIDDLEWARE ───────────────────────────────────────
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
@@ -248,6 +259,21 @@ wss.on('connection', (ws) => {
         ws.send(JSON.stringify({ type: 'session_data', balance, inventory }));
         ws.send(JSON.stringify({ type: 'jackpot_state', round: _jpPub() }));
         console.log(`[WS] ${u} identified — balance: ${balance}`);
+      }
+
+      if (msg.type === 'profile_update') {
+        const client = wsClients.get(wsId);
+        if (client?.username) {
+          const { wagered, won, lost, winCount, lossCount, bestWin, maxStreak, level, displayName, avatar } = msg;
+          saveProfile(client.username, { wagered, won, lost, winCount, lossCount, bestWin, maxStreak, level, displayName, avatar });
+        }
+      }
+
+      if (msg.type === 'profile_request') {
+        const target = (msg.username || '').toLowerCase();
+        if (!target) return;
+        const prof = getProfile(target);
+        ws.send(JSON.stringify({ type: 'profile_data', username: target, profile: prof }));
       }
 
       if (msg.type === 'jackpot_join') {
