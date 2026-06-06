@@ -82,7 +82,7 @@ function addBalance(username, amount) {
 function addInventoryItem(username, item) {
   const db = loadDB();
   ensureUser(db, username);
-  const entry = { id: Date.now() + '_' + crypto.randomBytes(4).toString('hex'), ...item, depositedAt: Date.now() };
+  const entry = { ...item, id: Date.now() + '_' + crypto.randomBytes(4).toString('hex'), depositedAt: Date.now() };
   db.inventory[username].unshift(entry);
   saveDB(db);
   return entry;
