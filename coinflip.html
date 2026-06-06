@@ -1679,12 +1679,11 @@
       grid.innerHTML = '';
       if (pets.length > 0) {
         if (petSec) petSec.style.display = 'block';
-        pets.forEach((_, idx) => _cmSelInv.add(idx));
-        if (hint) hint.textContent = 'Pets auto-selected. Click to deselect.';
+        if (hint) hint.textContent = 'Select pets to wager.';
         pets.forEach((item, idx) => {
           const short = (item.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
           const d = document.createElement('div');
-          d.style.cssText='background:rgba(124,77,232,.14);border:1.5px solid var(--purple);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
+          d.style.cssText='background:var(--bg-card2);border:1.5px solid var(--border);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
           d.innerHTML=`<div style="width:46px;height:46px;margin:0 auto 4px;"><img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.opacity='.3'"></div><div style="font-size:.56rem;font-weight:700;line-height:1.2;">${short}</div><div style="font-size:.58rem;color:var(--purple-b);font-weight:800;">${fmtPSG(item.value)}</div>`;
           d.onclick=()=>{
             if(_cmSelInv.has(idx)){_cmSelInv.delete(idx);d.style.borderColor='var(--border)';d.style.background='var(--bg-card2)';}
@@ -1799,10 +1798,27 @@
       if (grid) grid.innerHTML = '';
       if (pets.length > 0 && grid) {
         if (petSec) petSec.style.display = 'block';
+
+        // Greedy auto-select: pick highest-value items that fit within 105% of creator's amount
+        const _autoTarget = _invJoinCtx ? _invJoinCtx.creatorAmount : 0;
+        const _autoMax    = Math.ceil(_autoTarget * 1.05);
+        let   _autoRunning = 0;
+        const sortedByVal = [...pets.entries()].sort((a,b) => (b[1].value||0) - (a[1].value||0));
+        for (const [idx, item] of sortedByVal) {
+          if (_autoRunning >= _autoTarget) break;
+          if (_autoRunning + (item.value||0) <= _autoMax) {
+            _invSelected.add(idx);
+            _autoRunning += (item.value||0);
+          }
+        }
+
         pets.forEach((item, idx) => {
           const short = (item.name || '').replace(/^(Huge|Titanic|Gargantuan)\s/, '');
           const d = document.createElement('div');
-          d.style.cssText = 'background:rgba(0,0,0,.3);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .15s;';
+          const isSel = _invSelected.has(idx);
+          d.style.cssText = isSel
+            ? 'background:rgba(124,77,232,.14);border:1.5px solid rgba(124,77,232,.6);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .15s;'
+            : 'background:rgba(0,0,0,.3);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .15s;';
           d.innerHTML = `<div style="width:48px;height:48px;margin:0 auto 4px;"><img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.opacity='.3'"></div><div style="font-size:.56rem;font-weight:700;line-height:1.2;margin-bottom:2px;">${short}</div><div style="font-size:.58rem;color:#4ade80;font-weight:800;">${fmtPSG(item.value)}</div>`;
           d.onclick = () => {
             if (_invSelected.has(idx)) { _invSelected.delete(idx); d.style.borderColor='rgba(255,255,255,.1)'; d.style.background='rgba(0,0,0,.3)'; }

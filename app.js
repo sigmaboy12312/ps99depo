@@ -309,6 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function fmtPSG(n) {
+  n = (n || 0) / 10000; // 1M gems internal = 100 display units
   function r(x) { return +(x.toFixed(x >= 100 ? 0 : x >= 10 ? 1 : 2)); }
   if (n >= 1e9) return r(n / 1e9) + 'B';
   if (n >= 1e6) return r(n / 1e6) + 'M';

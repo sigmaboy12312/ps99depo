@@ -407,6 +407,33 @@
   let userDeposit = 0;
   let spinning    = false;
   let _timerIv    = null; // client-side countdown display only
+  let _idleRaf    = null;
+  let _idleDir    = -1;
+  let _idlePos    = 0;
+
+  function _jpStartIdle() {
+    if (_idleRaf || !players.length) return;
+    const tape = document.getElementById('jp-tape');
+    if (!tape || !tape.children.length) return;
+    tape.style.transition = 'none';
+    const step = () => {
+      if (spinning) { _idleRaf = null; return; }
+      _idlePos += _idleDir * 0.4;
+      const max = Math.min(players.length * 200, 600);
+      if (_idlePos <= -max) _idleDir = 1;
+      if (_idlePos >= 0)    _idleDir = -1;
+      tape.style.transform = `translateX(${_idlePos}px)`;
+      _idleRaf = requestAnimationFrame(step);
+    };
+    _idleRaf = requestAnimationFrame(step);
+  }
+
+  function _jpStopIdle() {
+    if (_idleRaf) { cancelAnimationFrame(_idleRaf); _idleRaf = null; }
+    _idlePos = 0;
+    const tape = document.getElementById('jp-tape');
+    if (tape) { tape.style.transition = 'none'; tape.style.transform = 'translateX(0)'; }
+  }
 
   function getTotalPot() { return players.reduce((s, p) => s + p.bet, 0); }
 
@@ -598,9 +625,12 @@
       _st.querySelector('.jp-arena-status-sub').textContent   = subs[round.status]   || '';
     }
 
+    render(); // build tape FIRST so _doSpinAnimation has correct segments
+
     // Trigger spin animation when server says spinning
     if (round.status === 'spinning' && round.winner && !spinning) {
       spinning = true;
+      _jpStopIdle();
       document.getElementById('deposit-btn').disabled = true;
       document.getElementById('jp-arena-card').classList.add('spinning');
       _doSpinAnimation(round.winner);
@@ -608,9 +638,10 @@
       spinning = false;
       document.getElementById('deposit-btn').disabled = false;
       document.getElementById('jp-arena-card').classList.remove('spinning');
+      _jpStartIdle();
+    } else if (round.status === 'countdown') {
+      _jpStopIdle();
     }
-
-    render();
   }
 
   // ── Receive server messages ───────────────────────────────
@@ -680,8 +711,10 @@
       });
     }
     tape.innerHTML = html;
-    tape.style.transform = 'translateX(0)';
-    tape.style.transition = 'none';
+    if (!spinning) {
+      tape.style.transform = 'translateX(0)';
+      tape.style.transition = 'none';
+    }
   }
 
   // ── Spin ─────────────────────────────────────────────────
