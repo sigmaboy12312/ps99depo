@@ -515,8 +515,14 @@
       display:inline-block;
       transition:filter 0.3s;
     }
+    #cin-coin.coin-paused.landed-heads #cin-coin-inner {
+      filter: drop-shadow(0 0 28px rgba(58,174,248,.95)) drop-shadow(0 0 60px rgba(26,127,212,.6));
+    }
+    #cin-coin.coin-paused.landed-tails #cin-coin-inner {
+      filter: drop-shadow(0 0 28px rgba(245,160,32,.95)) drop-shadow(0 0 60px rgba(208,112,16,.6));
+    }
     #cin-coin.coin-paused #cin-coin-inner {
-      filter: drop-shadow(0 0 24px rgba(255,195,40,.95)) drop-shadow(0 0 60px rgba(255,170,20,.55));
+      filter: drop-shadow(0 0 28px rgba(255,195,40,.95)) drop-shadow(0 0 60px rgba(255,170,20,.55));
     }
     @keyframes starburstAnim {
       0%   { opacity:0; transform:scale(.4) rotate(0deg); }
@@ -855,8 +861,117 @@
         <div class="cin-countdown" id="cin-countdown"></div>
         <div id="cin-coin" style="width:192px;height:192px;position:relative;perspective:800px;display:inline-block;z-index:10;">
           <div id="cin-coin-inner" style="width:192px;height:192px;transform-style:preserve-3d;position:relative;transform:rotateY(0deg);">
-            <div id="cin-f-heads" style="position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;background:radial-gradient(circle at 36% 30%,#fffce0 0%,#ffe040 18%,#e8a800 48%,#c07000 72%,#6b3a00 100%);box-shadow:inset -6px -9px 18px rgba(0,0,0,.45),0 0 0 8px #9a6010,0 12px 40px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:5.6rem;font-weight:900;font-family:'Arial Black',Arial,sans-serif;color:rgba(60,20,0,.52);text-shadow:2px 3px 0 rgba(255,240,100,.42),-1px -1px 0 rgba(0,0,0,.12);">H</div>
-            <div id="cin-f-tails" style="position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;transform:rotateY(180deg);background:radial-gradient(circle at 36% 30%,#daf6ff 0%,#48b0ff 18%,#0e52cc 48%,#0a2a80 72%,#040f40 100%);box-shadow:inset -6px -9px 18px rgba(0,0,0,.45),0 0 0 8px #1040a0,0 12px 40px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:5.6rem;font-weight:900;font-family:'Arial Black',Arial,sans-serif;color:rgba(0,10,60,.52);text-shadow:2px 3px 0 rgba(100,190,255,.42),-1px -1px 0 rgba(0,0,0,.12);">T</div>
+            <div id="cin-f-heads" style="position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;overflow:hidden;">
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="192" height="192">
+                <defs>
+                  <radialGradient id="hcenter" cx="42%" cy="38%" r="65%"><stop offset="0%" stop-color="#ffffff"/><stop offset="70%" stop-color="#ddf0ff"/><stop offset="100%" stop-color="#c2e4ff"/></radialGradient>
+                  <radialGradient id="hletter" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#5bc8ff"/><stop offset="100%" stop-color="#0a6ec4"/></radialGradient>
+                  <filter id="hdrp"><feDropShadow dx="2" dy="3" stdDeviation="2" flood-color="#0a5aaa" flood-opacity="0.5"/></filter>
+                </defs>
+                <!-- White base -->
+                <circle cx="100" cy="100" r="99" fill="white"/>
+                <!-- Notch tabs (24, every 15°) -->
+                <g fill="#3aaef8">
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(0 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(15 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(30 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(45 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(60 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(75 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(90 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(105 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(120 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(135 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(150 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(165 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(180 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(195 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(210 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(225 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(240 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(255 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(270 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(285 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(300 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(315 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(330 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(345 100 100)"/>
+                </g>
+                <!-- Outer ring -->
+                <circle cx="100" cy="100" r="87" fill="#1a7fd4"/>
+                <!-- Ring highlight -->
+                <circle cx="100" cy="100" r="82" fill="#3aaef8"/>
+                <!-- Mid ring dark -->
+                <circle cx="100" cy="100" r="76" fill="#1060b8"/>
+                <!-- Mid ring bright -->
+                <circle cx="100" cy="100" r="71" fill="#2494e8"/>
+                <!-- Inner ring dark -->
+                <circle cx="100" cy="100" r="66" fill="#1060b8"/>
+                <!-- Center disc -->
+                <circle cx="100" cy="100" r="60" fill="url(#hcenter)"/>
+                <!-- Shine sweep -->
+                <ellipse cx="82" cy="78" rx="22" ry="14" fill="white" opacity="0.35" transform="rotate(-30 82 78)"/>
+                <!-- H letter shadow -->
+                <text x="102" y="124" text-anchor="middle" font-size="78" font-weight="900" font-family="Arial Black,Arial,sans-serif" fill="#0a5aaa" opacity="0.35">H</text>
+                <!-- H letter -->
+                <text x="100" y="122" text-anchor="middle" font-size="78" font-weight="900" font-family="Arial Black,Arial,sans-serif" fill="url(#hletter)">H</text>
+              </svg>
+            </div>
+            <div id="cin-f-tails" style="position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;transform:rotateY(180deg);overflow:hidden;">
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="192" height="192">
+                <defs>
+                  <radialGradient id="tcenter" cx="42%" cy="38%" r="65%"><stop offset="0%" stop-color="#ffffff"/><stop offset="70%" stop-color="#fff4dd"/><stop offset="100%" stop-color="#ffe5b0"/></radialGradient>
+                  <radialGradient id="tletter" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#ffcc55"/><stop offset="100%" stop-color="#c06000"/></radialGradient>
+                </defs>
+                <!-- White base -->
+                <circle cx="100" cy="100" r="99" fill="white"/>
+                <!-- Notch tabs (24, every 15°) -->
+                <g fill="#f5a020">
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(0 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(15 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(30 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(45 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(60 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(75 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(90 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(105 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(120 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(135 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(150 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(165 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(180 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(195 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(210 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(225 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(240 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(255 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(270 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(285 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(300 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(315 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(330 100 100)"/>
+                  <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(345 100 100)"/>
+                </g>
+                <!-- Outer ring -->
+                <circle cx="100" cy="100" r="87" fill="#d07010"/>
+                <!-- Ring highlight -->
+                <circle cx="100" cy="100" r="82" fill="#f5a020"/>
+                <!-- Mid ring dark -->
+                <circle cx="100" cy="100" r="76" fill="#b05800"/>
+                <!-- Mid ring bright -->
+                <circle cx="100" cy="100" r="71" fill="#e88c10"/>
+                <!-- Inner ring dark -->
+                <circle cx="100" cy="100" r="66" fill="#b05800"/>
+                <!-- Center disc -->
+                <circle cx="100" cy="100" r="60" fill="url(#tcenter)"/>
+                <!-- Shine sweep -->
+                <ellipse cx="82" cy="78" rx="22" ry="14" fill="white" opacity="0.35" transform="rotate(-30 82 78)"/>
+                <!-- T letter shadow -->
+                <text x="102" y="124" text-anchor="middle" font-size="78" font-weight="900" font-family="Arial Black,Arial,sans-serif" fill="#8b4000" opacity="0.35">T</text>
+                <!-- T letter -->
+                <text x="100" y="122" text-anchor="middle" font-size="78" font-weight="900" font-family="Arial Black,Arial,sans-serif" fill="url(#tletter)">T</text>
+              </svg>
+            </div>
           </div>
           <div id="cin-starburst" style="position:absolute;inset:-38px;pointer-events:none;opacity:0;border-radius:50%;"></div>
         </div>
@@ -2268,7 +2383,7 @@
     document.getElementById('cin-countdown').className = 'cin-countdown';
     document.getElementById('cin-countdown').textContent = '';
     document.getElementById('cin-coin').style.filter = '';
-    document.getElementById('cin-coin').classList.remove('coin-paused');
+    document.getElementById('cin-coin').classList.remove('coin-paused','landed-heads','landed-tails');
     const _ci = document.getElementById('cin-coin-inner'); if (_ci) _ci.style.transform = 'rotateY(0deg)';
     const _sb = document.getElementById('cin-starburst'); if (_sb) _sb.classList.remove('active');
     document.getElementById('cin-you-col').className = 'cin-player-col';
@@ -2463,7 +2578,8 @@
       } else {
         cinFlipAF = null;
         coinEl.style.filter = '';
-        coinEl.classList.add('coin-paused');
+        coinEl.classList.remove('landed-heads','landed-tails');
+        coinEl.classList.add('coin-paused', side === 'heads' ? 'landed-heads' : 'landed-tails');
         playCrownSound();
         shakeCinematic(6, 320);
 
