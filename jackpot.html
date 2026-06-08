@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>99Depo &mdash; Jackpot</title>
-  <link rel="stylesheet" href="style.css?v=208">
+  <link rel="stylesheet" href="style.css?v=212">
   <style>
     #jp-canvas { position:fixed;inset:0;pointer-events:none;z-index:800; }
     #jp-flash  { position:fixed;inset:0;background:#fbbf24;pointer-events:none;opacity:0;z-index:750;transition:opacity .08s ease; }
@@ -389,9 +389,10 @@
   </div>
 </div>
 
-<script src="app.js?v=208"></script>
+<script src="app.js?v=213"></script>
 <script>
   const COLORS = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b','#ec4899','#6366f1','#f97316','#a855f7','#14b8a6'];
+  const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
   function randCVPet() {
     const pool = (typeof CV !== 'undefined') ? CV.filter(p => p.img && p.n > 0) : [];
@@ -399,7 +400,8 @@
   }
   function petThumbUrl(pet) {
     if (!pet || !pet.img) return '';
-    return `https://assetdelivery.roblox.com/v1/asset/?id=${pet.img}`;
+    const imgNum = String(pet.img).replace(/\D/g,'');
+    return imgNum ? `https://assetdelivery.roblox.com/v1/asset/?id=${imgNum}` : '';
   }
 
   // Bot bets tied to their pet's actual (normal) value ±30%
@@ -466,18 +468,37 @@
     }
     grid.style.display  = 'grid';
     empty.style.display = 'none';
-    grid.innerHTML = inv.map(item => {
-      const thumb = item.img ? `https://assetdelivery.roblox.com/v1/asset/?id=${item.img}` : '';
-      const imgHtml = thumb
-        ? `<img src="${thumb}" style="width:52px;height:52px;object-fit:contain;" onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='https://db.biggames.io/api/thumbnails/asset/${item.img}';}else{this.style.opacity='.2';}">`
-        : `<div style="width:52px;height:52px;border-radius:8px;background:${item.color||'#7c4de8'}33;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🪙</div>`;
-      const tipData = JSON.stringify({name:item.name,value:item.value||0,img:item.img||''});
-      return `<div class="join-item-card" id="jic-${item.id}" onclick="_toggleJoinItem('${item.id}')" data-item-tip='${tipData.replace(/'/g,"&#39;")}' style="border-color:${item.color||'rgba(255,255,255,.1)'}33;">
-        ${imgHtml}
-        <div style="font-size:.52rem;font-weight:800;color:#fff;margin-top:4px;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;">${item.name}</div>
-        <div style="font-size:.6rem;font-weight:900;color:#fbbf24;pointer-events:none;">${fmtB(item.value||0)}</div>
-      </div>`;
-    }).join('');
+    grid.innerHTML = '';
+    inv.forEach(item => {
+      const imgNum = String(item.img||'').replace(/\D/g,'');
+      const d = document.createElement('div');
+      d.className = 'join-item-card';
+      d.id = 'jic-' + item.id;
+      d.style.borderColor = (item.color||'rgba(255,255,255,.1)') + '33';
+      d.setAttribute('data-item-tip', JSON.stringify({name:item.name,value:item.value||0,img:item.img||''}));
+      d.onclick = () => _toggleJoinItem(item.id);
+      if (imgNum) {
+        const _ji = document.createElement('img');
+        _ji.src = `https://assetdelivery.roblox.com/v1/asset/?id=${imgNum}`;
+        _ji.style.cssText = 'width:52px;height:52px;object-fit:contain;';
+        _ji.onerror = function() { if (!this.dataset.fb) { this.dataset.fb=1; this.src=`https://db.biggames.io/api/thumbnails/asset/${imgNum}`; } else { this.style.opacity='.2'; } };
+        d.appendChild(_ji);
+      } else {
+        const _jp = document.createElement('div');
+        _jp.style.cssText = `width:52px;height:52px;border-radius:8px;background:${item.color||'#7c4de8'}33;display:flex;align-items:center;justify-content:center;font-size:1.4rem;`;
+        _jp.textContent = '??';
+        d.appendChild(_jp);
+      }
+      const _jn = document.createElement('div');
+      _jn.style.cssText = 'font-size:.52rem;font-weight:800;color:#fff;margin-top:4px;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;';
+      _jn.textContent = item.name;
+      d.appendChild(_jn);
+      const _jv = document.createElement('div');
+      _jv.style.cssText = 'font-size:.6rem;font-weight:900;color:#fbbf24;pointer-events:none;';
+      _jv.textContent = fmtB(item.value||0);
+      d.appendChild(_jv);
+      grid.appendChild(d);
+    });
     _updateJoinTotal();
   }
 
@@ -510,7 +531,7 @@
 
     if (typeof _wsConn !== 'undefined' && _wsConn && _wsConn.readyState === WebSocket.OPEN) {
       // Server mode: server verifies items, removes from DB, broadcasts state
-      _wsConn.send(JSON.stringify({ type:'jackpot_join', items:selected, cvPet, displayName: me.username || 'You', avatar: localStorage.getItem('ps99g_rblx_avatar') || '' }));
+      _wsConn.send(JSON.stringify({ type:'jackpot_join', items:selected, cvPet, displayName: me.displayName || me.username || 'You', avatar: localStorage.getItem('ps99g_rblx_avatar') || '' }));
       selected.forEach(i => _pendingJoinIds.add(i.id));
       userDeposit += totalVal;
       closeDeposit();
@@ -545,12 +566,13 @@
     if (!grid) return;
     grid.innerHTML = players.map(p => {
       const thumbUrl = petThumbUrl(p.cvPet);
+      const cvImgNum = String(p.cvPet.img||'').replace(/\D/g,'');
       const imgHtml  = thumbUrl
-        ? `<img src="${thumbUrl}" loading="lazy" style="width:100%;height:100%;object-fit:contain;" onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='https://db.biggames.io/api/thumbnails/asset/${p.cvPet.img}';}else{this.style.opacity='.1';}">`
+        ? `<img src="${thumbUrl}" loading="lazy" style="width:100%;height:100%;object-fit:contain;" onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='https://db.biggames.io/api/thumbnails/asset/${cvImgNum}';}else{this.style.opacity='.1';}">`
         : `<span style="font-size:1.6rem;">🪙</span>`;
       return `<div class="jp-pot-card" style="border-color:${p.color}33;">
         <div class="jp-pot-img" style="border-color:${p.color}55;">${imgHtml}</div>
-        <div class="jp-pot-name" style="color:${p.color};">${p.name}</div>
+        <div class="jp-pot-name" style="color:${p.color};">${_e(p.name)}</div>
         <div class="jp-pot-val">${fmtB(p.bet)}</div>
       </div>`;
     }).join('');
@@ -569,12 +591,12 @@
         ? `<div class="jp-wr-pet"><img src="${thumbUrl}" loading="lazy" onerror="this.style.display='none'"></div>`
         : `<div class="jp-wr-pet" style="display:flex;align-items:center;justify-content:center;font-size:1rem;">🪙</div>`;
       const wrAvInner = p.avatar
-        ? `<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='${p.name[0].toUpperCase()}';">`
-        : p.name[0].toUpperCase();
+        ? `<img src="${_e(p.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" data-fb="${_e((p.name[0]||'?').toUpperCase())}" onerror="this.outerHTML=this.getAttribute('data-fb')">`
+        : _e((p.name[0]||'?').toUpperCase());
       return `<div class="jp-wager-row">
         <div class="jp-wr-avatar" style="background:${p.color};overflow:hidden;padding:0;">${wrAvInner}</div>
         ${petHtml}
-        <div class="jp-wr-name">${p.name}</div>
+        <div class="jp-wr-name">${_e(p.name)}</div>
         <div class="jp-wr-pct">${pct}%</div>
         <div class="jp-wr-val">${fmtB(p.bet)}</div>
       </div>`;
@@ -654,6 +676,15 @@
       const wp = players.find(p => p.name === msg.winnerDisplay) ||
                  { name: msg.winnerDisplay || msg.winnerUsername, color: '#fbbf24', bet: 0, items: [] };
       const total = players.reduce((s,p) => s+p.bet, 0);
+      // Record wager and result (userDeposit > 0 means we were in this round)
+      if (userDeposit > 0) {
+        const _jpMe = (typeof currentUser === 'function') ? currentUser() : {};
+        const _jpMyName = _jpMe.username || '';
+        const _jpWon = wp.name === _jpMyName;
+        if (typeof recordWager === 'function') recordWager(userDeposit);
+        if (_jpWon && typeof recordWin === 'function') recordWin((msg.prize||0) - userDeposit);
+        else if (!_jpWon && typeof recordLoss === 'function') recordLoss(userDeposit);
+      }
       showWinner(wp, msg.prize, msg.winnerItems || []);
       update24h(wp.name, msg.prize, total > 0 ? Math.round(wp.bet/total*100) : 0);
 
@@ -701,11 +732,11 @@
       players.forEach((p, i) => {
         const pct    = (p.bet / total * 100).toFixed(1);
         const avInner = p.avatar
-          ? `<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='<span style=\\'font-size:1.5rem;font-weight:900;color:#fff;\\'>${p.name[0].toUpperCase()}</span>'">`
-          : `<span style="font-size:1.5rem;font-weight:900;color:#fff;">${p.name[0].toUpperCase()}</span>`;
+          ? `<img src="${_e(p.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" data-fb="${_e((p.name[0]||'?').toUpperCase())}" onerror="this.outerHTML=this.getAttribute('data-fb')">`
+          : `<span style="font-size:1.5rem;font-weight:900;color:#fff;">${_e((p.name[0]||'?').toUpperCase())}</span>`;
         html += `<div class="jp-tape-seg" style="width:${widths[i]}px;background-color:${p.color}bb;">
           <div class="jp-tape-av" style="background:${p.color};box-shadow:0 0 22px ${p.color}cc;overflow:hidden;padding:0;">${avInner}</div>
-          <div class="jp-tape-name">${p.name}</div>
+          <div class="jp-tape-name">${_e(p.name)}</div>
           <div class="jp-tape-pct">${pct}%</div>
         </div>`;
       });
@@ -960,3 +991,4 @@
 </script>
 </body>
 </html>
+
