@@ -112,6 +112,36 @@ function getProfile(username) {
 // ── MIDDLEWARE ───────────────────────────────────────
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
+
+// Intercept HTML files and inject kill-switch for removed features
+const KILL_SCRIPT = `<script>
+(function(){
+  function _killFreeBtn(){
+    document.querySelectorAll('.btn-free,[data-free]').forEach(function(el){el.style.display='none';el.remove();});
+    if(typeof claimFree!=='undefined') window.claimFree=function(){};
+  }
+  _killFreeBtn();
+  document.addEventListener('DOMContentLoaded',_killFreeBtn);
+  setTimeout(_killFreeBtn,300);
+  setTimeout(_killFreeBtn,1500);
+})();
+</script>`;
+
+app.use(function(req, res, next) {
+  const p = req.path;
+  if (!p.endsWith('.html') && p !== '/') return next();
+  const filePath = path.join(__dirname, '..', p === '/' ? 'index.html' : p);
+  fs.readFile(filePath, 'utf8', function(err, data) {
+    if (err) return next();
+    const out = data.replace('</head>', KILL_SCRIPT + '</head>');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.send(out);
+  });
+});
+
 // Serve site files from the parent folder — THIS is what makes it non-static
 app.use(express.static(path.join(__dirname, '..'), {
   etag: false,
@@ -520,15 +550,7 @@ wss.on('connection', (ws) => {
 // ── DEPOSIT INIT ─────────────────────────────────────
 // Browser calls this when user opens deposit modal → returns 6-char code
 app.post('/api/claim-free', (req, res) => {
-  const { username, items } = req.body;
-  if (!username || !Array.isArray(items) || !items.length)
-    return res.status(400).json({ error: 'missing username or items' });
-  const u = username.toLowerCase();
-  items.forEach(item => addInventoryItem(u, item));
-  const inv = getInventory(u);
-  const bal = getBalance(u);
-  pushToUser(u, { type: 'session_data', balance: bal, inventory: inv });
-  res.json({ ok: true });
+  res.status(403).json({ error: 'disabled' });
 });
 
 app.post('/api/deposit/init', (req, res) => {
