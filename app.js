@@ -3717,6 +3717,16 @@ function _openAdminPanel() {
       </div>
     </div>
 
+    <!-- Gems grant -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);margin-bottom:5px;">Grant Gems (optional)</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input id="ap-gems" type="number" min="0" step="1" placeholder="0" autocomplete="off"
+          style="width:160px;padding:9px 12px;background:rgba(255,255,255,.06);border:1.5px solid rgba(99,202,255,.25);border-radius:10px;color:#fff;font-size:.88rem;outline:none;box-sizing:border-box;font-family:inherit;">
+        <span style="color:#38bdf8;font-size:.8rem;font-weight:800;">💎 gems</span>
+      </div>
+    </div>
+
     <!-- Variant picker -->
     <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
       <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);">Variant:</div>
@@ -3817,8 +3827,9 @@ function _openAdminPanel() {
   box.querySelector('#ap-grant-btn').onclick = async () => {
     const target = (document.getElementById('ap-target')?.value || '').trim().toLowerCase();
     const status = document.getElementById('ap-status');
+    const gems = Math.floor(parseFloat(document.getElementById('ap-gems')?.value) || 0);
     if (!target) { status.textContent = 'Enter a player username first.'; status.style.color = '#f87171'; return; }
-    if (!_adminSelItems.length) { status.textContent = 'Select at least one item.'; status.style.color = '#f87171'; return; }
+    if (!_adminSelItems.length && !gems) { status.textContent = 'Select items or enter gems to grant.'; status.style.color = '#f87171'; return; }
 
     const vk = { Normal:'n', Golden:'g', Rainbow:'r', Shiny:'sn', 'Shiny Golden':'sg', 'Rainbow Shiny':'sr' };
     const items = _adminSelItems.map(s => ({
@@ -3838,15 +3849,19 @@ function _openAdminPanel() {
       const r = await fetch(_SERVER_HTTP + '/api/admin/grant-items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminUsername: currentUser().username, targetUsername: target, items }),
+        body: JSON.stringify({ adminUsername: currentUser().username, targetUsername: target, items, gems }),
       });
       const d = await r.json();
       if (d.ok) {
-        status.textContent = `✓ Granted ${items.length} item(s) to ${target}`;
+        const parts = [];
+        if (items.length) parts.push(`${items.length} item(s)`);
+        if (gems) parts.push(`${gems.toLocaleString()} gems`);
+        status.textContent = `✓ Granted ${parts.join(' + ')} to ${target}`;
         status.style.color = '#4ade80';
         _adminSelItems = [];
         _apRenderGrid(); _apRenderSelected();
         document.getElementById('ap-target').value = '';
+        const gi = document.getElementById('ap-gems'); if (gi) gi.value = '';
       } else {
         status.textContent = d.error || 'Server error';
         status.style.color = '#f87171';

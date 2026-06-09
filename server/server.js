@@ -657,12 +657,13 @@ app.post('/api/giveaway/start', (req, res) => {
 });
 
 app.post('/api/admin/grant-items', (req, res) => {
-  const { adminUsername, targetUsername, items } = req.body;
+  const { adminUsername, targetUsername, items, gems } = req.body;
   if (!adminUsername || adminUsername.toLowerCase() !== ADMIN_USER) return res.status(403).json({ error: 'forbidden' });
   const target = (targetUsername || adminUsername).toLowerCase();
   const processed = (Array.isArray(items) ? items : []).map(item => addInventoryItem(target, item));
+  if (gems && typeof gems === 'number' && gems > 0) addBalance(target, Math.floor(gems));
   pushToUser(target, { type: 'session_data', balance: getBalance(target), inventory: getInventory(target) });
-  res.json({ ok: true, added: processed.length });
+  res.json({ ok: true, added: processed.length, gems: gems || 0 });
 });
 
 app.get('/api/roblox-avatar/:userId', async (req, res) => {
