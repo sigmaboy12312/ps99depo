@@ -425,7 +425,7 @@ function _connectWS() {
 
       } else if (msg.type === 'giveaway_end') {
         if (msg.winner) {
-          _renderChatMsg({ username: '__system', text: `ðŸŽ‰ ${msg.winner} won the giveaway (${msg.item?.name || 'item'})!`, isSystem: true }, false);
+          _renderChatMsg({ username: '__system', text: `&#127881; ${msg.winner} won the giveaway (${msg.item?.name || 'item'})!`, isSystem: true }, false);
           const me = currentUser();
           if (me.username && msg.winner === me.username) showToast(`You won the giveaway!`, 'win');
         } else {
@@ -2273,12 +2273,12 @@ function openProfileModal(type, idx, isOwner) {
   if (data.isOwner) {
     // -- OWNER: gold crown profile --
     avEl.style.cssText = 'background:linear-gradient(135deg,#92400e,#f59e0b,#78350f);box-shadow:0 0 24px rgba(245,158,11,.7);color:#fff;font-size:1.5rem;';
-    avEl.textContent = 'ðŸ‘‘';
+    avEl.textContent = '👑';
     if (ringEl) ringEl.style.background = 'linear-gradient(135deg,#f59e0b,#fbbf24,#f59e0b)';
     if (hdrEl)  hdrEl.style.background  = 'linear-gradient(135deg,rgba(245,158,11,.45) 0%,rgba(180,83,9,.2) 50%,transparent 100%),linear-gradient(135deg,#451a03,#78350f,#92400e)';
-    document.getElementById('prof-lv-pill').textContent = 'ðŸ‘‘ OWNER';
+    document.getElementById('prof-lv-pill').textContent = '👑 OWNER';
     document.getElementById('prof-lv-pill').style.cssText = 'background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;border:none;font-size:.65rem;box-shadow:0 0 12px rgba(245,158,11,.4);';
-    rankPill.innerHTML = 'ðŸ‘‘&nbsp;SITE OWNER';
+    rankPill.innerHTML = '&#128081;&nbsp;SITE OWNER';
     rankPill.style.cssText = 'color:#fbbf24;border-color:#f59e0b;background:rgba(245,158,11,.12);font-size:.6rem;letter-spacing:.06em;';
   } else {
     const selfAvatar = (type === 'you') ? localStorage.getItem('ps99g_rblx_avatar') : (data.avatar || '');
@@ -2612,7 +2612,7 @@ function _addGemItems(name, qty) {
 }
 
 // Build stacked gem picker UI inside `container`. Returns { getTotal() }.
-// Gem items show as rows with âˆ’ qty + MAX controls instead of individual slots.
+// Gem items show as rows with âˆ' qty + MAX controls instead of individual slots.
 function buildGemPicker(container, inv, onChange) {
   const counts = _countGems(inv);
   const present = GEM_DENOMS.filter(g => counts[g.name] > 0).reverse(); // biggest first
@@ -2632,7 +2632,7 @@ function buildGemPicker(container, inv, onChange) {
         <div style="font-size:.58rem;color:var(--text-muted);">Owned: <b style="color:${gem.color};">${owned.toLocaleString()}</b></div>
       </div>
       <div style="display:flex;align-items:center;gap:4px;">
-        <button class="gpick-dec" style="width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#9ca3af;font-size:1.1rem;cursor:pointer;padding:0;line-height:1;display:flex;align-items:center;justify-content:center;">âˆ’</button>
+        <button class="gpick-dec" style="width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#9ca3af;font-size:1.1rem;cursor:pointer;padding:0;line-height:1;display:flex;align-items:center;justify-content:center;">âˆ'</button>
         <input class="gpick-inp" type="number" min="0" max="${owned}" value="0" style="width:42px;text-align:center;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:3px 0;color:#fff;font-size:.78rem;font-weight:800;">
         <button class="gpick-inc" style="width:24px;height:24px;border-radius:6px;background:rgba(124,77,232,.18);border:1px solid rgba(124,77,232,.4);color:#a67dff;font-size:1.1rem;cursor:pointer;padding:0;line-height:1;display:flex;align-items:center;justify-content:center;">+</button>
         <button class="gpick-max" style="padding:3px 7px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80;font-size:.62rem;font-weight:800;cursor:pointer;white-space:nowrap;">MAX</button>
@@ -3377,7 +3377,7 @@ function _renderChatMsg(msg, isMe) {
                   :              'linear-gradient(135deg,#1e1b4b,#4338ca)';
 
   const adminBadge = isAdminMsg
-    ? `<span style="font-size:.54rem;font-weight:900;background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;padding:2px 7px;border-radius:20px;margin-left:4px;letter-spacing:.04em;box-shadow:0 0 8px rgba(245,158,11,.4);">ðŸ‘‘ OWNER</span>`
+    ? `<span style="font-size:.54rem;font-weight:900;background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;padding:2px 7px;border-radius:20px;margin-left:4px;letter-spacing:.04em;box-shadow:0 0 8px rgba(245,158,11,.4);">&#128081; OWNER</span>`
     : '';
 
   const msgBg = isAdminMsg
@@ -3932,11 +3932,11 @@ function _refreshAuthButton() {
       <button class="auth-user-chip" onclick="_openUserDropdown(event)">
         ${avHtml}
         <span style="font-size:.75rem;font-weight:700;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_rEsc(name)}</span>
-        ${isOwner ? ‘<span style="font-size:.85rem;line-height:1;filter:drop-shadow(0 0 6px gold);">ðŸ’’</span>’ : ‘’}
+        ${isOwner ? '<span style="font-size:.85rem;line-height:1;filter:drop-shadow(0 0 6px gold);">&#128081;</span>' : ''}
       </button>`;
     if (u.avatar) {
-      const _ai = wrap.querySelector(‘img’);
-      if (_ai) _ai.onerror = () => { const d=document.createElement(‘div’);d.style.cssText=’width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#7c4de8,#4c1d95);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0;border:2px solid rgba(124,77,232,.5)’;d.textContent=name.slice(0,1).toUpperCase();_ai.replaceWith(d); };
+      const _ai = wrap.querySelector('img');
+      if (_ai) _ai.onerror = () => { const d=document.createElement('div');d.style.cssText='width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#7c4de8,#4c1d95);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0;border:2px solid rgba(124,77,232,.5)';d.textContent=name.slice(0,1).toUpperCase();_ai.replaceWith(d); };
     }
   } else {
     wrap.innerHTML = `<button class="auth-login-btn" onclick="_openLoginModal()">Login</button>`;
@@ -4067,7 +4067,7 @@ function _finishLogin(username, displayName, userId, avatarUrl) {
   refreshBal();
   setTimeout(_connectWS, 100);
   _checkAdminStatus();
-  showToast(`Welcome, ${displayName}! ðŸŽ‰`, 'win');
+  showToast(`Welcome, ${displayName}! &#127881;`, 'win');
 }
 
 function _openUserDropdown(e) {
@@ -4087,7 +4087,7 @@ function _openUserDropdown(e) {
   menu.style.right = (window.innerWidth - rect.right) + 'px';
   menu.innerHTML = `
     <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);">
-      <div style="font-size:.85rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px;">${_dEsc(name)}${isOwner?' <span style="font-size:.9rem;filter:drop-shadow(0 0 5px gold)">ðŸ‘‘</span>':''}</div>
+      <div style="font-size:.85rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px;">${_dEsc(name)}${isOwner?' <span style="font-size:.9rem;filter:drop-shadow(0 0 5px gold)">&#128081;</span>':''}</div>
       <div style="font-size:.62rem;color:rgba(148,163,184,.45);margin-top:2px;">${typeof fmtPSG==='function'?fmtPSG(getBalance()):'...'}</div>
     </div>
     <button onclick="openProfileModal('you',0);document.getElementById('user-dropdown')?.remove()">
