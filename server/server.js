@@ -47,18 +47,57 @@ function endGiveaway() {
   }
   activeGiveaway = null;
 }
-const DB_FILE      = process.env.DB_PATH || path.join(__dirname, 'db.json');
+const DB_FILE        = process.env.DB_PATH || path.join(__dirname, 'db.json');
+const UPSTASH_URL    = (process.env.UPSTASH_REDIS_REST_URL    || '').replace(/\/$/, '');
+const UPSTASH_TOKEN  = process.env.UPSTASH_REDIS_REST_TOKEN   || '';
+const REDIS_KEY      = 'ps99db';
 
-// ── JSON DATABASE ────────────────────────────────────
-// db.users    = { [username]: { balance, createdAt } }
-// db.inventory= { [username]: [{ id, name, img, tier, variant, value, depositedAt }] }
+// ── JSON DATABASE (in-memory + Upstash sync) ─────────
+// _db.users    = { [username]: { balance, createdAt } }
+// _db.inventory= { [username]: [{ id, name, img, tier, variant, value, depositedAt }] }
 
-function loadDB() {
-  try { return JSON.parse(fs.readFileSync(DB_FILE, 'utf8')); }
-  catch { return { users: {}, inventory: {} }; }
+let _db = { users: {}, inventory: {} };
+let _saveTimer = null;
+
+async function _upstashGet() {
+  if (!UPSTASH_URL) return null;
+  try {
+    const r = await fetch(`${UPSTASH_URL}/get/${REDIS_KEY}`, {
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+    });
+    const d = await r.json();
+    return d.result ? JSON.parse(d.result) : null;
+  } catch (e) { console.error('[DB] Upstash load error:', e.message); return null; }
 }
+
+async function _upstashSet(data) {
+  if (!UPSTASH_URL) return;
+  try {
+    await fetch(`${UPSTASH_URL}/set/${REDIS_KEY}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify([JSON.stringify(data)])
+    });
+  } catch (e) { console.error('[DB] Upstash save error:', e.message); }
+}
+
+async function initDB() {
+  // Try Upstash first, then local file
+  const remote = await _upstashGet();
+  if (remote) { _db = remote; console.log('[DB] Loaded from Upstash'); return; }
+  try { _db = JSON.parse(fs.readFileSync(DB_FILE, 'utf8')); console.log('[DB] Loaded from local file'); }
+  catch { console.log('[DB] Fresh database'); }
+}
+
+function loadDB() { return _db; }
+
 function saveDB(db) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+  _db = db;
+  try { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2)); } catch {}
+  if (UPSTASH_URL) {
+    clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(() => _upstashSet(_db), 2000);
+  }
 }
 
 function ensureUser(db, username) {
@@ -777,8 +816,10 @@ app.post('/api/withdraw/complete', (req, res) => {
 });
 
 // ── START ────────────────────────────────────────────
-server.listen(PORT, () => {
-  console.log(`\n  PS99Gems server running on http://localhost:${PORT}`);
-  console.log(`  Serving site from:   ${path.join(__dirname, '..')}`);
-  console.log(`  Database file:       ${DB_FILE}\n`);
+initDB().then(() => {
+  server.listen(PORT, () => {
+    console.log(`\n  PS99Gems server running on http://localhost:${PORT}`);
+    console.log(`  Serving site from:   ${path.join(__dirname, '..')}`);
+    console.log(`  Upstash sync:        ${UPSTASH_URL ? 'enabled' : 'disabled (local file only)'}\n`);
+  });
 });
