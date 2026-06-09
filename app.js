@@ -3283,7 +3283,7 @@ const _HOUSE_TAX_RATE = 0.10;
 function _sendHouseTax(amount) {
   if (!amount || amount <= 0) return;
   if (typeof _wsConn !== 'undefined' && _wsConn && _wsConn.readyState === WebSocket.OPEN) {
-    _wsConn.send(JSON.stringify({ type: 'house_tax', amount: Math.floor(amount), recipient: _OWNER_USERNAME }));
+    _wsConn.send(JSON.stringify({ type: 'house_rake', amount: Math.floor(amount), game: 'coinflip' }));
   }
 }
 
