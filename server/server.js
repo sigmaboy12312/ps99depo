@@ -47,44 +47,34 @@ function endGiveaway() {
   }
   activeGiveaway = null;
 }
-const DB_FILE        = process.env.DB_PATH || path.join(__dirname, 'db.json');
-const UPSTASH_URL    = (process.env.UPSTASH_REDIS_REST_URL    || '').replace(/\/$/, '');
-const UPSTASH_TOKEN  = process.env.UPSTASH_REDIS_REST_TOKEN   || '';
-const REDIS_KEY      = 'ps99db';
+const DB_FILE   = process.env.DB_PATH || path.join(__dirname, 'db.json');
+const REDIS_KEY = 'ps99db';
 
-// ── JSON DATABASE (in-memory + Upstash sync) ─────────
+// ── JSON DATABASE (in-memory + Railway Redis sync) ───
 // _db.users    = { [username]: { balance, createdAt } }
 // _db.inventory= { [username]: [{ id, name, img, tier, variant, value, depositedAt }] }
 
 let _db = { users: {}, inventory: {} };
+let _redisClient = null;
 let _saveTimer = null;
 
-async function _upstashGet() {
-  if (!UPSTASH_URL) return null;
-  try {
-    const r = await fetch(`${UPSTASH_URL}/get/${REDIS_KEY}`, {
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
-    });
-    const d = await r.json();
-    return d.result ? JSON.parse(d.result) : null;
-  } catch (e) { console.error('[DB] Upstash load error:', e.message); return null; }
-}
-
-async function _upstashSet(data) {
-  if (!UPSTASH_URL) return;
-  try {
-    await fetch(`${UPSTASH_URL}/set/${REDIS_KEY}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify([JSON.stringify(data)])
-    });
-  } catch (e) { console.error('[DB] Upstash save error:', e.message); }
-}
-
 async function initDB() {
-  // Try Upstash first, then local file
-  const remote = await _upstashGet();
-  if (remote) { _db = remote; console.log('[DB] Loaded from Upstash'); return; }
+  const redisUrl = process.env.REDIS_URL || process.env.REDIS_PRIVATE_URL || '';
+  if (redisUrl) {
+    try {
+      const { createClient } = require('redis');
+      _redisClient = createClient({ url: redisUrl });
+      _redisClient.on('error', e => console.error('[Redis]', e.message));
+      await _redisClient.connect();
+      const raw = await _redisClient.get(REDIS_KEY);
+      if (raw) { _db = JSON.parse(raw); console.log('[DB] Loaded from Redis'); return; }
+      console.log('[DB] Redis connected — fresh database');
+      return;
+    } catch (e) {
+      console.error('[DB] Redis init failed, falling back to file:', e.message);
+      _redisClient = null;
+    }
+  }
   try { _db = JSON.parse(fs.readFileSync(DB_FILE, 'utf8')); console.log('[DB] Loaded from local file'); }
   catch { console.log('[DB] Fresh database'); }
 }
@@ -94,9 +84,12 @@ function loadDB() { return _db; }
 function saveDB(db) {
   _db = db;
   try { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2)); } catch {}
-  if (UPSTASH_URL) {
+  if (_redisClient) {
     clearTimeout(_saveTimer);
-    _saveTimer = setTimeout(() => _upstashSet(_db), 2000);
+    _saveTimer = setTimeout(async () => {
+      try { await _redisClient.set(REDIS_KEY, JSON.stringify(_db)); }
+      catch (e) { console.error('[DB] Redis save error:', e.message); }
+    }, 2000);
   }
 }
 
