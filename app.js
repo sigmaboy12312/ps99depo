@@ -417,17 +417,19 @@ function _connectWS() {
         } catch {}
 
       } else if (msg.type === 'giveaway_start') {
-        _renderChatMsg({ username: '__system', text: `ðŸŽ Giveaway started by ${msg.host || 'Owner'}: ${msg.item?.name || 'item'}! Type !enter in chat to join.`, isSystem: true }, false);
+        _showGiveawayBanner(msg);
+        _renderChatMsg({ username: '__system', text: `🎁 ${msg.host || 'Someone'} started a giveaway for ${msg.item?.name || 'an item'}! Click ENTER in the banner above.`, isSystem: true }, false);
 
       } else if (msg.type === 'giveaway_count') {
-        const el = document.getElementById('giveaway-entry-count');
-        if (el) el.textContent = msg.count + ' entered';
+        const el = document.getElementById('_ga-entries');
+        if (el) el.textContent = (msg.count || 0) + ' entr' + (msg.count === 1 ? 'y' : 'ies');
 
       } else if (msg.type === 'giveaway_end') {
+        _showGiveawayEnd(msg);
         if (msg.winner) {
-          _renderChatMsg({ username: '__system', text: `&#127881; ${msg.winner} won the giveaway (${msg.item?.name || 'item'})!`, isSystem: true }, false);
           const me = currentUser();
-          if (me.username && msg.winner === me.username) showToast(`You won the giveaway!`, 'win');
+          if (me.username && msg.winner === me.username) showToast('You won the giveaway!', 'win');
+          _renderChatMsg({ username: '__system', text: `🎉 ${msg.winner} won the giveaway (${msg.item?.name || 'item'})!`, isSystem: true }, false);
         } else {
           _renderChatMsg({ username: '__system', text: 'Giveaway ended with no entries.', isSystem: true }, false);
         }
@@ -3248,14 +3250,200 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Restore chat history from previous pages
   _loadChatHistory();
+  _initChatGiveawayBtn();
 
 });
+
+/* ── GIVEAWAY BANNER ────────────────────────────────── */
+let _gaCurrentData = null;
+let _gaTimerInterval = null;
+let _gaEntered = false;
+
+function _showGiveawayBanner(msg) {
+  _gaCurrentData = msg;
+  _gaEntered = false;
+  const chatPanel = document.querySelector('.chat-panel');
+  if (!chatPanel) return;
+  let banner = document.getElementById('_giveaway-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = '_giveaway-banner';
+    const chatHeader = chatPanel.querySelector('.chat-header');
+    if (chatHeader) chatHeader.after(banner);
+    else chatPanel.prepend(banner);
+  }
+  const item = msg.item || {};
+  const imgId = String(item.img || '').replace(/\D/g, '');
+  const imgSrc = imgId ? `https://assetdelivery.roblox.com/v1/asset/?id=${imgId}` : '';
+  const endsAt = msg.endsAt || (Date.now() + (msg.durationSecs || 60) * 1000);
+  const variantColor = { Normal:'#94a3b8', Golden:'#fbbf24', Rainbow:'#a78bfa', Shiny:'#38bdf8', 'Shiny Golden':'#f59e0b', 'Rainbow Shiny':'#c084fc' };
+  const vc = variantColor[item.variant] || '#94a3b8';
+
+  banner.style.cssText = 'background:linear-gradient(135deg,rgba(20,10,50,.97),rgba(35,15,70,.97));border-bottom:2px solid rgba(167,139,250,.4);padding:10px 12px;position:relative;flex-shrink:0;';
+  banner.innerHTML = `
+    <div style="font-size:.48rem;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:rgba(167,139,250,.6);margin-bottom:6px;">🎁 GIVEAWAY by <span style="color:#a78bfa;">${msg.host || '?'}</span></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="position:relative;flex-shrink:0;">
+        ${imgSrc ? `<img src="${imgSrc}" style="width:52px;height:52px;object-fit:contain;border-radius:10px;background:rgba(0,0,0,.4);display:block;" onerror="this.style.opacity='.15'">` : '<div style="width:52px;height:52px;background:rgba(167,139,250,.1);border-radius:10px;"></div>'}
+        ${item.variant && item.variant !== 'Normal' ? `<div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);font-size:.38rem;font-weight:900;color:${vc};background:rgba(0,0,0,.85);padding:1px 5px;border-radius:4px;white-space:nowrap;">${item.variant}</div>` : ''}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.82rem;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name || 'Item'}</div>
+        <div style="font-size:.62rem;color:#a78bfa;font-weight:800;margin-top:1px;">${fmtPSG(item.value || 0)}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+          <span id="_ga-timer" style="font-size:.65rem;font-weight:900;color:#fbbf24;min-width:36px;">--</span>
+          <span id="_ga-entries" style="font-size:.6rem;color:rgba(255,255,255,.4);font-weight:700;">0 entries</span>
+        </div>
+      </div>
+      <button id="_ga-enter-btn" onclick="_enterGiveaway()" style="flex-shrink:0;padding:9px 14px;background:linear-gradient(135deg,#7c4de8,#6d28d9);border:none;border-radius:10px;color:#fff;font-size:.72rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 0 14px rgba(124,77,232,.4);">ENTER</button>
+    </div>`;
+  _gaStartTimer(endsAt);
+}
+
+function _gaStartTimer(endsAt) {
+  clearInterval(_gaTimerInterval);
+  const tick = () => {
+    const el = document.getElementById('_ga-timer');
+    if (!el) { clearInterval(_gaTimerInterval); return; }
+    const rem = Math.max(0, endsAt - Date.now());
+    const s = Math.ceil(rem / 1000);
+    el.textContent = s > 60 ? Math.floor(s / 60) + 'm ' + (s % 60) + 's' : s + 's';
+    if (s <= 10) el.style.color = '#ef4444';
+    if (rem <= 0) clearInterval(_gaTimerInterval);
+  };
+  tick();
+  _gaTimerInterval = setInterval(tick, 500);
+}
+
+function _showGiveawayEnd(msg) {
+  clearInterval(_gaTimerInterval);
+  const banner = document.getElementById('_giveaway-banner');
+  if (!banner) return;
+  const item = msg.item || _gaCurrentData?.item || {};
+  const imgId = String(item.img || '').replace(/\D/g, '');
+  const imgSrc = imgId ? `https://assetdelivery.roblox.com/v1/asset/?id=${imgId}` : '';
+  if (msg.winner) {
+    banner.style.cssText = 'background:linear-gradient(135deg,rgba(5,20,10,.97),rgba(10,35,15,.97));border-bottom:2px solid rgba(34,197,94,.5);padding:10px 12px;position:relative;flex-shrink:0;animation:gaWinPulse .4s ease;';
+    banner.innerHTML = `
+      <div style="font-size:.48rem;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:rgba(34,197,94,.6);margin-bottom:6px;">🎉 GIVEAWAY ENDED</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        ${imgSrc ? `<img src="${imgSrc}" style="width:44px;height:44px;object-fit:contain;border-radius:10px;background:rgba(0,0,0,.4);" onerror="this.style.opacity='.15'">` : '<div style="width:44px;height:44px;background:rgba(34,197,94,.1);border-radius:10px;"></div>'}
+        <div style="flex:1;">
+          <div style="font-size:.68rem;font-weight:900;color:#4ade80;">Winner: ${msg.winner}</div>
+          <div style="font-size:.6rem;color:rgba(255,255,255,.4);">won ${item.name || 'item'}</div>
+        </div>
+      </div>`;
+    setTimeout(() => { banner?.remove(); _gaCurrentData = null; }, 8000);
+  } else {
+    banner.remove();
+    _gaCurrentData = null;
+  }
+}
+
+function _enterGiveaway() {
+  const u = currentUser();
+  if (!u.username) { showToast('Log in to enter', 'info'); return; }
+  if (_gaEntered) return;
+  if (!_wsConn || _wsConn.readyState !== WebSocket.OPEN) { showToast('Not connected', 'info'); return; }
+  _wsConn.send(JSON.stringify({ type: 'giveaway_enter' }));
+  _gaEntered = true;
+  const btn = document.getElementById('_ga-enter-btn');
+  if (btn) { btn.textContent = '✓ Entered'; btn.disabled = true; btn.style.background = 'rgba(34,197,94,.2)'; btn.style.border = '1px solid rgba(34,197,94,.4)'; btn.style.color = '#4ade80'; btn.style.boxShadow = 'none'; }
+}
+
+function _initChatGiveawayBtn() {
+  const inputRow = document.querySelector('.chat-input-row');
+  if (!inputRow || document.getElementById('_chat-ga-btn')) return;
+  const btn = document.createElement('button');
+  btn.id = '_chat-ga-btn';
+  btn.title = 'Start Giveaway';
+  btn.style.cssText = 'padding:7px 10px;background:rgba(167,139,250,.1);border:1.5px solid rgba(167,139,250,.2);border-radius:9px;color:#a78bfa;cursor:pointer;font-size:.88rem;flex-shrink:0;line-height:1;';
+  btn.textContent = '🎁';
+  btn.onclick = _openGiveawayModal;
+  const sendBtn = document.getElementById('chat-send');
+  if (sendBtn) inputRow.insertBefore(btn, sendBtn);
+  else inputRow.appendChild(btn);
+}
+
+function _openGiveawayModal() {
+  const u = currentUser();
+  if (!u.username) { showToast('Log in first', 'info'); return; }
+  if (document.getElementById('_ga-modal')) return;
+  const inv = getInventory();
+  const overlay = document.createElement('div');
+  overlay.id = '_ga-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit;';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  let selId = null;
+  let selDur = 60;
+
+  const rebuild = () => {
+    overlay.innerHTML = '';
+    const box = document.createElement('div');
+    box.style.cssText = 'background:linear-gradient(160deg,#130f2e,#09071a);border:1.5px solid rgba(167,139,250,.4);border-radius:20px;padding:22px;width:min(420px,96vw);max-height:88vh;overflow-y:auto;';
+
+    const durs = [['30s', 30], ['1m', 60], ['2m', 120], ['3m', 180]];
+    const durBtns = durs.map(([lbl, v]) => {
+      const a = v === selDur;
+      return `<button class="_gaDurBtn" data-v="${v}" style="flex:1;padding:8px 4px;background:${a ? 'rgba(167,139,250,.2)' : 'rgba(255,255,255,.05)'};border:1.5px solid ${a ? '#a78bfa' : 'rgba(255,255,255,.1)'};border-radius:9px;color:${a ? '#a78bfa' : 'rgba(255,255,255,.45)'};font-size:.75rem;font-weight:900;cursor:pointer;font-family:inherit;">${lbl}</button>`;
+    }).join('');
+
+    box.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div style="font-size:.95rem;font-weight:900;color:#a78bfa;">🎁 Start Giveaway</div>
+        <button onclick="document.getElementById('_ga-modal').remove()" style="background:rgba(255,255,255,.07);border:none;color:rgba(255,255,255,.5);font-size:1.1rem;cursor:pointer;border-radius:6px;width:28px;height:28px;">&times;</button>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(167,139,250,.7);margin-bottom:8px;">Duration</div>
+        <div style="display:flex;gap:7px;">${durBtns}</div>
+      </div>
+      <div style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(167,139,250,.7);margin-bottom:8px;">Select Item to Give Away</div>
+      <div id="_ga-ig" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:220px;overflow-y:auto;margin-bottom:16px;"></div>
+      <button id="_ga-go" style="width:100%;padding:12px;background:${selId ? 'linear-gradient(135deg,#7c4de8,#6d28d9)' : 'rgba(255,255,255,.06)'};border:none;border-radius:11px;color:${selId ? '#fff' : 'rgba(255,255,255,.3)'};font-size:.88rem;font-weight:900;cursor:${selId ? 'pointer' : 'default'};font-family:inherit;">${selId ? 'Start Giveaway' : 'Select an item first'}</button>`;
+
+    overlay.appendChild(box);
+
+    box.querySelectorAll('._gaDurBtn').forEach(b => b.addEventListener('click', () => { selDur = parseInt(b.dataset.v); rebuild(); }));
+
+    const grid = box.querySelector('#_ga-ig');
+    if (!inv.length) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;font-size:.7rem;color:rgba(255,255,255,.25);padding:20px 0;">No items in inventory</div>';
+    } else {
+      inv.forEach(item => {
+        const isSel = selId === item.id;
+        const d = document.createElement('div');
+        d.style.cssText = `cursor:pointer;border-radius:10px;border:2px solid ${isSel ? '#a78bfa' : 'rgba(255,255,255,.07)'};background:${isSel ? 'rgba(167,139,250,.12)' : 'rgba(0,0,0,.3)'};padding:6px 4px;text-align:center;transition:all .12s;`;
+        const imgId = String(item.img || '').replace(/\D/g, '');
+        if (imgId) { const img = document.createElement('img'); img.src = `https://assetdelivery.roblox.com/v1/asset/?id=${imgId}`; img.style.cssText = 'width:42px;height:42px;object-fit:contain;display:block;margin:0 auto 3px;'; img.onerror = () => { img.style.opacity = '.15'; }; d.appendChild(img); }
+        const nm = document.createElement('div'); nm.style.cssText = 'font-size:.44rem;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'; nm.textContent = item.name; d.appendChild(nm);
+        const vl = document.createElement('div'); vl.style.cssText = 'font-size:.44rem;color:#a78bfa;font-weight:900;'; vl.textContent = fmtPSG(item.value || 0); d.appendChild(vl);
+        d.onclick = () => { selId = isSel ? null : item.id; rebuild(); };
+        grid.appendChild(d);
+      });
+    }
+
+    box.querySelector('#_ga-go').onclick = () => {
+      if (!selId) return;
+      if (!_wsConn || _wsConn.readyState !== WebSocket.OPEN) { showToast('Not connected', 'info'); return; }
+      _wsConn.send(JSON.stringify({ type: 'start_giveaway', itemId: selId, durationSecs: selDur }));
+      overlay.remove();
+      showToast('Giveaway started!', 'win');
+    };
+  };
+
+  rebuild();
+  document.body.appendChild(overlay);
+}
+/* ── END GIVEAWAY ──────────────────────────────────── */
 
 function sendChatMsg() {
   const inp = document.getElementById('chat-input');
   if (!inp || !inp.value.trim()) return;
   const text = inp.value.trim();
   inp.value = '';
+  // Intercept !enter command
+  if (text.toLowerCase() === '!enter') { _enterGiveaway(); return; }
 
   const u = currentUser();
   const displayName = u.displayName || u.username || ('Guest#' + Math.floor(Math.random()*9000+1000));
@@ -3318,6 +3506,18 @@ function _applyAdminBadge() {
   document.querySelectorAll('.admin-crown-badge').forEach(el => el.style.display = 'inline');
   document.querySelectorAll('.cv-add-btn').forEach(el => el.style.display = 'block');
   document.querySelectorAll('.chat-ban-btn').forEach(el => el.style.display = '');
+  if (!document.getElementById('_admin-nav-btn')) {
+    const authWrap = document.getElementById('auth-wrap');
+    if (authWrap) {
+      const btn = document.createElement('button');
+      btn.id = '_admin-nav-btn';
+      btn.title = 'Admin Panel';
+      btn.style.cssText = 'padding:6px 11px;background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);border-radius:9px;color:#fbbf24;font-size:.75rem;font-weight:900;cursor:pointer;font-family:inherit;margin-right:6px;white-space:nowrap;';
+      btn.innerHTML = '&#128081; Admin';
+      btn.onclick = _openAdminPanel;
+      authWrap.parentNode.insertBefore(btn, authWrap);
+    }
+  }
 }
 
 let _chatAdminName = localStorage.getItem('ps99g_admin_name') || 'Owner';
@@ -3616,6 +3816,7 @@ function _openWalletPanel(e) {
   panel.innerHTML = `
     <style>
       @keyframes walletSlideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
+      @keyframes gaWinPulse { 0%{transform:scale(1)} 40%{transform:scale(1.02)} 100%{transform:scale(1)} }
     </style>
     <!-- Header gradient -->
     <div style="height:90px;background:linear-gradient(160deg,#3b0764,#6d28d9,#4c1d95);position:relative;flex-shrink:0;">
