@@ -331,7 +331,7 @@ function fmtB(n) { return fmtPSG(n); }
 /* -- WEBSOCKET  -  real-time link to trade-bot server -- */
 // Set SERVER_URL to your deployed server (e.g. 'https://myapp.railway.app')
 // Leave as '' to auto-detect (localhost in dev, same host in prod)
-const _SERVER_OVERRIDE = 'https://ps99depo.up.railway.app';
+const _SERVER_OVERRIDE = '';
 
 const _isLocal = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '';
 const _SERVER_HTTP = _SERVER_OVERRIDE || (_isLocal ? 'http://localhost:3001' : 'https://' + location.hostname);
