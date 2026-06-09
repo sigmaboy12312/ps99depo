@@ -3523,16 +3523,16 @@ function _injectLoginCSS() {
 }
 
 function _injectAuthButton() {
-  if (document.getElementById('auth-wrap')) return;
-  const target = document.querySelector('.nav-right') || document.querySelector('.topbar-right');
-  if (!target) return;
-  // Inject wallet button
-  _injectWalletButton();
-  // Inject login/user chip
-  const wrap = document.createElement('div');
-  wrap.id = 'auth-wrap';
-  wrap.style.cssText = 'display:flex;align-items:center;margin-left:6px;';
-  target.appendChild(wrap);
+  if (!document.getElementById('auth-wrap')) {
+    const target = document.querySelector('.nav-right') || document.querySelector('.topbar-right');
+    if (target) {
+      _injectWalletButton();
+      const wrap = document.createElement('div');
+      wrap.id = 'auth-wrap';
+      wrap.style.cssText = 'display:flex;align-items:center;margin-left:6px;';
+      target.appendChild(wrap);
+    }
+  }
   _refreshAuthButton();
 }
 
@@ -4114,7 +4114,7 @@ function logoutAccount() {
 
 function initVerification() {
   _injectLoginCSS();
-  setTimeout(_injectAuthButton, 200);
+  _injectAuthButton();
 }
 
 

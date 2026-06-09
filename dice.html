@@ -554,7 +554,7 @@
     <a href="leaderboard.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#60a5fa" stroke-width="1.8"><rect x="2" y="10" width="3" height="8"/><rect x="8.5" y="6" width="3" height="12"/><rect x="15" y="2" width="3" height="16"/></svg> Leaderboard</a>
     <a href="values.html" class="nav-btn"><svg viewBox="0 0 20 20" fill="none" stroke="#f472b6" stroke-width="1.8"><polygon points="10,2 13,8 19,8 14,12 16,18 10,14 4,18 6,12 1,8 7,8"/></svg> CV Values</a>
   </div>
-  <div class="nav-right">
+  <div class="nav-right"><div id="wallet-btn-wrap" style="display:flex;align-items:center;"><button id="wallet-btn" onclick="_openWalletPanel(event)" title="Wallet" style="display:flex;align-items:center;gap:7px;padding:7px 13px;background:rgba(124,77,232,.15);border:1.5px solid rgba(124,77,232,.35);border-radius:10px;color:#c4b5fd;cursor:pointer;font-family:inherit;transition:all .15s;font-size:.78rem;font-weight:700;"><svg viewBox="0 0 20 20" fill="none" width="16" height="16"><rect x="2" y="5" width="16" height="12" rx="2" stroke="#a78bfa" stroke-width="1.6"/><path d="M2 8h16" stroke="#a78bfa" stroke-width="1.6"/><circle cx="15" cy="12" r="1.5" fill="#f59e0b"/></svg><span data-bal-nav>-</span></button></div><div id="auth-wrap" style="display:flex;align-items:center;margin-left:6px;"><button class="auth-login-btn" onclick="_openLoginModal()" style="padding:7px 18px;background:linear-gradient(135deg,#7c4de8,#6d28d9);border:none;border-radius:9px;color:#fff;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 0 16px rgba(124,77,232,.4);">Login</button></div>
     <div class="online-badge"><div class="online-dot"></div><span id="online-count">&mdash;</span> online</div>
   </div>
 </nav>
@@ -627,7 +627,7 @@
 
 </div>
 
-<script src="app.js?v=214"></script>
+<script src="app.js?v=215"></script>
 <script>
   refreshBal();
   const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1302,5 +1302,6 @@
 </script>
 </body>
 </html>
+
 
 
