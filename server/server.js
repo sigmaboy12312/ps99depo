@@ -47,7 +47,7 @@ function endGiveaway() {
   }
   activeGiveaway = null;
 }
-const DB_FILE      = path.join(__dirname, 'db.json');
+const DB_FILE      = process.env.DB_PATH || path.join(__dirname, 'db.json');
 
 // ── JSON DATABASE ────────────────────────────────────
 // db.users    = { [username]: { balance, createdAt } }
