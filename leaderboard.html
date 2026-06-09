@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -217,7 +217,7 @@
 </div>
 </div>
 
-<script src="app.js?v=213"></script>
+<script src="app.js?v=214"></script>
 <script>
   refreshBal();
   const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -257,7 +257,7 @@
       const rk=typeof getRank==="function"?getRank(p.wagered):null;
       const card=document.createElement("div");
       card.className="lb-pod-card rank-"+rank+(p.isYou?" lb-you":"");
-      card.onclick=()=>showToast(p.name+" — "+fmtB(Math.abs(p[field]))+" "+activeTab,"info");
+      card.onclick=()=>showToast(p.name+" â€” "+fmtB(Math.abs(p[field]))+" "+activeTab,"info");
       const _podAvBg=p.avatar?'rgba(0,0,0,.4)':`linear-gradient(135deg,${p.color},${p.color}88)`;
       const _podAvContent=p.avatar?`<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.style.background='linear-gradient(135deg,${p.color},${p.color}88)';this.remove();">`:`${p.name[0].toUpperCase()}`;
       card.innerHTML=
@@ -284,7 +284,7 @@
       const badge=rk?`<span style="font-size:.56rem;font-weight:900;padding:1px 5px;border-radius:20px;background:${rk.bg};color:${rk.color};margin-left:5px;">${rk.name}</span>`:"";
       const row=document.createElement("div");
       row.className="lb-row"+(p.isYou?" lb-you":"");
-      row.onclick=()=>showToast(`${p.name} — Profit: ${fmtB(p.profit)} | Wagered: ${fmtB(p.wagered)}`,"info");
+      row.onclick=()=>showToast(`${p.name} â€” Profit: ${fmtB(p.profit)} | Wagered: ${fmtB(p.wagered)}`,"info");
       row.innerHTML=
         `<div class="lb-row-rank" style="${i<3?"color:"+TROPHY_COLORS[i]+";font-weight:900;":""}">${i<3?TROPHY_SVG[i]:"#"+(i+1)}</div>`+
         `<div class="lb-row-av" style="background:${p.avatar?'rgba(0,0,0,.4)':`linear-gradient(135deg,${p.color},${p.color}88)`};overflow:hidden;">${p.avatar?`<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.style.background='linear-gradient(135deg,${p.color},${p.color}88)';this.remove();">`:`${p.name[0].toUpperCase()}`}</div>`+

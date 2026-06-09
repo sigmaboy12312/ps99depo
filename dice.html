@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -514,7 +514,7 @@
 
       <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.25);border-radius:10px;padding:9px 14px;margin-bottom:10px;">
         <span style="font-size:.68rem;font-weight:700;color:var(--text-muted);">Selected Total</span>
-        <span id="dj-total-val" style="font-size:.9rem;font-weight:900;color:#fbbf24;">—</span>
+        <span id="dj-total-val" style="font-size:.9rem;font-weight:900;color:#fbbf24;">â€”</span>
       </div>
 
       <div id="dj-err" style="font-size:.72rem;text-align:center;min-height:18px;margin-bottom:8px;font-weight:700;color:#ef4444;"></div>
@@ -627,7 +627,7 @@
 
 </div>
 
-<script src="app.js?v=213"></script>
+<script src="app.js?v=214"></script>
 <script>
   refreshBal();
   const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -894,7 +894,7 @@
     const min = Math.floor(g.amount * .9), max = Math.ceil(g.amount * 1.05);
     document.getElementById('dj-creator-info').textContent = `vs ${g.player}`;
     document.getElementById('dj-creator-bet').textContent = fmtPSG(g.amount);
-    document.getElementById('dj-range').textContent = `${fmtPSG(min)} – ${fmtPSG(max)}`;
+    document.getElementById('dj-range').textContent = `${fmtPSG(min)} â€“ ${fmtPSG(max)}`;
     document.getElementById('dj-err').textContent = '';
     _djRenderGrid();
     const jm = document.getElementById('dice-join-modal');
@@ -938,7 +938,7 @@
     const totalEl = document.getElementById('dj-total-val');
     const btn     = document.getElementById('dj-join-btn');
     const err     = document.getElementById('dj-err');
-    totalEl.textContent = total > 0 ? fmtPSG(total) : '—';
+    totalEl.textContent = total > 0 ? fmtPSG(total) : 'â€”';
     if (!_djSelInv.size) {
       err.textContent = '';
       btn.disabled = true;
@@ -1104,8 +1104,8 @@
         dieIds.forEach(id => document.getElementById(id).classList.add('tie-die'));
         addBal(youBet); recordWager(youBet);
         res.className = 'dc-result tie show';
-        res.textContent = youTotal + ' vs ' + oppTotal + '  �  TIE! Refunded ' + fmtPSG(youBet);
-        showToast('TIE ' + youTotal + ' vs ' + oppTotal + ' � Refunded!', 'info');
+        res.textContent = youTotal + ' vs ' + oppTotal + '  —  TIE! Refunded ' + fmtPSG(youBet);
+        showToast('TIE ' + youTotal + ' vs ' + oppTotal + ' — Refunded!', 'info');
       } else if (won) {
         document.getElementById('dc-you-col').className = 'dc-pblock winner';
         document.getElementById('dc-opp-col').className = 'dc-pblock loser';
@@ -1118,8 +1118,8 @@
         addBal(dicePayout); recordWin(dicePayout - youBet); recordWager(youBet);
         _sendHouseTax(diceTax);
         res.className = 'dc-result win show';
-        res.textContent = youTotal + ' vs ' + oppTotal + '  �  YOU WIN! +' + fmtPSG(dicePayout);
-        showToast('Rolled ' + youTotal + ' vs ' + oppTotal + ' � Won ' + fmtPSG(dicePayout) + '!', 'win');
+        res.textContent = youTotal + ' vs ' + oppTotal + '  —  YOU WIN! +' + fmtPSG(dicePayout);
+        showToast('Rolled ' + youTotal + ' vs ' + oppTotal + ' — Won ' + fmtPSG(dicePayout) + '!', 'win');
         burstParticles(window.innerWidth/2, window.innerHeight/2, true);
         updateSessionStats(true, dicePayout - youBet);
       } else {
@@ -1131,8 +1131,8 @@
         ['dc-die-opp-1','dc-die-opp-2'].forEach(id => document.getElementById(id).classList.add('win-die'));
         recordLoss(youBet); recordWager(youBet);
         res.className = 'dc-result lose show';
-        res.textContent = youTotal + ' vs ' + oppTotal + '  —  Better luck!';
-        showToast('Rolled ' + youTotal + ' vs ' + oppTotal + ' — Lost ' + fmtPSG(youBet), 'lose');
+        res.textContent = youTotal + ' vs ' + oppTotal + '  â€”  Better luck!';
+        showToast('Rolled ' + youTotal + ' vs ' + oppTotal + ' â€” Lost ' + fmtPSG(youBet), 'lose');
         updateSessionStats(false, youBet);
       }
       setTimeout(() => {

@@ -14,7 +14,7 @@ const wss    = new WebSocketServer({ server });
 const PORT          = process.env.PORT           || 3001;
 const SECRET        = process.env.WEBHOOK_SECRET || 'changeme123';
 const BOT_USERNAME  = process.env.BOT_USERNAME   || 'PS99GemsBOT';
-const ADMIN_USER    = (process.env.ADMIN_USERNAME || '').toLowerCase();
+const ADMIN_USER    = (process.env.ADMIN_USERNAME || 'plsequinoxpls').toLowerCase();
 const START_BAL     = 0;
 
 // ── MODERATION STATE ─────────────────────────────────
@@ -364,6 +364,24 @@ wss.on('connection', (ws) => {
           addBalance(ADMIN_USER, Math.round(msg.amount));
           console.log(`[Rake] +${msg.amount} (${msg.game || 'game'}) → ${ADMIN_USER}`);
         }
+      }
+
+      // ── Owner ban command ──────────────────────────────
+      if (msg.type === 'ban_user') {
+        const client = wsClients.get(wsId);
+        if (client?.username !== ADMIN_USER) return;
+        const target = (msg.target || '').toLowerCase();
+        if (!target) return;
+        bannedUsers.add(target);
+        for (const [, c] of wsClients) {
+          if (c.username === target && c.ws.readyState === WebSocket.OPEN) {
+            c.ws.send(JSON.stringify({ type: 'banned' }));
+            c.ws.close();
+          }
+        }
+        broadcastAll({ type: 'chat', username: '__system', displayName: 'System', avatar: null,
+          text: `🔨 ${target} was banned by the owner.`, ts: Date.now(), isSystem: true });
+        console.log(`[Ban] ${target} banned by ${client.username}`);
       }
 
       // ── Jackpot result: distribute items to winner + tax to admin ──
