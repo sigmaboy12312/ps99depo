@@ -813,6 +813,6 @@ initDB().then(() => {
   server.listen(PORT, () => {
     console.log(`\n  PS99Gems server running on http://localhost:${PORT}`);
     console.log(`  Serving site from:   ${path.join(__dirname, '..')}`);
-    console.log(`  Upstash sync:        ${UPSTASH_URL ? 'enabled' : 'disabled (local file only)'}\n`);
+    console.log(`  Redis sync:          ${_redisClient ? 'enabled' : 'disabled (local file only)'}\n`);
   });
 });
