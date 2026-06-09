@@ -367,7 +367,7 @@ function _connectWS() {
         }
 
       } else if (msg.type === 'session_data') {
-        // Server inventory is authoritative â€” always overwrite local
+        // Server inventory is authoritative — always overwrite local
         if (Array.isArray(msg.inventory)) {
           try { localStorage.setItem('ps99g_inv', JSON.stringify(msg.inventory)); } catch {}
         }
@@ -2361,7 +2361,7 @@ function _openChatProfile(key) {
   document.getElementById('prof-id-pill').textContent = d.username ? '@' + d.username : '';
   // Show loading state while we fetch real stats
   ['pstat-w','pstat-p','pstat-wr','pstat-bw','pstat-ws','pstat-gc'].forEach(id => {
-    const el = document.getElementById(id); if (el) { el.textContent = 'â€¦'; el.style.color = ''; }
+    const el = document.getElementById(id); if (el) { el.textContent = '"¦'; el.style.color = ''; }
   });
   const rank0 = getEffectiveRank(_tipTargetUsername, 0);
   rankPill.innerHTML = `${rank0.icon}&nbsp;${rank0.name.toUpperCase()}`;
@@ -2382,7 +2382,7 @@ function _handleProfileData(msg) {
   if (!ov || !ov.classList.contains('active')) return; // modal closed
   if (!msg.profile) {
     ['pstat-w','pstat-p','pstat-wr','pstat-bw','pstat-ws','pstat-gc'].forEach(id => {
-      const el = document.getElementById(id); if (el) el.textContent = 'â€”';
+      const el = document.getElementById(id); if (el) el.textContent = '—';
     });
     return;
   }
@@ -2560,7 +2560,7 @@ const GEM_DENOMS = [
   { name: '100M Gems', value: 100_000_000,    color: '#7c4de8', gem: true },
   { name: '1B Gems',   value: 1_000_000_000,  color: '#4ade80', gem: true },
 ];
-GEM_DENOMS.sort((a, b) => a.value - b.value); // ascending â€” small first
+GEM_DENOMS.sort((a, b) => a.value - b.value); // ascending — small first
 
 function _gemSVG(colorOrName) {
   const isBag = colorOrName === '1B Gems';
@@ -2690,7 +2690,7 @@ function _autoFillInventory() {
   if (gemBal >= 1e8) { const qty = Math.min(8, Math.floor((gemBal % 1e9) / 1e8)); const d = GEM_DENOMS.find(g => g.name === '100M Gems'); if (d) for (let i = 0; i < qty; i++) gemItems.push({ id: Date.now() + 'h' + i + Math.floor(Math.random()*9999), name: d.name, value: d.value, color: d.color, gem: true }); }
   if (gemBal >= 1e7) { const qty = Math.min(9, Math.floor((gemBal % 1e8) / 1e7)); const d = GEM_DENOMS.find(g => g.name === '10M Gems'); if (d) for (let i = 0; i < qty; i++) gemItems.push({ id: Date.now() + 't' + i + Math.floor(Math.random()*9999), name: d.name, value: d.value, color: d.color, gem: true }); }
 
-  // Write directly to inventory without calling addBal â€” these items represent existing balance
+  // Write directly to inventory without calling addBal — these items represent existing balance
   _saveInv([...gemItems, ...newItems]);
   _updateNavInvBadge();
 }
@@ -3022,7 +3022,7 @@ function _renderWdrInv() {
 
   grid.innerHTML = '';
 
-  // Gem section â€” stacked rows with quantity badge
+  // Gem section — stacked rows with quantity badge
   if (hasGems) {
     const gemSec = document.createElement('div');
     gemSec.style.cssText = 'margin-bottom:12px;';
@@ -3063,7 +3063,7 @@ function _renderWdrInv() {
     grid.appendChild(gemSec);
   }
 
-  // Pet items â€” individual selectable slots
+  // Pet items — individual selectable slots
   if (pets.length > 0) {
     const petSec = document.createElement('div');
     petSec.innerHTML = hasGems ? '<div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:6px;">Pets</div>' : '';
@@ -3898,7 +3898,13 @@ function _ownerAddPetToInv(pet) {
     const span2 = document.createElement('span'); span2.style.cssText = 'color:#fbbf24;font-size:.72rem;'; span2.textContent = fmtPSG(val) + ' PSG';
     btn.appendChild(span1); btn.appendChild(span2);
     btn.onclick = () => {
+      const item = { name: pet.name, img: pet.img, tier: pet.tier, color: pet.color, variant: v, value: val };
       _addToInv({ name: pet.name, img: pet.img, tier: pet.tier, color: pet.color }, v, val);
+      const u = currentUser();
+      fetch(_SERVER_HTTP + '/api/admin/grant-items', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminUsername: u.username, targetUsername: u.username, items: [item] })
+      }).catch(() => {});
       ov.remove();
       showToast(`Added ${pet.name} (${v}) to your inventory!`, 'win');
     };
