@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>99Depo &mdash; Dice</title>
-  <link rel="stylesheet" href="style.css?v=207">
+  <link rel="stylesheet" href="style.css?v=212">
   <style>
     /*  DICE ROLL CINEMATIC  */
     #dice-cin {
@@ -602,7 +602,7 @@
                 <svg viewBox="0 0 20 20" fill="none" stroke="#22c55e" stroke-width="1.8" width="16" height="16"><path d="M6 9H4.5a2.5 2.5 0 0 0 0 5H6M18 9h-1.5a2.5 2.5 0 0 1 0 5H14M18 2H6v6a4 4 0 0 0 8 0V2"/></svg>
               </div>
               <div style="font-size:.7rem;font-weight:900;color:#86efac;margin-bottom:3px;">Win</div>
-              <div style="font-size:.6rem;color:var(--text-muted);line-height:1.45;">Higher roll takes 98.5% of the pot</div>
+              <div style="font-size:.6rem;color:var(--text-muted);line-height:1.45;">Higher roll wins the pot</div>
             </div>
           </div>
         </div>
@@ -627,9 +627,10 @@
 
 </div>
 
-<script src="app.js?v=207"></script>
+<script src="app.js?v=213"></script>
 <script>
   refreshBal();
+  const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
   // Ensure modals are hidden until explicitly opened
   ['dice-create-modal','dice-join-modal','dice-cin'].forEach(id => {
@@ -688,8 +689,10 @@
     return Object.keys(_dcGems).reduce((s, k) => s + _dcGems[k] * GEM_DENOM_VALS[k], 0);
   }
   function dcGemChange(key, delta) {
-    _dcGems[key] = Math.max(0, _dcGems[key] + delta);
+    const _gemNames = { b:'1B Gems', h:'100M Gems', t:'10M Gems', o:'1M Gems' };
     const inv = getInventory();
+    const owned = inv.filter(i => i.gem && i.name === _gemNames[key]).length;
+    _dcGems[key] = Math.max(0, Math.min(owned, _dcGems[key] + delta));
     const itemsTotal = [..._dcCreateSelInv].reduce((s,i) => s+(inv[i]?.value||0), 0);
     const labels = { b:'1B', h:'100M', t:'10M', o:'1M' };
     Object.keys(_dcGems).forEach(k => {
@@ -793,44 +796,14 @@
   }
   buildDiceList();
 
-  //  DICE HISTORY 
-  const DICE_HIST_COLORS = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b'];
-  function genAndRenderDiceHistory() {
-    const el = document.getElementById('dice-hist-panel');
-    if (!el) return;
-    el.innerHTML = '';
-    for (let i = 0; i < 18; i++) {
-      const names = DICE_BOT_NAMES;
-      const p1 = names[Math.floor(Math.random()*names.length)];
-      let p2; do { p2 = names[Math.floor(Math.random()*names.length)]; } while(p2===p1);
-      const d1 = Math.floor(Math.random()*10)+1, d2 = Math.floor(Math.random()*10)+1;
-      const winner = d1 !== d2 ? (d1>d2?p1:p2) : p1;
-      const amt = [2,5,10,25,50][Math.floor(Math.random()*5)]*1e6;
-      const ago = Math.floor(Math.random()*90)+1;
-      const winnerIsP1 = winner === p1;
-      const div = document.createElement('div');
-      div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.05);';
-      div.innerHTML = `
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-          <div style="background:${winnerIsP1?'#fbbf24':'rgba(255,255,255,.15)'};color:${winnerIsP1?'#78350f':'#fff'};border-radius:7px;padding:3px 9px;font-size:.8rem;font-weight:900;">${d1}</div>
-          <span style="font-size:.6rem;color:var(--text-muted);">vs</span>
-          <div style="background:${!winnerIsP1?'#fbbf24':'rgba(255,255,255,.15)'};color:${!winnerIsP1?'#78350f':'#fff'};border-radius:7px;padding:3px 9px;font-size:.8rem;font-weight:900;">${d2}</div>
-        </div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:.78rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="color:#fbbf24;">${winner}</span> beat ${winner===p1?p2:p1}</div>
-          <div style="font-size:.64rem;color:var(--text-muted);">${ago}m ago</div>
-        </div>
-        <div style="font-size:.78rem;font-weight:800;color:#22c55e;">+${fmtB(amt)}</div>`;
-      el.appendChild(div);
-    }
-  }
+  function genAndRenderDiceHistory() {} // removed fake history
   function diceTabSwitch(tab) {
     const isCreate = tab === 'create';
     document.getElementById('dice-match-list').style.display = isCreate ? '' : 'none';
-    document.getElementById('dice-hist-panel').style.display = isCreate ? 'none' : 'block';
+    const hp = document.getElementById('dice-hist-panel');
+    if (hp) { hp.style.display = isCreate ? 'none' : 'block'; hp.innerHTML = '<div style="text-align:center;padding:32px 0;color:rgba(255,255,255,.2);font-size:.8rem;">No match history yet.</div>'; }
     document.getElementById('dc-create-btn').classList.toggle('active', isCreate);
     document.getElementById('dc-hist-btn').classList.toggle('active', !isCreate);
-    if (!isCreate) genAndRenderDiceHistory();
   }
 
   //  VIEW MODAL (simple preview) 
@@ -870,7 +843,10 @@
         const short = (item.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
         const d = document.createElement('div');
         d.style.cssText='background:var(--bg-card2);border:1.5px solid var(--border);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
-        d.innerHTML=`<div style="width:46px;height:46px;margin:0 auto 4px;"><img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.opacity='.3'"></div><div style="font-size:.56rem;font-weight:700;">${short}</div><div style="font-size:.58rem;color:var(--purple-b);font-weight:800;">${fmtPSG(item.value)}</div>`;
+        const _dcImg=document.createElement('div');_dcImg.style.cssText='width:46px;height:46px;margin:0 auto 4px;';const _dcI2=document.createElement('img');_dcI2.src=`https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}`;_dcI2.style.cssText='width:100%;height:100%;object-fit:contain;';_dcI2.onerror=()=>{_dcI2.style.opacity='.3';};_dcImg.appendChild(_dcI2);
+        const _dcNm=document.createElement('div');_dcNm.style.cssText='font-size:.56rem;font-weight:700;';_dcNm.textContent=short;
+        const _dcVl=document.createElement('div');_dcVl.style.cssText='font-size:.58rem;color:var(--purple-b);font-weight:800;';_dcVl.textContent=fmtPSG(item.value);
+        d.appendChild(_dcImg);d.appendChild(_dcNm);d.appendChild(_dcVl);
         d.onclick=()=>{
           if(_dcCreateSelInv.has(idx)){_dcCreateSelInv.delete(idx);d.style.borderColor='var(--border)';d.style.background='var(--bg-card2)';}
           else{_dcCreateSelInv.add(idx);d.style.borderColor='var(--purple)';d.style.background='rgba(124,77,232,.14)';}
@@ -894,6 +870,11 @@
     const bet=itemsTotal+gemDenomTotal;
     if(bet<1) return showToast('Enter a bet amount','info');
     if(!deductBal(bet)) return showToast('Not enough balance!','lose');
+    // Remove wagered items so they can't be double-spent
+    const _wIds=[..._dcCreateSelInv].map(i=>inv[i]?.id).filter(Boolean);
+    _popFromInvSilent(_wIds);
+    const _gemSel={'1B Gems':_dcGems.b,'100M Gems':_dcGems.h,'10M Gems':_dcGems.t,'1M Gems':_dcGems.o};
+    _popGemsFromInv(_gemSel);
     closeDiceCreate();
     showToast('Match created! Finding opponent...','info');
     const botName = DICE_BOT_NAMES[Math.floor(Math.random()*DICE_BOT_NAMES.length)];
@@ -933,7 +914,10 @@
         const short = (item.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
         const d = document.createElement('div');
         d.style.cssText = 'background:var(--bg-card2);border:1.5px solid var(--border);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
-        d.innerHTML = `<div style="width:46px;height:46px;margin:0 auto 4px;"><img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.opacity='.3'"></div><div style="font-size:.56rem;font-weight:700;">${short}</div><div style="font-size:.58rem;color:var(--purple-b);font-weight:800;">${fmtPSG(item.value)}</div>`;
+        const _img = document.createElement('div'); _img.style.cssText = 'width:46px;height:46px;margin:0 auto 4px;'; const _i2 = document.createElement('img'); _i2.src = `https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}`; _i2.style.cssText = 'width:100%;height:100%;object-fit:contain;'; _i2.onerror = () => { _i2.style.opacity = '.3'; }; _img.appendChild(_i2);
+        const _nm = document.createElement('div'); _nm.style.cssText = 'font-size:.56rem;font-weight:700;'; _nm.textContent = short;
+        const _vl = document.createElement('div'); _vl.style.cssText = 'font-size:.58rem;color:var(--purple-b);font-weight:800;'; _vl.textContent = fmtPSG(item.value);
+        d.appendChild(_img); d.appendChild(_nm); d.appendChild(_vl);
         d.onclick = () => {
           if (_djSelInv.has(idx)) { _djSelInv.delete(idx); d.style.borderColor='var(--border)'; d.style.background='var(--bg-card2)'; }
           else { _djSelInv.add(idx); d.style.borderColor='var(--purple)'; d.style.background='rgba(124,77,232,.14)'; }
@@ -989,7 +973,8 @@
     if (total < min) { document.getElementById('dj-err').textContent = `Need at least ${fmtPSG(min)}`; return; }
     document.getElementById('dj-err').textContent = '';
     const proceed = () => {
-      selected.forEach(item => { if (typeof _removeFromInv === 'function') _removeFromInv(item.id); });
+      if (!deductBal(total)) { showToast('Not enough balance!', 'lose'); return; }
+      _popFromInvSilent(selected.map(i => i.id));
       closeDiceJoin();
       const topPet = selected.reduce((a,b) => (b.value||0) > (a.value||0) ? b : a, selected[0]);
       runDiceGame('You', total, g.player, g.amount, g.pet || null, topPet, selected, null);
@@ -1025,13 +1010,19 @@
     const _youAvUrl = typeof currentUser === 'function' ? currentUser().avatar : '';
     _youAv.className = 'dc-pav';
     if (_youAvUrl) {
-      _youAv.innerHTML = `<img src="${_youAvUrl}" onerror="this.parentElement.innerHTML='${(youName[0]||'Y').toUpperCase()}'">`;
+      const _avI = document.createElement('img'); _avI.src = _youAvUrl;
+      _avI.onerror = () => { _youAv.textContent = (youName[0]||'Y').toUpperCase(); };
+      _youAv.innerHTML = ''; _youAv.appendChild(_avI);
     } else { _youAv.textContent = (youName[0]||'Y').toUpperCase(); }
     document.getElementById('dc-you-name').textContent = youName;
 
     // Opp: avatar
     const _oppAv = document.getElementById('dc-opp-av');
-    _oppAv.className = 'dc-pav opp'; _oppAv.textContent = (oppName[0]||'?').toUpperCase(); _oppAv.innerHTML = `<span style="font-size:2rem;font-weight:900;">${(oppName[0]||'?').toUpperCase()}</span>`;
+    _oppAv.className = 'dc-pav opp';
+    const _oppSpan = document.createElement('span');
+    _oppSpan.style.cssText = 'font-size:2rem;font-weight:900;';
+    _oppSpan.textContent = (oppName[0]||'?').toUpperCase();
+    _oppAv.innerHTML = ''; _oppAv.appendChild(_oppSpan);
     document.getElementById('dc-opp-name').textContent = oppName;
 
     // Ranks
@@ -1057,7 +1048,7 @@
       rows.forEach(item => {
         total += item.value || 0;
         const r = document.createElement('div'); r.className = 'dc-item-row';
-        r.innerHTML = `<div class="dc-item-img">${item.img?`<img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img}" onerror="this.style.opacity='.3'">`:'&#128230;'}</div><span class="dc-item-name">${item.name||'Item'}</span><span class="dc-item-val">${fmtPSG(item.value||0)}</span>`;
+        r.innerHTML = `<div class="dc-item-img">${item.img?`<img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img}" onerror="this.style.opacity='.3'">`:'&#128230;'}</div><span class="dc-item-name">${_e(item.name||'Item')}</span><span class="dc-item-val">${fmtPSG(item.value||0)}</span>`;
         listEl.appendChild(r);
       });
       if (!rows.length && betAmt) {
@@ -1102,7 +1093,7 @@
       document.getElementById('dc-total-you').textContent = youTotal;
       document.getElementById('dc-total-opp').textContent = oppTotal;
 
-      const prize = Math.floor((youBet+oppBet)*0.90);
+      const prize = youBet + oppBet;
       const res = document.getElementById('dc-result');
 
       if (tied) {
@@ -1113,8 +1104,8 @@
         dieIds.forEach(id => document.getElementById(id).classList.add('tie-die'));
         addBal(youBet); recordWager(youBet);
         res.className = 'dc-result tie show';
-        res.textContent = youTotal + ' vs ' + oppTotal + '  â€”  TIE! Refunded ' + fmtPSG(youBet);
-        showToast('TIE ' + youTotal + ' vs ' + oppTotal + ' â€” Refunded!', 'info');
+        res.textContent = youTotal + ' vs ' + oppTotal + '  —  TIE! Refunded ' + fmtPSG(youBet);
+        showToast('TIE ' + youTotal + ' vs ' + oppTotal + ' — Refunded!', 'info');
       } else if (won) {
         document.getElementById('dc-you-col').className = 'dc-pblock winner';
         document.getElementById('dc-opp-col').className = 'dc-pblock loser';
@@ -1122,12 +1113,15 @@
         document.getElementById('dc-total-opp').className = 'dc-total-box lose-total';
         ['dc-die-you-1','dc-die-you-2'].forEach(id => document.getElementById(id).classList.add('win-die'));
         ['dc-die-opp-1','dc-die-opp-2'].forEach(id => document.getElementById(id).classList.add('lose-die'));
-        addBal(prize); recordWin(prize-youBet); recordWager(youBet);
+        const diceTax = Math.floor(prize * _HOUSE_TAX_RATE);
+        const dicePayout = prize - diceTax;
+        addBal(dicePayout); recordWin(dicePayout - youBet); recordWager(youBet);
+        _sendHouseTax(diceTax);
         res.className = 'dc-result win show';
-        res.textContent = youTotal + ' vs ' + oppTotal + '  â€”  YOU WIN! +' + fmtPSG(prize);
-        showToast('Rolled ' + youTotal + ' vs ' + oppTotal + ' â€” Won ' + fmtPSG(prize) + '!', 'win');
+        res.textContent = youTotal + ' vs ' + oppTotal + '  —  YOU WIN! +' + fmtPSG(dicePayout);
+        showToast('Rolled ' + youTotal + ' vs ' + oppTotal + ' — Won ' + fmtPSG(dicePayout) + '!', 'win');
         burstParticles(window.innerWidth/2, window.innerHeight/2, true);
-        updateSessionStats(true, prize-youBet);
+        updateSessionStats(true, dicePayout - youBet);
       } else {
         document.getElementById('dc-you-col').className = 'dc-pblock loser';
         document.getElementById('dc-opp-col').className = 'dc-pblock winner';
@@ -1186,9 +1180,6 @@
     dc.classList.remove('open'); dc.style.display = 'none';
     document.getElementById('dc-continue').classList.remove('show');
     document.getElementById('dc-click-hint').classList.remove('show');
-    const bots = DICE_BOT_NAMES;
-    DICE_MATCHES.push({ player: bots[Math.floor(Math.random()*bots.length)], amount: Math.floor((Math.random()*50+1)*1e6) });
-    if (DICE_MATCHES.length > 8) DICE_MATCHES.shift();
     buildDiceList();
     buildDcPets();
   }
@@ -1226,57 +1217,15 @@
   }, 7000);
 
   /*  DICE ACTIVITY PANELS  */
-  const _dcNames = ['xR4Zy','NovaPro','GemLord','Sk1yRdr','LegacyPS','HugeGang','TitanicX','PurpleKing','MuRaTwalker22','Levi2legitt'];
-  const _dcColors = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b','#ec4899','#f97316','#a855f7'];
-
   function buildRecentRolls() {
     const el = document.getElementById('dc-recent-rolls');
-    if (!el) return;
-    el.innerHTML = '';
-    for (let i = 0; i < 7; i++) {
-      const n1 = _dcNames[Math.floor(Math.random()*_dcNames.length)];
-      let n2; do { n2 = _dcNames[Math.floor(Math.random()*_dcNames.length)]; } while(n2===n1);
-      const d1 = Math.floor(Math.random()*10)+1, d2 = Math.floor(Math.random()*10)+1;
-      const p1won = d1 > d2;
-      const amt = [2,5,10,25,50][Math.floor(Math.random()*5)] * 1e6;
-      const ago = Math.floor(Math.random()*60)+1;
-      const c1 = _dcColors[Math.floor(Math.random()*_dcColors.length)];
-      const c2 = _dcColors[Math.floor(Math.random()*_dcColors.length)];
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);';
-      row.innerHTML = `
-        <div style="display:flex;gap:4px;flex-shrink:0;align-items:center;">
-          <div style="background:${p1won?'#fbbf24':'rgba(255,255,255,.12)'};color:${p1won?'#78350f':'#fff'};border-radius:6px;padding:2px 7px;font-size:.76rem;font-weight:900;">${d1}</div>
-          <span style="font-size:.58rem;color:var(--text-muted);">vs</span>
-          <div style="background:${!p1won?'#fbbf24':'rgba(255,255,255,.12)'};color:${!p1won?'#78350f':'#fff'};border-radius:6px;padding:2px 7px;font-size:.76rem;font-weight:900;">${d2}</div>
-        </div>
-        <div style="flex:1;font-size:.68rem;font-weight:800;color:var(--text-sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p1won?n1:n2} <span style="color:var(--text-muted);font-weight:400">won</span></div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:.68rem;font-weight:900;color:#22c55e;">+${fmtB(amt)}</div>
-          <div style="font-size:.55rem;color:var(--text-muted);">${ago}m ago</div>
-        </div>`;
-      el.appendChild(row);
-    }
+    if (el) el.innerHTML = '<div style="text-align:center;padding:20px 0;color:rgba(255,255,255,.2);font-size:.75rem;">No recent rolls yet.</div>';
   }
   buildRecentRolls();
-  setInterval(buildRecentRolls, 10000);
 
-  const _rankMedals = ['1st','2nd','3rd'];
   function buildDcTopPlayers() {
     const el = document.getElementById('dc-top-players');
-    if (!el) return;
-    const sorted = [..._dcNames].map(n => ({
-      name: n,
-      won: Math.floor(Math.random()*500+50) * 1e6,
-      color: _dcColors[Math.floor(Math.random()*_dcColors.length)]
-    })).sort((a,b) => b.won - a.won).slice(0, 5);
-    el.innerHTML = sorted.map((p, i) => `
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;border-radius:6px;">
-        <div style="width:22px;text-align:center;font-size:${i<3?'1rem':'.68rem'};font-weight:900;color:${i<3?'#fbbf24':'var(--text-muted)'};">${i<3?_rankMedals[i]:(i+1)}</div>
-        <div style="width:26px;height:26px;border-radius:50%;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 0 8px ${p.color}55;">${p.name[0]}</div>
-        <div style="flex:1;font-size:.74rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
-        <div style="font-size:.7rem;font-weight:900;color:#22c55e;">+${fmtB(p.won)}</div>
-      </div>`).join('');
+    if (el) el.innerHTML = '<div style="text-align:center;padding:20px 0;color:rgba(255,255,255,.2);font-size:.75rem;">No data yet.</div>';
   }
   buildDcTopPlayers();
 
@@ -1353,4 +1302,5 @@
 </script>
 </body>
 </html>
+
 

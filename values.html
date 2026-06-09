@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>99Depo &mdash; CV Values</title>
-  <link rel="stylesheet" href="style.css?v=207">
+  <link rel="stylesheet" href="style.css?v=212">
   <style>
     /*  Variant tabs  */
     .var-tabs {
@@ -269,7 +269,7 @@
   </div>
 </div>
 
-<script src="app.js?v=207"></script>
+<script src="app.js?v=213"></script>
 <script>
   const TIER_COLORS = {
     Gargantuan: '#ff5c1a',
@@ -384,6 +384,14 @@
         </div>
       `;
 
+      // Owner-only add button — revealed by _applyAdminBadge
+      const _addBtn = document.createElement('button');
+      _addBtn.className = 'cv-add-btn';
+      _addBtn.style.cssText = 'display:none;width:calc(100% - 16px);margin:0 8px 10px;padding:6px;background:rgba(245,158,11,.14);border:1.5px solid rgba(245,158,11,.35);border-radius:8px;color:#fbbf24;font-size:.62rem;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.03em;';
+      _addBtn.textContent = '+ Add to Inventory';
+      _addBtn.onclick = (e) => { e.stopPropagation(); if (typeof _ownerAddPetToInv === 'function') _ownerAddPetToInv(p); };
+      card.appendChild(_addBtn);
+
       grid.appendChild(card);
     });
   }
@@ -407,4 +415,5 @@
 </script>
 </body>
 </html>
+
 

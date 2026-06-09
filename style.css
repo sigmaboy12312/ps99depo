@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 /* -- RESET & VARS -- */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -315,7 +315,7 @@ a.nav-btn[href="values.html"]      svg { stroke:#f472b6; color:#f472b6; }
 @keyframes blink { 0%,100%{opacity:1;box-shadow:0 0 8px var(--green);} 50%{opacity:0.4;box-shadow:0 0 3px var(--green);} }
 .chat-count { font-size:0.7rem; color:var(--purple-b); font-weight:700; }
 
-/* ── ITEM HOVER TOOLTIP ── */
+/* â”€â”€ ITEM HOVER TOOLTIP â”€â”€ */
 .item-hover-tip {
   position:fixed; z-index:999999; pointer-events:none;
   background:linear-gradient(160deg,#1a1640,#0f0d22);
@@ -2778,7 +2778,7 @@ img[src=""], img:not([src]) {
 
 /* ============================================
    LOGO TRANSPARENCY + GLOW SYSTEM
-   logo.png is now RGBA — black bg removed.
+   logo.png is now RGBA â€” black bg removed.
    drop-shadow respects alpha so glow wraps
    just around the visible content.
 ============================================ */
@@ -2874,7 +2874,7 @@ body::before {
 }
 
 /* ============================================
-   NAV BOTTOM BORDER — ANIMATED GRADIENT LINE
+   NAV BOTTOM BORDER â€” ANIMATED GRADIENT LINE
 ============================================ */
 .topnav::after {
   content: '';
@@ -2981,3 +2981,4 @@ body::before {
   font-variant-numeric: tabular-nums;
   letter-spacing: -.02em;
 }
+

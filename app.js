@@ -1,4 +1,4 @@
-const PSG_ICON = '<span style="font-weight:900;letter-spacing:-0.02em;margin-right:1px;"></span>';
+﻿const PSG_ICON = '<span style="font-weight:900;letter-spacing:-0.02em;margin-right:1px;"></span>';
 
 /* ==================================================
    ACCOUNT SYSTEM  -  Roblox bio verification
@@ -46,9 +46,14 @@ function _applyUserEverywhere() {
 
   // Sidebar username line
   document.querySelectorAll('#sidebar-username').forEach(el => {
-    el.innerHTML = u.avatar
-      ? `<img src="${u.avatar}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;margin-right:6px;vertical-align:middle;">${u.displayName || u.username}`
-      : (u.displayName || u.username);
+    el.innerHTML = '';
+    if (u.avatar) {
+      const _av = document.createElement('img');
+      _av.src = u.avatar;
+      _av.style.cssText = 'width:20px;height:20px;border-radius:50%;object-fit:cover;margin-right:6px;vertical-align:middle;';
+      el.appendChild(_av);
+    }
+    el.appendChild(document.createTextNode(u.displayName || u.username));
   });
 }
 
@@ -217,15 +222,18 @@ async function _loginVerify() {
         const br = await fetch(_SERVER_HTTP + '/api/user/' + encodeURIComponent(username.toLowerCase()));
         if (br.ok) {
           const bd = await br.json();
-          if (typeof bd.balance === 'number') setBalance(bd.balance);
+          if (typeof bd.balance === 'number') setBalance(Math.max(_bal, bd.balance));
           if (Array.isArray(bd.inventory) && bd.inventory.length)
             localStorage.setItem('ps99g_inv', JSON.stringify(bd.inventory));
         }
       } catch {}
 
+      // Save display name into profile so profile modal shows real name
+      try { const _p = _getRawProfile(); _p.name = d.displayName || username; _saveRawProfile(_p); } catch {}
       _connectWS();
       _applyUserEverywhere();
       refreshBal();
+      _checkAdminStatus();
 
       // Success screen
       if (st) { st.style.color = '#4ade80'; st.textContent = ''; }
@@ -244,12 +252,13 @@ async function _loginVerify() {
 function _showVerifySuccess(displayName, avatarUrl) {
   const screen = document.getElementById('login-screen');
   if (!screen) return;
+  const _sve = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   screen.innerHTML = `
     <div style="width:min(440px,100%);background:linear-gradient(160deg,#0d1f14,#09071a);
                 border:1px solid rgba(34,197,94,.35);border-radius:24px;padding:40px 32px;text-align:center;
                 box-shadow:0 0 60px rgba(34,197,94,.15),0 40px 80px rgba(0,0,0,.7);">
-      ${avatarUrl ? `<img src="${avatarUrl}" style="width:80px;height:80px;border-radius:50%;border:3px solid rgba(34,197,94,.6);box-shadow:0 0 24px rgba(34,197,94,.4);margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;">` : ''}
-      <div style="font-size:1.3rem;font-weight:900;color:#fff;margin-bottom:6px;">Welcome, ${displayName}!</div>
+      ${avatarUrl ? `<img src="${_sve(avatarUrl)}" style="width:80px;height:80px;border-radius:50%;border:3px solid rgba(34,197,94,.6);box-shadow:0 0 24px rgba(34,197,94,.4);margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;">` : ''}
+      <div style="font-size:1.3rem;font-weight:900;color:#fff;margin-bottom:6px;">Welcome, ${_sve(displayName)}!</div>
       <div style="font-size:.8rem;color:rgba(148,163,184,.6);margin-bottom:24px;">Account verified  -  you're all set</div>
       <button onclick="_enterSiteAfterVerify()"
         style="padding:14px 40px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:12px;
@@ -277,7 +286,7 @@ function _silentLoad() {
   fetch(_SERVER_HTTP + '/api/user/' + encodeURIComponent(u.username))
     .then(r => r.ok ? r.json() : null)
     .then(d => {
-      if (d?.balance != null) { setBalance(d.balance); refreshBal(); }
+      if (d?.balance != null) { setBalance(Math.max(_bal, d.balance)); refreshBal(); }
       if (Array.isArray(d?.inventory) && d.inventory.length)
         localStorage.setItem('ps99g_inv', JSON.stringify(d.inventory));
     }).catch(() => {});
@@ -289,8 +298,9 @@ function _updateSidebarUsername() { _applyUserEverywhere(); }
 document.addEventListener('DOMContentLoaded', () => {
   const expiry = localStorage.getItem('ps99g_login_expiry');
   if (expiry && Date.now() > parseInt(expiry, 10)) {
-    ['ps99g_rblx_verified','ps99g_rblx_user','ps99g_rblx_display',
-     'ps99g_rblx_uid','ps99g_rblx_avatar','ps99g_login_expiry'].forEach(k => localStorage.removeItem(k));
+    ['ps99g_verified','ps99g_rblx_verified','ps99g_rblx_user','ps99g_rblx_display',
+     'ps99g_rblx_uid','ps99g_rblx_avatar','ps99g_login_expiry',
+     'ps99g_isAdmin','ps99g_admin_name','ps99g_phrase','ps99g_verify_phrase'].forEach(k => localStorage.removeItem(k));
   }
   const u = currentUser();
   if (u.username && u.verified) {
@@ -357,21 +367,21 @@ function _connectWS() {
         }
 
       } else if (msg.type === 'session_data') {
-        // Server inventory is authoritative — always overwrite local
+        // Server inventory is authoritative â€” always overwrite local
         if (Array.isArray(msg.inventory)) {
           try { localStorage.setItem('ps99g_inv', JSON.stringify(msg.inventory)); } catch {}
         }
-        // Sync _bal to inventory total so games (deductBal/getBalance) work correctly.
-        // Ignore msg.balance — server stores abstract balance separately from items,
-        // which is always 0 and would wipe out the user's in-game balance.
-        _bal = _invTotal();
+        // Use max so initial load sets bal from inventory, but game wins aren't wiped on reconnect.
+        _bal = Math.max(_bal, _invTotal());
         try { localStorage.setItem(BAL_KEY, _bal); } catch {}
+        _updateNavInvBadge();
         refreshBal();
 
       } else if (msg.type === 'deposit_complete') {
-        // Update balance from server response
+        // Add only the delta so game-session wins are preserved
         if (typeof msg.newBalance === 'number') {
-          setBalance(msg.newBalance);
+          const _depDelta = msg.newBalance - _invTotal();
+          if (_depDelta > 0) addBal(_depDelta);
           refreshBal();
         }
         // Re-sync inventory from server so item IDs match server DB
@@ -387,7 +397,7 @@ function _connectWS() {
       } else if (msg.type === 'chat') {
         // Skip echo of our own messages (already rendered optimistically)
         const me = currentUser();
-        if (!me.username || msg.username !== me.username) _renderChatMsg(msg, false);
+        if (!me.username || (msg.username || '').toLowerCase() !== me.username.toLowerCase()) _renderChatMsg(msg, false);
 
       } else if (msg.type === 'banned') {
         alert('You have been banned from 99Depo.');
@@ -398,31 +408,41 @@ function _connectWS() {
 
       } else if (msg.type === 'item_received') {
         showToast(`You received ${msg.item?.name} from the owner!`, 'win');
-        try {
+        if (msg.item) try {
           const inv = JSON.parse(localStorage.getItem('ps99g_inv') || '[]');
           inv.unshift(msg.item);
           localStorage.setItem('ps99g_inv', JSON.stringify(inv));
+          addBal(msg.item.value || 0);
+          _updateNavInvBadge();
         } catch {}
 
       } else if (msg.type === 'giveaway_start') {
-        _showGiveawayInChat(msg);
+        _renderChatMsg({ username: '__system', text: `ðŸŽ Giveaway started by ${msg.host || 'Owner'}: ${msg.item?.name || 'item'}! Type !enter in chat to join.`, isSystem: true }, false);
 
       } else if (msg.type === 'giveaway_count') {
         const el = document.getElementById('giveaway-entry-count');
         if (el) el.textContent = msg.count + ' entered';
 
       } else if (msg.type === 'giveaway_end') {
-        _showGiveawayResult(msg);
+        if (msg.winner) {
+          _renderChatMsg({ username: '__system', text: `ðŸŽ‰ ${msg.winner} won the giveaway (${msg.item?.name || 'item'})!`, isSystem: true }, false);
+          const me = currentUser();
+          if (me.username && msg.winner === me.username) showToast(`You won the giveaway!`, 'win');
+        } else {
+          _renderChatMsg({ username: '__system', text: 'Giveaway ended with no entries.', isSystem: true }, false);
+        }
 
       } else if (msg.type === 'tip_sent') {
         showToast(`Tip sent! (${fmtPSG(msg.total || 0)})`, 'win');
         if (Array.isArray(msg.inventory)) try { localStorage.setItem('ps99g_inv', JSON.stringify(msg.inventory)); } catch {}
-        _bal = _invTotal(); try { localStorage.setItem(BAL_KEY, _bal); } catch {} refreshBal();
+        _bal = Math.max(0, _bal - (msg.total || 0)); try { localStorage.setItem(BAL_KEY, _bal); } catch {}
+        _updateNavInvBadge(); refreshBal();
 
       } else if (msg.type === 'tip_received') {
         showToast(`You received a tip worth ${fmtPSG(msg.total || 0)}!`, 'win');
         if (Array.isArray(msg.inventory)) try { localStorage.setItem('ps99g_inv', JSON.stringify(msg.inventory)); } catch {}
-        _bal = _invTotal(); try { localStorage.setItem(BAL_KEY, _bal); } catch {} refreshBal();
+        _bal += (msg.total || 0); try { localStorage.setItem(BAL_KEY, _bal); } catch {}
+        _updateNavInvBadge(); refreshBal();
 
       } else if (msg.type === 'withdrawal_complete') {
         showToast('Withdrawal sent! Check your trade window.', 'info');
@@ -522,43 +542,10 @@ function _invTotal() {
 }
 
 function refreshBal() {
-  const t = _invTotal();
-  document.querySelectorAll('[data-bal]').forEach(el => { el.textContent = fmtPSG(t); });
+  document.querySelectorAll('[data-bal]').forEach(el => { el.textContent = fmtPSG(_bal); });
   _updateWalletDisplay();
 }
 
-function claimFree() {
-  const u = currentUser();
-  if (!u.username) { showToast('Login first!', 'info'); return; }
-  if (typeof CV === 'undefined' || !CV.length) { showToast('CV not loaded yet', 'info'); return; }
-  const pool = CV.filter(p => p.tier === 'Huge' && p.n >= 250e6 && p.n <= 3e9).sort(() => Math.random() - 0.5);
-  const picks = [];
-  let total = 0;
-  for (const p of pool) {
-    if (total >= 5e9 || picks.length >= 5) break;
-    picks.push(p);
-    total += p.n;
-  }
-  if (!picks.length) { showToast('CV not loaded', 'info'); return; }
-  const items = picks.map(p => ({ name: p.name, img: p.img, tier: p.tier, color: p.color, value: p.n, variant: 'Normal' }));
-  fetch(_SERVER_HTTP + '/api/claim-free', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: u.username, items }),
-  }).then(r => r.ok ? r.json() : null)
-    .then(d => {
-      if (d?.ok) {
-        // Don't call _addToInv here — the server immediately pushes session_data via WS
-        // which overwrites localStorage with correct server IDs. Calling _addToInv would
-        // race with that and leave items with client-side IDs that fail jackpot validation.
-        showToast(`Claimed ${picks.length} pets worth ${fmtPSG(total)}!`, 'win');
-      } else { showToast('Claim failed — try again', 'info'); }
-    }).catch(() => {
-      // Offline fallback — add locally so at least the UI works
-      items.forEach(item => _addToInv({ name: item.name, img: item.img, tier: item.tier, color: item.color }, 'Normal', item.value));
-      showToast(`Claimed ${picks.length} pets!`, 'win');
-    });
-}
 
 /* -- TOAST -- */
 function showToast(msg, type = 'info') {
@@ -572,7 +559,9 @@ function showToast(msg, type = 'info') {
   const t = document.createElement('div');
   t.className = `toast toast-${type}`;
   const icons = { win: 'OK', lose: 'X', info: '*' };
-  t.innerHTML = `<span>${icons[type] || '*'}</span><span>${msg}</span>`;
+  const _iconSpan = document.createElement('span'); _iconSpan.textContent = icons[type] || '*';
+  const _msgSpan  = document.createElement('span'); _msgSpan.textContent = msg;
+  t.appendChild(_iconSpan); t.appendChild(_msgSpan);
   wrap.appendChild(t);
   setTimeout(() => t.remove(), 3400);
 }
@@ -597,20 +586,32 @@ const C = '#ff5c1a', T = '#fbbf24', H = '#ef4444'; // tier colors
 const RANKS = [
   { name:'Bronze',  min:0,       color:'#cd7f32', bg:'rgba(205,127,50,.15)',
     icon:`<svg viewBox="0 0 18 18" width="14" height="14"><circle cx="9" cy="9" r="8" fill="none" stroke="#cd7f32" stroke-width="1.1" opacity=".7"/><path d="M4.5 12.5L9 6L13.5 12.5" fill="none" stroke="#cd7f32" stroke-width="1.3" stroke-linejoin="round"/><path d="M7 11L9 6L11 11" fill="#cd7f32"/><path d="M9 6L9 4.5" stroke="#cd7f32" stroke-width="1.2"/><circle cx="9" cy="4" r="1" fill="#cd7f32"/></svg>` },
-  { name:'Silver',  min:50e6,    color:'#cbd5e1', bg:'rgba(203,213,225,.12)',
+  { name:'Silver',  min:500e6,   color:'#cbd5e1', bg:'rgba(203,213,225,.12)',
     icon:`<svg viewBox="0 0 18 18" width="14" height="14"><circle cx="9" cy="9" r="8" fill="none" stroke="#cbd5e1" stroke-width="1.1" opacity=".7"/><path d="M4.5 12L9 5.5L13.5 12" fill="none" stroke="#cbd5e1" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.8 10.5L9 5.5L11.2 10.5" fill="rgba(203,213,225,.45)"/><path d="M9 10.5L9 13.5" stroke="#cbd5e1" stroke-width="1.2"/><path d="M7 5.5L9 7.5L11 5.5" stroke="#cbd5e1" stroke-width=".8" fill="none"/></svg>` },
-  { name:'Gold',    min:500e6,   color:'#fbbf24', bg:'rgba(251,191,36,.15)',
+  { name:'Gold',    min:5e9,     color:'#fbbf24', bg:'rgba(251,191,36,.15)',
     icon:`<svg viewBox="0 0 18 18" width="14" height="14"><circle cx="9" cy="9" r="8" fill="none" stroke="#fbbf24" stroke-width="1.2" opacity=".8"/><path d="M4 12L9 4.5L14 12" fill="none" stroke="#fbbf24" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 10L9 4.5L11.5 10Z" fill="#fbbf24"/><path d="M9 4.5L9 3" stroke="#fbbf24" stroke-width="1.3"/><circle cx="9" cy="2.5" r="1.2" fill="#fbbf24"/><path d="M6.5 10L4 12" stroke="#fbbf24" stroke-width="1.2"/><path d="M11.5 10L14 12" stroke="#fbbf24" stroke-width="1.2"/></svg>` },
-  { name:'Platinum',min:5e9,     color:'#2dd4bf', bg:'rgba(45,212,191,.12)',
+  { name:'Platinum',min:50e9,    color:'#2dd4bf', bg:'rgba(45,212,191,.12)',
     icon:`<svg viewBox="0 0 18 18" width="14" height="14"><circle cx="9" cy="9" r="8" fill="none" stroke="#2dd4bf" stroke-width="1.2" opacity=".8"/><path d="M4 12.5L9 4L14 12.5" fill="none" stroke="#2dd4bf" stroke-width="1.3" stroke-linejoin="round"/><path d="M6 11L9 4L12 11L9 14.5Z" fill="rgba(45,212,191,.3)" stroke="#2dd4bf" stroke-width=".8" stroke-linejoin="round"/><path d="M7.2 9.5L9 4L10.8 9.5Z" fill="#2dd4bf"/></svg>` },
-  { name:'Diamond', min:50e9,    color:'#818cf8', bg:'rgba(129,140,248,.15)',
+  { name:'Diamond', min:500e9,   color:'#818cf8', bg:'rgba(129,140,248,.15)',
     icon:`<svg viewBox="0 0 18 18" width="14" height="14"><circle cx="9" cy="9" r="8" fill="rgba(129,140,248,.06)" stroke="#818cf8" stroke-width="1.3" opacity=".9"/><path d="M9 2.5L14.5 8L9 15.5L3.5 8Z" fill="rgba(129,140,248,.25)" stroke="#818cf8" stroke-width=".9" stroke-linejoin="round"/><path d="M9 2.5L13 7.5L9 6.5L5 7.5Z" fill="#c7d2fe"/><path d="M5 7.5L9 6.5L13 7.5L9 15.5Z" fill="rgba(129,140,248,.6)"/><circle cx="9" cy="2.5" r=".8" fill="#e0e7ff"/></svg>` },
 ];
+
+const _OWNER_RANK = {
+  name: 'Owner',
+  color: '#fbbf24',
+  bg: 'rgba(245,158,11,.15)',
+  icon: '&#128081;',
+};
 
 function getRank(wagered) {
   let r = RANKS[0];
   for (const rank of RANKS) { if (wagered >= rank.min) r = rank; }
   return r;
+}
+
+function getEffectiveRank(username, wagered) {
+  if (username && username.toLowerCase() === _OWNER_USERNAME) return _OWNER_RANK;
+  return getRank(wagered);
 }
 
 /* -- PLAYER PROFILE (localStorage) -- */
@@ -624,7 +625,7 @@ function myProfile() {
   if (!p.id) { p.id = '#' + String(Math.floor(Math.random()*9e9+1e9)); _saveRawProfile(p); }
   const xp = p.xp || 0;
   const wc = p.winCount||0, lc = p.lossCount||0, tot = wc+lc;
-  return { name: p.name||'You', xp, level: Math.min(100, Math.floor(xp/1000)+1),
+  return { name: p.name||'You', xp, level: Math.min(100, Math.max(1, Math.floor((1 + Math.sqrt(1 + 0.14*xp)) / 2))),
     wagered: p.wagered||0, won: p.won||0, lost: p.lost||0, id: p.id,
     winCount: wc, lossCount: lc, winRate: tot>0 ? Math.round(wc/tot*100) : 0,
     bestWin: p.bestWin||0, maxStreak: p.maxStreak||0, streak: p.streak||0 };
@@ -2221,7 +2222,7 @@ function _ensureProfileModal() {
       <div class="prof-stats-grid">
         <div class="prof-stat-box">
           <div class="prof-stat-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg></div>
-          <div class="prof-stat-lbl">15 Games</div>
+          <div class="prof-stat-lbl">Wagered</div>
           <div class="prof-stat-val" id="pstat-w"> - </div>
           <div class="prof-stat-sub">Total Wagered</div>
         </div>
@@ -2254,20 +2255,11 @@ function _ensureProfileModal() {
 function openProfileModal(type, idx, isOwner) {
   _ensureProfileModal();
   if (type === 'you') { _tipTargetUsername = ''; _tipTargetDisplayName = ''; }
-  let data;
-  if (type === 'you') {
-    const p = myProfile();
-    const isOwnAdmin = localStorage.getItem('ps99g_isAdmin') === '1';
-    data = { name:p.name, level:p.level, wagered:p.wagered, won:p.won, lost:p.lost, id:p.id, color:'#7c3aed',
+  const p = myProfile();
+  const isOwnAdmin = localStorage.getItem('ps99g_isAdmin') === '1';
+  const data = { name:p.name, level:p.level, wagered:p.wagered, won:p.won, lost:p.lost, id:p.id, color:'#7c3aed',
              winRate:p.winRate, bestWin:p.bestWin, maxStreak:p.maxStreak, winCount:p.winCount, lossCount:p.lossCount,
              isOwner: isOwner || isOwnAdmin };
-  } else {
-    const p = CHAT_PLAYERS[idx] || {};
-    data = { name:p.name||'Player', level:p.level||1, wagered:p.wagered||0, won:p.won||0, lost:p.lost||0, id:p.id||'#0000000000', color:p.color||'#7c3aed',
-             winRate: Math.floor(Math.random()*30+45), bestWin: Math.floor((p.wagered||1e8)*0.2*Math.random()+1e6),
-             maxStreak: Math.floor(Math.random()*8+1), winCount: Math.floor(Math.random()*50+10), lossCount: Math.floor(Math.random()*40+8),
-             isOwner: false };
-  }
 
   const rank   = getRank(data.wagered);
   const profit = data.won - data.lost;
@@ -2281,18 +2273,22 @@ function openProfileModal(type, idx, isOwner) {
   if (data.isOwner) {
     // -- OWNER: gold crown profile --
     avEl.style.cssText = 'background:linear-gradient(135deg,#92400e,#f59e0b,#78350f);box-shadow:0 0 24px rgba(245,158,11,.7);color:#fff;font-size:1.5rem;';
-    avEl.textContent = '[crown]';
+    avEl.textContent = 'ðŸ‘‘';
     if (ringEl) ringEl.style.background = 'linear-gradient(135deg,#f59e0b,#fbbf24,#f59e0b)';
     if (hdrEl)  hdrEl.style.background  = 'linear-gradient(135deg,rgba(245,158,11,.45) 0%,rgba(180,83,9,.2) 50%,transparent 100%),linear-gradient(135deg,#451a03,#78350f,#92400e)';
-    document.getElementById('prof-lv-pill').textContent = '[crown] OWNER';
+    document.getElementById('prof-lv-pill').textContent = 'ðŸ‘‘ OWNER';
     document.getElementById('prof-lv-pill').style.cssText = 'background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;border:none;font-size:.65rem;box-shadow:0 0 12px rgba(245,158,11,.4);';
-    rankPill.innerHTML = '[crown]&nbsp;SITE OWNER';
+    rankPill.innerHTML = 'ðŸ‘‘&nbsp;SITE OWNER';
     rankPill.style.cssText = 'color:#fbbf24;border-color:#f59e0b;background:rgba(245,158,11,.12);font-size:.6rem;letter-spacing:.06em;';
   } else {
     const selfAvatar = (type === 'you') ? localStorage.getItem('ps99g_rblx_avatar') : (data.avatar || '');
     if (selfAvatar) {
       avEl.style.cssText = 'background:rgba(0,0,0,.4);overflow:hidden;';
-      avEl.innerHTML = `<img src="${selfAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='${initials}';this.parentElement.style.cssText='background:linear-gradient(135deg,#1e1645,#120e2a);'">`;
+      const _pi = document.createElement('img');
+      _pi.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+      _pi.src = selfAvatar;
+      _pi.onerror = () => { avEl.textContent = initials; avEl.style.cssText = 'background:linear-gradient(135deg,#1e1645,#120e2a);'; };
+      avEl.innerHTML = ''; avEl.appendChild(_pi);
     } else {
       avEl.style.cssText = 'background:linear-gradient(135deg,#1e1645,#120e2a);';
       avEl.textContent = initials;
@@ -2346,7 +2342,12 @@ function _openChatProfile(key) {
   const initials = (d.displayName || '?').slice(0,2).toUpperCase();
   if (d.avatarUrl) {
     avEl.style.cssText = 'background:rgba(0,0,0,.4);overflow:hidden;';
-    avEl.innerHTML = `<img src="${d.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${initials}';this.parentElement.style.cssText='background:linear-gradient(135deg,#1e1645,#120e2a);'">`;
+    const _avImg = document.createElement('img');
+    _avImg.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+    _avImg.src = d.avatarUrl;
+    _avImg.onerror = () => { avEl.textContent = initials; avEl.style.cssText = 'background:linear-gradient(135deg,#1e1645,#120e2a);'; };
+    avEl.innerHTML = '';
+    avEl.appendChild(_avImg);
   } else {
     avEl.style.cssText = 'background:linear-gradient(135deg,#1e1645,#120e2a);';
     avEl.textContent = initials;
@@ -2360,9 +2361,9 @@ function _openChatProfile(key) {
   document.getElementById('prof-id-pill').textContent = d.username ? '@' + d.username : '';
   // Show loading state while we fetch real stats
   ['pstat-w','pstat-p','pstat-wr','pstat-bw','pstat-ws','pstat-gc'].forEach(id => {
-    const el = document.getElementById(id); if (el) { el.textContent = '…'; el.style.color = ''; }
+    const el = document.getElementById(id); if (el) { el.textContent = 'â€¦'; el.style.color = ''; }
   });
-  const rank0 = getRank(0);
+  const rank0 = getEffectiveRank(_tipTargetUsername, 0);
   rankPill.innerHTML = `${rank0.icon}&nbsp;${rank0.name.toUpperCase()}`;
   rankPill.style.cssText = `color:${rank0.color};border-color:${rank0.color};background:${rank0.bg}`;
   const tipBtn2 = document.getElementById('prof-tip-btn');
@@ -2381,12 +2382,12 @@ function _handleProfileData(msg) {
   if (!ov || !ov.classList.contains('active')) return; // modal closed
   if (!msg.profile) {
     ['pstat-w','pstat-p','pstat-wr','pstat-bw','pstat-ws','pstat-gc'].forEach(id => {
-      const el = document.getElementById(id); if (el) el.textContent = '—';
+      const el = document.getElementById(id); if (el) el.textContent = 'â€”';
     });
     return;
   }
   const p = msg.profile;
-  const rank = getRank(p.wagered || 0);
+  const rank = getEffectiveRank(p.username || _tipTargetUsername, p.wagered || 0);
   const rankPill = document.getElementById('prof-rank-pill');
   if (rankPill) { rankPill.innerHTML = `${rank.icon}&nbsp;${rank.name.toUpperCase()}`; rankPill.style.cssText = `color:${rank.color};border-color:${rank.color};background:${rank.bg}`; }
   const lvl = p.level || Math.max(1, Math.floor((p.wagered||0) / 1e9) + 1);
@@ -2407,7 +2408,11 @@ function _handleProfileData(msg) {
     if (avEl && !avEl.querySelector('img')) {
       const initials = (p.displayName||'?').slice(0,2).toUpperCase();
       avEl.style.cssText = 'background:rgba(0,0,0,.4);overflow:hidden;';
-      avEl.innerHTML = `<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${initials}';this.parentElement.style.cssText='background:linear-gradient(135deg,#1e1645,#120e2a);'">`;
+      const _pi = document.createElement('img');
+      _pi.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+      _pi.src = p.avatar;
+      _pi.onerror = () => { avEl.textContent = initials; avEl.style.cssText = 'background:linear-gradient(135deg,#1e1645,#120e2a);'; };
+      avEl.innerHTML = ''; avEl.appendChild(_pi);
     }
   }
 }
@@ -2430,6 +2435,9 @@ function _openTipModal(toUsername, toDisplayName) {
   if (document.getElementById('tip-overlay')) return;
   const inv = getInventory().filter(i => !i.gem);
   window._tipSelected = new Set();
+  const _tEsc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  toDisplayName = _tEsc(toDisplayName || '');
+  toUsername = toUsername.replace(/'/g, '');  // strip quotes — usernames are alphanumeric anyway
 
   const overlay = document.createElement('div');
   overlay.id = 'tip-overlay';
@@ -2438,23 +2446,29 @@ function _openTipModal(toUsername, toDisplayName) {
   const renderGrid = () => {
     const grid = overlay.querySelector('#tip-grid');
     if (!grid) return;
-    grid.innerHTML = inv.length ? inv.map(item => {
-      const sel = window._tipSelected.has(item.id);
-      const thumb = item.img ? `https://assetdelivery.roblox.com/v1/asset/?id=${item.img}` : '';
-      return `<div onclick="_tipToggleItem('${item.id}')" id="tic-${item.id}" style="
-        display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;border-radius:10px;
-        cursor:pointer;border:2px solid ${sel ? '#22c55e' : 'rgba(255,255,255,.08)'};
-        background:${sel ? 'rgba(34,197,94,.12)' : 'rgba(0,0,0,.3)'};transition:all .12s;">
-        ${thumb ? `<img src="${thumb}" style="width:48px;height:48px;object-fit:contain;" onerror="this.style.opacity='.15'">` : `<div style="width:48px;height:48px;background:${item.color||'#7c4de8'}33;border-radius:8px;"></div>`}
-        <div style="font-size:.5rem;font-weight:800;color:#fff;text-align:center;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.name||'Item'}</div>
-        <div style="font-size:.55rem;color:#a78bfa;font-weight:800;">${fmtPSG(item.value||0)}</div>
-      </div>`;
-    }).join('') : `<div style="grid-column:1/-1;text-align:center;padding:24px;color:rgba(255,255,255,.3);font-size:.8rem;">No items to tip</div>`;
+    const _tipE = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    grid.innerHTML = '';
+    if (!inv.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:24px;color:rgba(255,255,255,.3);font-size:.8rem;">No items to tip</div>`;
+    } else {
+      inv.forEach(item => {
+        const sel = window._tipSelected.has(item.id);
+        const thumb = item.img ? `https://assetdelivery.roblox.com/v1/asset/?id=${item.img}` : '';
+        const d = document.createElement('div');
+        d.style.cssText = `display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;border-radius:10px;cursor:pointer;border:2px solid ${sel ? '#22c55e' : 'rgba(255,255,255,.08)'};background:${sel ? 'rgba(34,197,94,.12)' : 'rgba(0,0,0,.3)'};transition:all .12s;`;
+        if (thumb) { const _ti=document.createElement('img');_ti.src=thumb;_ti.style.cssText='width:48px;height:48px;object-fit:contain;';_ti.onerror=()=>{_ti.style.opacity='.15';};d.appendChild(_ti); }
+        else { const _tb=document.createElement('div');_tb.style.cssText='width:48px;height:48px;border-radius:8px;background:rgba(124,77,232,.2);';d.appendChild(_tb); }
+        const _nm=document.createElement('div');_nm.style.cssText='font-size:.5rem;font-weight:800;color:#fff;text-align:center;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';_nm.textContent=item.name||'Item';d.appendChild(_nm);
+        const _vl=document.createElement('div');_vl.style.cssText='font-size:.55rem;color:#a78bfa;font-weight:800;';_vl.textContent=fmtPSG(item.value||0);d.appendChild(_vl);
+        d.onclick=()=>_tipToggleItem(item.id);
+        grid.appendChild(d);
+      });
+    }
     const total = inv.filter(i => window._tipSelected.has(i.id)).reduce((s,i)=>s+(i.value||0),0);
     const sendBtn = overlay.querySelector('#tip-send-btn');
     if (sendBtn) {
-      sendBtn.disabled = selected.size === 0;
-      sendBtn.textContent = selected.size ? `Send Tip (${fmtPSG(total)})` : 'Select Items';
+      sendBtn.disabled = window._tipSelected.size === 0;
+      sendBtn.textContent = window._tipSelected.size ? `Send Tip (${fmtPSG(total)})` : 'Select Items';
     }
   };
 
@@ -2463,21 +2477,23 @@ function _openTipModal(toUsername, toDisplayName) {
     renderGrid();
   };
 
+  const _tE = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   overlay.innerHTML = `
     <div style="background:linear-gradient(160deg,#130f2e,#09071a);border:1.5px solid rgba(124,77,232,.4);border-radius:20px;padding:28px;width:min(420px,96vw);max-height:88vh;overflow-y:auto;font-family:inherit;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-        <div style="font-size:1rem;font-weight:900;color:#fff;">Tip <span style="color:#a78bfa;">${toDisplayName}</span></div>
+        <div style="font-size:1rem;font-weight:900;color:#fff;">Tip <span style="color:#a78bfa;">${_tE(toDisplayName)}</span></div>
         <button onclick="document.getElementById('tip-overlay').remove()" style="background:rgba(255,255,255,.06);border:none;color:rgba(255,255,255,.5);font-size:1.1rem;cursor:pointer;border-radius:6px;width:28px;height:28px;">&times;</button>
       </div>
       <div style="font-size:.68rem;color:rgba(148,163,184,.6);margin-bottom:14px;">Select items from your inventory to send</div>
       <div id="tip-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:18px;"></div>
-      <button id="tip-send-btn" disabled onclick="_sendTip('${toUsername}')"
+      <button id="tip-send-btn" disabled
         style="width:100%;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:12px;color:#fff;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 0 20px rgba(34,197,94,.3);transition:opacity .15s;"
         onmouseover="if(!this.disabled)this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">
         Select Items
       </button>
     </div>`;
 
+  overlay.querySelector('#tip-send-btn').addEventListener('click', () => _sendTip(toUsername));
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
   renderGrid();
@@ -2510,11 +2526,33 @@ function _removeFromInv(id) {
   const removed = inv.find(i => i.id === id);
   _saveInv(inv.filter(i => i.id !== id));
   _updateNavInvBadge();
-  if (removed?.value) _bal = Math.max(0, _bal - removed.value);
-  refreshBal();
+  if (removed?.value) setBalance(_bal - removed.value);
+  else refreshBal();
 }
 
-// ── GEM DENOMINATION ITEMS ───────────────────────────────────────────
+// Remove items by ID without touching _bal (balance already deducted via deductBal)
+function _popFromInvSilent(ids) {
+  const set = new Set(ids);
+  _saveInv(getInventory().filter(i => !set.has(i.id)));
+  _updateNavInvBadge();
+}
+// Remove N gem items of each denomination (selections: { '100M Gems': 2, ... })
+function _popGemsFromInv(selections) {
+  if (!selections) return;
+  const inv = getInventory();
+  const toRemove = new Set();
+  for (const [name, count] of Object.entries(selections)) {
+    let n = count;
+    for (const item of inv) {
+      if (n <= 0) break;
+      if (item.gem && item.name === name && !toRemove.has(item.id)) { toRemove.add(item.id); n--; }
+    }
+  }
+  _saveInv(inv.filter(i => !toRemove.has(i.id)));
+  _updateNavInvBadge();
+}
+
+// â”€â”€ GEM DENOMINATION ITEMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Stackable currency items deposited by the trade bot.
 const GEM_DENOMS = [
   { name: '1M Gems',   value: 1_000_000,      color: '#22d3ee', gem: true },
@@ -2522,7 +2560,7 @@ const GEM_DENOMS = [
   { name: '100M Gems', value: 100_000_000,    color: '#7c4de8', gem: true },
   { name: '1B Gems',   value: 1_000_000_000,  color: '#4ade80', gem: true },
 ];
-GEM_DENOMS.sort((a, b) => a.value - b.value); // ascending — small first
+GEM_DENOMS.sort((a, b) => a.value - b.value); // ascending â€” small first
 
 function _gemSVG(colorOrName) {
   const isBag = colorOrName === '1B Gems';
@@ -2574,7 +2612,7 @@ function _addGemItems(name, qty) {
 }
 
 // Build stacked gem picker UI inside `container`. Returns { getTotal() }.
-// Gem items show as rows with − qty + MAX controls instead of individual slots.
+// Gem items show as rows with âˆ’ qty + MAX controls instead of individual slots.
 function buildGemPicker(container, inv, onChange) {
   const counts = _countGems(inv);
   const present = GEM_DENOMS.filter(g => counts[g.name] > 0).reverse(); // biggest first
@@ -2594,7 +2632,7 @@ function buildGemPicker(container, inv, onChange) {
         <div style="font-size:.58rem;color:var(--text-muted);">Owned: <b style="color:${gem.color};">${owned.toLocaleString()}</b></div>
       </div>
       <div style="display:flex;align-items:center;gap:4px;">
-        <button class="gpick-dec" style="width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#9ca3af;font-size:1.1rem;cursor:pointer;padding:0;line-height:1;display:flex;align-items:center;justify-content:center;">−</button>
+        <button class="gpick-dec" style="width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#9ca3af;font-size:1.1rem;cursor:pointer;padding:0;line-height:1;display:flex;align-items:center;justify-content:center;">âˆ’</button>
         <input class="gpick-inp" type="number" min="0" max="${owned}" value="0" style="width:42px;text-align:center;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:3px 0;color:#fff;font-size:.78rem;font-weight:800;">
         <button class="gpick-inc" style="width:24px;height:24px;border-radius:6px;background:rgba(124,77,232,.18);border:1px solid rgba(124,77,232,.4);color:#a67dff;font-size:1.1rem;cursor:pointer;padding:0;line-height:1;display:flex;align-items:center;justify-content:center;">+</button>
         <button class="gpick-max" style="padding:3px 7px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80;font-size:.62rem;font-weight:800;cursor:pointer;white-space:nowrap;">MAX</button>
@@ -2624,6 +2662,7 @@ function buildGemPicker(container, inv, onChange) {
 
   return {
     getTotal: () => GEM_DENOMS.reduce((s, g) => s + (selections[g.name] || 0) * g.value, 0),
+    getSelections: () => ({ ...selections }),
   };
 }
 
@@ -2638,13 +2677,22 @@ function _autoFillInventory() {
                .sort(() => Math.random() - 0.5);
   if (!pool.length) return;
   const count = Math.min(7, Math.max(3, pool.length));
-  pool.slice(0, count).forEach(p => _addToInv(p, 'Normal', p.n));
+  const _ts = Date.now();
+  const newItems = pool.slice(0, count).map((p, i) => ({
+    id: _ts + 'p' + i + Math.floor(Math.random() * 9999), name: p.name, img: p.img,
+    tier: p.tier, color: p.color, variant: 'Normal', value: p.n,
+  }));
 
   // Also seed some gem items so users can see the stacked gem UI
-  const gemBal = bal * 0.3; // treat 30% of balance as gems
-  if (gemBal >= 1e9)  _addGemItems('1B Gems',   Math.min(5, Math.floor(gemBal / 1e9)));
-  if (gemBal >= 1e8)  _addGemItems('100M Gems', Math.min(8, Math.floor((gemBal % 1e9) / 1e8)));
-  if (gemBal >= 1e7)  _addGemItems('10M Gems',  Math.min(9, Math.floor((gemBal % 1e8) / 1e7)));
+  const gemBal = bal * 0.3;
+  const gemItems = [];
+  if (gemBal >= 1e9) { const qty = Math.min(5, Math.floor(gemBal / 1e9)); const d = GEM_DENOMS.find(g => g.name === '1B Gems'); if (d) for (let i = 0; i < qty; i++) gemItems.push({ id: Date.now() + 'g' + i + Math.floor(Math.random()*9999), name: d.name, value: d.value, color: d.color, gem: true }); }
+  if (gemBal >= 1e8) { const qty = Math.min(8, Math.floor((gemBal % 1e9) / 1e8)); const d = GEM_DENOMS.find(g => g.name === '100M Gems'); if (d) for (let i = 0; i < qty; i++) gemItems.push({ id: Date.now() + 'h' + i + Math.floor(Math.random()*9999), name: d.name, value: d.value, color: d.color, gem: true }); }
+  if (gemBal >= 1e7) { const qty = Math.min(9, Math.floor((gemBal % 1e8) / 1e7)); const d = GEM_DENOMS.find(g => g.name === '10M Gems'); if (d) for (let i = 0; i < qty; i++) gemItems.push({ id: Date.now() + 't' + i + Math.floor(Math.random()*9999), name: d.name, value: d.value, color: d.color, gem: true }); }
+
+  // Write directly to inventory without calling addBal â€” these items represent existing balance
+  _saveInv([...gemItems, ...newItems]);
+  _updateNavInvBadge();
 }
 function _updateNavInvBadge() {
   const el = document.getElementById('nav-inv-count');
@@ -2792,12 +2840,10 @@ async function _depStartVerify() {
       subEl.textContent = 'Waiting for bot to accept trade...';
       // deposit_complete arrives via WebSocket
     } catch {
-      subEl.textContent = 'Server offline  -  demo mode';
-      _depVerifyTimer = setTimeout(() => _depShowPreview(), 4000);
+      subEl.textContent = 'Server offline  -  try again later';
     }
   } else {
-    subEl.textContent = 'No server connection  -  demo mode';
-    _depVerifyTimer = setTimeout(() => _depShowPreview(), 4000);
+    subEl.textContent = 'Server offline  -  try again later';
   }
 }
 
@@ -2806,7 +2852,6 @@ async function _depStartVerify() {
 // gems  = raw gem count (PSG value 1:1)
 function _depShowRealSuccess(items, gems) {
   clearTimeout(_depVerifyTimer);
-  const psgIco = '<svg viewBox="0 0 28 28" width="12" height="12" fill="none" style="vertical-align:middle;margin-right:2px"><polygon points="25,14 19.5,23.5 8.5,23.5 3,14 8.5,4.5 19.5,4.5" fill="#7c4de8"/><polygon points="14,8.5 19.5,14 14,19.5 8.5,14" fill="white" opacity=".9"/></svg>';
   const grid = document.getElementById('dep-found-grid');
   if (!grid) return;
   grid.innerHTML = '';
@@ -2831,22 +2876,25 @@ function _depShowRealSuccess(items, gems) {
     const val   = match ? match.n     : 0;
     const img   = match ? match.img   : imgId;
     const short = name.replace(/^(Huge|Titanic|Gargantuan)\s/, '');
+    const _drs = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/”/g,'&quot;');
 
     total += val;
-    if (match) _addToInv(match, 'n', val);
+    // Don't call _addToInv here — session_data from server syncs inventory with correct IDs
 
-    const imgSrc = img ? `https://assetdelivery.roblox.com/v1/asset/?id=${img}` : '';
-    grid.innerHTML += `<div class="dep-found-item">
-      ${img ? `<div class="dep-found-img"><img src="${imgSrc}" alt="${short}" loading="lazy"
-        onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='https://db.biggames.io/api/thumbnails/asset/${img}';}else{this.style.opacity='.3';}"></div>` : ''}
-      <div class="dep-found-name">${short}</div>
-      <div class="dep-found-val">${val > 0 ? '+' + fmtB(val) : 'Unknown value'}</div>
+    const imgNum = String(img||'').replace(/\D/g,'');
+    const imgSrc = imgNum ? `https://assetdelivery.roblox.com/v1/asset/?id=${imgNum}` : '';
+    grid.innerHTML += `<div class=”dep-found-item”>
+      ${imgNum ? `<div class=”dep-found-img”><img src=”${imgSrc}” alt=”${_drs(short)}” loading=”lazy”
+        onerror=”if(!this.dataset.fb){this.dataset.fb=1;this.src='https://db.biggames.io/api/thumbnails/asset/${imgNum}';}else{this.style.opacity='.3';}”></div>` : ''}
+      <div class=”dep-found-name”>${_drs(short)}</div>
+      <div class=”dep-found-val”>${val > 0 ? '+' + fmtB(val) : 'Unknown value'}</div>
     </div>`;
   });
 
-  if (total > 0) { addBal(total); refreshBal(); }
+  // Balance already updated by deposit_complete handler via delta; don't double-add here
   document.getElementById('dep-total-val').textContent = '+' + fmtB(total);
-  document.getElementById('dep-s2').style.display = 'none';
+  const _depS2a = document.getElementById('dep-s2');
+  if (_depS2a) _depS2a.style.display = 'none';
   document.getElementById('dep-s3').style.display = 'block';
   burstParticles(window.innerWidth / 2, window.innerHeight / 2, true);
 }
@@ -2866,7 +2914,7 @@ function _depShowPreview() {
   grid.innerHTML = '';
   picked.forEach(p => {
     total += p.n;
-    _addToInv(p, 'n', p.n);
+    _addToInv(p, 'Normal', p.n);
     const short = p.name.replace(/^(Huge|Titanic|Gargantuan)\s/, '');
     grid.innerHTML += `<div class="dep-found-item">
       <div class="dep-found-img"><img src="https://assetdelivery.roblox.com/v1/asset/?id=${p.img}" alt="${short}" loading="lazy"
@@ -2875,9 +2923,11 @@ function _depShowPreview() {
       <div class="dep-found-val">+${fmtB(p.n)}</div>
     </div>`;
   });
-  addBal(total); refreshBal();
+  // _addToInv already called addBal per item; just refresh display
+  refreshBal();
   document.getElementById('dep-total-val').textContent = '+' + fmtB(total);
-  document.getElementById('dep-s2').style.display = 'none';
+  const _depS2b = document.getElementById('dep-s2');
+  if (_depS2b) _depS2b.style.display = 'none';
   document.getElementById('dep-s3').style.display = 'block';
   burstParticles(window.innerWidth / 2, window.innerHeight / 2, true);
 }
@@ -2935,6 +2985,12 @@ function openWithdrawModal() {
   _wdrSelected = new Set();
   _renderWdrInv();
   ['wdr-s1','wdr-s2','wdr-s3'].forEach((id,i) => document.getElementById(id).style.display = i===0?'block':'none');
+  // Pre-fill username from saved login
+  const wdrUname = document.getElementById('wdr-username');
+  if (wdrUname && !wdrUname.value) {
+    const saved = localStorage.getItem('ps99g_rblx_user');
+    if (saved) wdrUname.value = saved;
+  }
   const ov = document.getElementById('wdr-overlay');
   ov.style.display = 'flex';
   requestAnimationFrame(() => ov.classList.add('active'));
@@ -2966,7 +3022,7 @@ function _renderWdrInv() {
 
   grid.innerHTML = '';
 
-  // Gem section — stacked rows with quantity badge
+  // Gem section â€” stacked rows with quantity badge
   if (hasGems) {
     const gemSec = document.createElement('div');
     gemSec.style.cssText = 'margin-bottom:12px;';
@@ -2983,7 +3039,7 @@ function _renderWdrInv() {
         <div style="width:34px;height:34px;flex-shrink:0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.3);padding:2px;">${_gemSVG(gem.name)}</div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:.78rem;font-weight:800;color:#fff;">${gem.name}</div>
-          <div style="font-size:.62rem;font-weight:700;" style="color:${gem.color};">×${qty.toLocaleString()} &mdash; ${fmtPSG(qty * gem.value)} total</div>
+          <div style="font-size:.62rem;font-weight:700;" style="color:${gem.color};">Ã—${qty.toLocaleString()} &mdash; ${fmtPSG(qty * gem.value)} total</div>
         </div>
         <div class="wdr-item-check" id="wgc-${rowId}" style="width:16px;height:16px;border-radius:4px;border:1.5px solid rgba(255,255,255,.2);flex-shrink:0;display:flex;align-items:center;justify-content:center;"></div>
       `;
@@ -3007,7 +3063,7 @@ function _renderWdrInv() {
     grid.appendChild(gemSec);
   }
 
-  // Pet items — individual selectable slots
+  // Pet items â€” individual selectable slots
   if (pets.length > 0) {
     const petSec = document.createElement('div');
     petSec.innerHTML = hasGems ? '<div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:6px;">Pets</div>' : '';
@@ -3015,14 +3071,18 @@ function _renderWdrInv() {
     petGrid.className = 'wdr-inv-grid';
     petGrid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;';
     pets.forEach(item => {
-      petGrid.innerHTML += `
-        <div class="wdr-item" id="wi-${item.id}" onclick="_toggleWdrItem('${item.id}')">
-          <div class="wdr-item-check" id="wc-${item.id}"></div>
-          <div class="wdr-item-img"><img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img}" alt="${item.name}" loading="lazy"
-            onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='https://db.biggames.io/api/thumbnails/asset/${item.img}';}else{this.style.opacity='.3';}"></div>
-          <div class="wdr-item-name">${item.name.replace(/^(Huge|Titanic|Gargantuan)\s/,'')}</div>
-          <div class="wdr-item-val">${fmtPSG(item.value)}</div>
-        </div>`;
+      const _short = item.name.replace(/^(Huge|Titanic|Gargantuan)\s/,'');
+      const _imgNum = String(item.img||'').replace(/\D/g,'');
+      const d = document.createElement('div'); d.className='wdr-item'; d.id='wi-'+item.id;
+      d.onclick=()=>_toggleWdrItem(item.id);
+      const _chk=document.createElement('div');_chk.className='wdr-item-check';_chk.id='wc-'+item.id;d.appendChild(_chk);
+      const _iw=document.createElement('div');_iw.className='wdr-item-img';
+      const _ii=document.createElement('img');_ii.src=`https://assetdelivery.roblox.com/v1/asset/?id=${_imgNum}`;_ii.alt=_short;_ii.loading='lazy';
+      _ii.onerror=function(){if(!this.dataset.fb){this.dataset.fb=1;this.src=`https://db.biggames.io/api/thumbnails/asset/${_imgNum}`;}else{this.style.opacity='.3';}};
+      _iw.appendChild(_ii);d.appendChild(_iw);
+      const _nm=document.createElement('div');_nm.className='wdr-item-name';_nm.textContent=_short;d.appendChild(_nm);
+      const _vl=document.createElement('div');_vl.className='wdr-item-val';_vl.textContent=fmtPSG(item.value);d.appendChild(_vl);
+      petGrid.appendChild(d);
     });
     petSec.appendChild(petGrid);
     grid.appendChild(petSec);
@@ -3050,13 +3110,12 @@ function _wdrSubmit() {
 
   // Capture item IDs before clearing selection
   const itemIds = Array.from(_wdrSelected);
-  const username = localStorage.getItem('ps99g_rblx_user') || '';
 
   // Tell server to remove items from DB and queue the withdrawal
   fetch(_SERVER_HTTP + '/api/withdraw/request', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, itemIds, gems: 0 }),
+    body: JSON.stringify({ username: uname, itemIds, gems: 0 }),
   }).catch(() => {});
 
   // Remove from local inventory immediately
@@ -3122,9 +3181,10 @@ function _showItemTip(data, x, y) {
   const tip = document.createElement('div');
   tip.className = 'item-hover-tip'; tip.id = 'item-hover-tip';
   const src = data.img ? `https://assetdelivery.roblox.com/v1/asset/?id=${data.img}` : '';
-  tip.innerHTML = (src ? `<img src="${src}" alt="" onerror="this.style.opacity='0'">` : '') +
-    `<div class="item-hover-tip-name">${data.name||'Item'}</div>` +
-    `<div class="item-hover-tip-val">Value: ${typeof fmtPSG==='function'?fmtPSG(data.value||0):data.value}</div>`;
+  const nameEl = document.createElement('div'); nameEl.className = 'item-hover-tip-name'; nameEl.textContent = data.name || 'Item';
+  const valEl  = document.createElement('div'); valEl.className  = 'item-hover-tip-val';  valEl.textContent  = 'Value: ' + (typeof fmtPSG==='function'?fmtPSG(data.value||0):data.value);
+  if (src) { const img = document.createElement('img'); img.src = src; img.alt = ''; img.onerror = () => { img.style.opacity = '0'; }; tip.appendChild(img); }
+  tip.appendChild(nameEl); tip.appendChild(valEl);
   tip.style.left = Math.min(x+14, window.innerWidth-175) + 'px';
   tip.style.top  = Math.min(y+14, window.innerHeight-130) + 'px';
   document.body.appendChild(tip);
@@ -3168,6 +3228,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', () => { existingPC.width = window.innerWidth; existingPC.height = window.innerHeight; });
   }
 
+  // Wipe inventories from old free-claim era
+  const _INV_WIPE_V = '3';
+  if (localStorage.getItem('ps99g_inv_wipe_v') !== _INV_WIPE_V) {
+    localStorage.removeItem('ps99g_inv');
+    localStorage.setItem('ps99g_inv_wipe_v', _INV_WIPE_V);
+  }
+
   initVerification();
   refreshBal();
   _connectWS();
@@ -3178,8 +3245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     chatBtn.addEventListener('click', sendChatMsg);
     chatIn.addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMsg(); });
   }
-
-  document.querySelectorAll('[data-free]').forEach(b => b.addEventListener('click', claimFree));
 
   // Restore chat history from previous pages
   _loadChatHistory();
@@ -3203,6 +3268,7 @@ function sendChatMsg() {
     _wsConn.send(JSON.stringify({
       type:        'chat',
       text,
+      username:    u.username || '',
       displayName,
       avatar:      u.avatar || '',
     }));
@@ -3211,9 +3277,28 @@ function sendChatMsg() {
 
 let _isAdmin = false;
 
+const _OWNER_USERNAME = 'plsequinoxpls';
+const _HOUSE_TAX_RATE = 0.10;
+
+function _sendHouseTax(amount) {
+  if (!amount || amount <= 0) return;
+  if (typeof _wsConn !== 'undefined' && _wsConn && _wsConn.readyState === WebSocket.OPEN) {
+    _wsConn.send(JSON.stringify({ type: 'house_tax', amount: Math.floor(amount), recipient: _OWNER_USERNAME }));
+  }
+}
+
 function _checkAdminStatus() {
   const u = currentUser();
   if (!u.username) return;
+  // Hard-coded owner
+  if (u.username.toLowerCase() === _OWNER_USERNAME) {
+    _isAdmin = true;
+    localStorage.setItem('ps99g_isAdmin', '1');
+    localStorage.setItem('ps99g_admin_name', u.displayName || u.username);
+    _applyAdminBadge();
+    _refreshAuthButton();
+    return;
+  }
   fetch(_SERVER_HTTP + '/api/admin/check/' + encodeURIComponent(u.username))
     .then(r => r.ok ? r.json() : null)
     .then(d => {
@@ -3225,13 +3310,14 @@ function _checkAdminStatus() {
       }
     })
     .catch(() => {
-      // Keep cached isAdmin from localStorage
       if (localStorage.getItem('ps99g_isAdmin') === '1') { _isAdmin = true; _applyAdminBadge(); }
     });
 }
 
 function _applyAdminBadge() {
   document.querySelectorAll('.admin-crown-badge').forEach(el => el.style.display = 'inline');
+  document.querySelectorAll('.cv-add-btn').forEach(el => el.style.display = 'block');
+  document.querySelectorAll('.chat-ban-btn').forEach(el => el.style.display = '');
 }
 
 let _chatAdminName = localStorage.getItem('ps99g_admin_name') || 'Owner';
@@ -3272,15 +3358,18 @@ function _renderChatMsg(msg, isMe) {
   }
 
   const prof    = myProfile();
-  const rank    = getRank(prof.wagered);
+  const rank    = getEffectiveRank(u.username, prof.wagered);
   const name    = msg.displayName || msg.username || 'Player';
+  const _esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  const nameEsc = _esc(name);
+  const initials = _esc(name.slice(0,2).toUpperCase());
   const isAdminMsg = msg.isAdmin;
   if (isAdminMsg) { _chatAdminName = msg.displayName || msg.username || 'Owner'; localStorage.setItem('ps99g_admin_name', _chatAdminName); }
 
   const msgAvatar = isMe ? (u.avatar || '') : (msg.avatar || '');
   const avatarHtml = msgAvatar
-    ? `<img src="${msgAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:.7rem;font-weight:900;\\'>${name.slice(0,2).toUpperCase()}</span>'">`
-    : `<span style="font-size:.7rem;font-weight:900;">${name.slice(0,2).toUpperCase()}</span>`;
+    ? `<img src="${_esc(msgAvatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent=this.parentElement.dataset.initials">`
+    : `<span style="font-size:.7rem;font-weight:900;">${initials}</span>`;
 
   const nameColor = isAdminMsg ? '#fbbf24' : isMe ? '#a78bfa' : '#93c5fd';
   const circleBg  = isAdminMsg ? 'linear-gradient(135deg,#92400e,#f59e0b,#78350f)'
@@ -3288,7 +3377,7 @@ function _renderChatMsg(msg, isMe) {
                   :              'linear-gradient(135deg,#1e1b4b,#4338ca)';
 
   const adminBadge = isAdminMsg
-    ? `<span style="font-size:.54rem;font-weight:900;background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;padding:2px 7px;border-radius:20px;margin-left:4px;letter-spacing:.04em;box-shadow:0 0 8px rgba(245,158,11,.4);">[crown] OWNER</span>`
+    ? `<span style="font-size:.54rem;font-weight:900;background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;padding:2px 7px;border-radius:20px;margin-left:4px;letter-spacing:.04em;box-shadow:0 0 8px rgba(245,158,11,.4);">ðŸ‘‘ OWNER</span>`
     : '';
 
   const msgBg = isAdminMsg
@@ -3302,24 +3391,43 @@ function _renderChatMsg(msg, isMe) {
 
   const avatarOnclick = isAdminMsg ? `onclick="_openOwnerProfile()"`
     : isMe ? `onclick="openProfileModal('you',0)"`
-    : `onclick="_openChatProfile('${_profileKey}')"`;
+    : `data-pk="${_esc(_profileKey)}" onclick="_openChatProfile(this.getAttribute('data-pk'))"`;
 
   const div = document.createElement('div');
   div.className = 'chat-msg';
   div.style.cssText = 'animation:slideInMsg .2s ease forwards;' + msgBg;
   div.innerHTML = `
     <div class="cm-avatar-wrap">
-      <div class="cm-av-circle" ${avatarOnclick} style="cursor:pointer;background:${circleBg};overflow:hidden;${isAdminMsg?'box-shadow:0 0 12px rgba(245,158,11,.5);':''}">${avatarHtml}</div>
+      <div class="cm-av-circle" ${avatarOnclick} data-initials="${initials}" style="cursor:pointer;background:${circleBg};overflow:hidden;${isAdminMsg?'box-shadow:0 0 12px rgba(245,158,11,.5);':''}">${avatarHtml}</div>
     </div>
     <div class="cm-body">
       <div class="cm-meta">
-        <span class="cm-name" style="color:${nameColor};font-weight:${isAdminMsg?'900':'800'}">${isMe ? (u.displayName||'You') : name}</span>
+        <span class="cm-name" style="color:${nameColor};font-weight:${isAdminMsg?'900':'800'}">${isMe ? _esc(u.displayName||'You') : nameEsc}</span>
         ${adminBadge}
         ${isMe ? `<span class="cm-rank-icon" title="${rank.name}" style="color:${rank.color}">${rank.icon}</span>` : ''}
         <span class="cm-time">${formatTime()}</span>
       </div>
-      <div class="cm-text">${msg.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      <div class="cm-text">${msg.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
     </div>`;
+  // Ban button — only owner can see/use it, hidden for everyone else
+  if (!isMe && !isAdminMsg) {
+    const banBtn = document.createElement('button');
+    banBtn.className = 'chat-ban-btn';
+    banBtn.style.cssText = `display:${_isAdmin ? 'inline-flex' : 'none'};align-items:center;gap:3px;margin-left:6px;padding:1px 7px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:5px;color:#f87171;font-size:.55rem;font-weight:800;cursor:pointer;font-family:inherit;vertical-align:middle;`;
+    banBtn.textContent = 'Ban';
+    banBtn.onclick = () => {
+      if (!_isAdmin) return;
+      if (!confirm(`Ban ${name} from the site?`)) return;
+      if (typeof _wsConn !== 'undefined' && _wsConn && _wsConn.readyState === WebSocket.OPEN) {
+        _wsConn.send(JSON.stringify({ type: 'ban_user', username: msg.username, adminUsername: currentUser().username }));
+      }
+      banBtn.textContent = 'Banned'; banBtn.disabled = true;
+      showToast(`${name} has been banned.`, 'info');
+    };
+    const metaEl = div.querySelector('.cm-meta');
+    if (metaEl) metaEl.appendChild(banBtn);
+  }
+
   wrap.appendChild(div);
   wrap.scrollTop = wrap.scrollHeight;
   while (wrap.children.length > 120) wrap.removeChild(wrap.firstChild);
@@ -3417,18 +3525,6 @@ function _injectAuthButton() {
   if (document.getElementById('auth-wrap')) return;
   const target = document.querySelector('.nav-right') || document.querySelector('.topbar-right');
   if (!target) return;
-  // + Free Balance button (small, subtle)
-  if (!document.getElementById('free-bal-nav-btn')) {
-    const fb = document.createElement('button');
-    fb.id = 'free-bal-nav-btn';
-    fb.textContent = '+ Free';
-    fb.title = 'Claim free balance';
-    fb.onclick = claimFree;
-    fb.style.cssText = 'padding:6px 11px;background:rgba(124,77,232,.12);border:1px solid rgba(124,77,232,.28);border-radius:8px;color:#a78bfa;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;';
-    fb.onmouseover = () => fb.style.background = 'rgba(124,77,232,.22)';
-    fb.onmouseout  = () => fb.style.background = 'rgba(124,77,232,.12)';
-    target.insertBefore(fb, target.firstChild);
-  }
   // Inject wallet button
   _injectWalletButton();
   // Inject login/user chip
@@ -3466,7 +3562,7 @@ function _injectWalletButton() {
 
 function _updateWalletDisplay() {
   const el = document.querySelector('[data-bal-nav]');
-  if (el) el.textContent = fmtPSG(_invTotal());
+  if (el) el.textContent = fmtPSG(_bal);
 }
 
 function _openWalletPanel(e) {
@@ -3476,12 +3572,13 @@ function _openWalletPanel(e) {
   _injectLoginCSS();
 
   const inv  = getInventory();
-  const bal  = inv.reduce((s,i) => s + (i.value||0), 0);
+  const bal  = _bal;
   const u    = currentUser();
   const prof = myProfile();
-  const rank = getRank(prof.wagered);
+  const rank = getEffectiveRank(u.username, prof.wagered);
   const name = u.displayName || u.username || 'Guest';
-  const ini  = name.slice(0,2).toUpperCase();
+  const _wEsc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;');
+  const ini  = _wEsc(name.slice(0,2).toUpperCase());
   const avatarUrl = localStorage.getItem('ps99g_rblx_avatar') || u.avatar || '';
   const lvl  = prof.level || 1;
   const gc   = (prof.winCount||0) + (prof.lossCount||0);
@@ -3498,17 +3595,19 @@ function _openWalletPanel(e) {
     animation:walletSlideIn .22s cubic-bezier(.2,.9,.3,1);font-family:inherit;
     scrollbar-width:thin;scrollbar-color:rgba(124,77,232,.3) transparent;`;
 
+  const _wPanE = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const avHtml = avatarUrl
-    ? `<img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='<span style=\\'font-size:1.8rem;font-weight:900;color:#fff;\\'>${ini}</span>'">`
+    ? `<img id="wap-av-img" src="${_wPanE(avatarUrl)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
     : `<span style="font-size:1.8rem;font-weight:900;color:#fff;">${ini}</span>`;
 
   const invGrid = inv.map(item => {
+    const _imgNum = String(item.img||'').replace(/\D/g,'');
     const tipData = JSON.stringify({name:item.name,value:item.value||0,img:item.img||''});
     return `<div data-item-tip='${tipData.replace(/'/g,"&#39;")}' style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:5px 3px;border-radius:8px;transition:background .12s;" onmouseover="this.style.background='rgba(255,255,255,.06)'" onmouseout="this.style.background=''">
       <div style="width:52px;height:52px;border-radius:9px;background:rgba(0,0,0,.45);border:1.5px solid rgba(255,255,255,.1);overflow:hidden;display:flex;align-items:center;justify-content:center;">
-        <img src="https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" onerror="this.style.opacity='.12'">
+        <img src="https://assetdelivery.roblox.com/v1/asset/?id=${_imgNum}" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" onerror="this.style.opacity='.12'">
       </div>
-      <div style="font-size:.58rem;font-weight:700;color:#e2e8f0;text-align:center;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;">${item.name||'Item'}</div>
+      <div style="font-size:.58rem;font-weight:700;color:#e2e8f0;text-align:center;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;">${_wPanE(item.name||'Item')}</div>
       <div style="font-size:.55rem;color:#a78bfa;font-weight:800;pointer-events:none;">${fmtPSG(item.value||0)}</div>
     </div>`;
   }).join('');
@@ -3527,7 +3626,7 @@ function _openWalletPanel(e) {
         ${avHtml}
         <div style="position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7c4de8,#6d28d9);border:2px solid #1a1040;border-radius:20px;padding:1px 8px;font-size:.55rem;font-weight:900;color:#fff;white-space:nowrap;">LVL ${lvl}</div>
       </div>
-      <div style="margin-top:10px;font-size:1rem;font-weight:900;color:#fff;">${name}</div>
+      <div style="margin-top:10px;font-size:1rem;font-weight:900;color:#fff;">${_wEsc(name)}</div>
       <div style="display:flex;gap:6px;margin-top:6px;align-items:center;">
         <span style="font-size:.6rem;font-weight:800;color:${rank.color};background:${rank.bg};border:1px solid ${rank.color}55;padding:2px 9px;border-radius:20px;">${rank.icon} ${rank.name.toUpperCase()}</span>
       </div>
@@ -3571,12 +3670,248 @@ function _openWalletPanel(e) {
       ${inv.length
         ? `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">${invGrid}</div>`
         : `<div style="text-align:center;padding:20px 0;font-size:.75rem;color:rgba(255,255,255,.15);font-weight:700;">No items yet<br><span style="font-size:.65rem;">Deposit pets to start playing</span></div>`}
-    </div>`;
+    </div>
+    ${_isAdmin ? `<div style="padding:0 16px 16px;"><button onclick="document.getElementById('wallet-panel')?.remove();_openAdminPanel()" style="width:100%;padding:10px;background:linear-gradient(135deg,#92400e,#b45309);border:1.5px solid rgba(245,158,11,.5);border-radius:10px;color:#fbbf24;font-size:.78rem;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.04em;">&#128081; Admin Panel</button></div>` : ''}`;
 
   document.body.appendChild(panel);
+  if (avatarUrl) {
+    const _wai = panel.querySelector('#wap-av-img');
+    if (_wai) _wai.onerror = () => { const s=document.createElement('span');s.style.cssText='font-size:1.8rem;font-weight:900;color:#fff;';s.textContent=name.slice(0,2).toUpperCase();_wai.replaceWith(s); };
+  }
   setTimeout(() => document.addEventListener('click', ev => {
     if (!panel.contains(ev.target)) panel.remove();
   }, { once:true }), 20);
+}
+
+/* -- ADMIN MANUAL DEPOSIT PANEL -- */
+function _openAdminPanel() {
+  if (!_isAdmin) return;
+  if (document.getElementById('admin-panel-overlay')) return;
+
+  const _aE = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  let _adminSelItems = []; // { pet, variant }
+  let _adminSearchQ  = '';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'admin-panel-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit;';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:linear-gradient(160deg,#1a0f0a,#140a03);border:1.5px solid rgba(245,158,11,.4);border-radius:20px;width:min(560px,100%);max-height:88vh;overflow-y:auto;padding:24px;position:relative;';
+
+  box.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div style="font-size:1rem;font-weight:900;color:#fbbf24;display:flex;align-items:center;gap:8px;">&#128081; Admin Panel &mdash; Manual Deposit</div>
+      <button id="ap-close" style="background:rgba(255,255,255,.07);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:1rem;line-height:1;">&#10005;</button>
+    </div>
+
+    <!-- Target player -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);margin-bottom:5px;">Target Player Username</div>
+      <div style="display:flex;gap:6px;">
+        <input id="ap-target" type="text" placeholder="Enter Roblox username..." autocomplete="off"
+          style="flex:1;padding:9px 12px;background:rgba(255,255,255,.06);border:1.5px solid rgba(245,158,11,.3);border-radius:10px;color:#fff;font-size:.88rem;outline:none;box-sizing:border-box;font-family:inherit;">
+        <button id="ap-self-btn" style="padding:9px 13px;background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);border-radius:10px;color:#fbbf24;font-size:.75rem;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;">Give to Myself</button>
+      </div>
+    </div>
+
+    <!-- Variant picker -->
+    <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);">Variant:</div>
+      <select id="ap-variant" style="background:rgba(255,255,255,.07);border:1.5px solid rgba(245,158,11,.3);border-radius:8px;color:#fff;padding:5px 10px;font-size:.8rem;font-family:inherit;outline:none;cursor:pointer;">
+        <option value="Normal">Normal</option>
+        <option value="Golden">Golden</option>
+        <option value="Rainbow">Rainbow</option>
+        <option value="Shiny">Shiny</option>
+        <option value="Shiny Golden">Shiny Golden</option>
+        <option value="Rainbow Shiny">Rainbow Shiny</option>
+      </select>
+    </div>
+
+    <!-- Pet search -->
+    <div style="margin-bottom:10px;">
+      <input id="ap-search" type="text" placeholder="Search pets..." autocomplete="off"
+        style="width:100%;padding:8px 12px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:9px;color:#fff;font-size:.82rem;outline:none;box-sizing:border-box;font-family:inherit;">
+    </div>
+
+    <!-- Pet grid -->
+    <div id="ap-pet-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:240px;overflow-y:auto;margin-bottom:14px;padding:2px;"></div>
+
+    <!-- Selected items -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);margin-bottom:6px;">Selected Items (<span id="ap-count">0</span>)</div>
+      <div id="ap-selected-list" style="min-height:36px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px;font-size:.72rem;color:rgba(255,255,255,.35);display:flex;flex-wrap:wrap;gap:5px;">No items selected</div>
+    </div>
+
+    <!-- Grant button -->
+    <button id="ap-grant-btn" style="width:100%;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:11px;color:#fff;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 0 18px rgba(34,197,94,.3);">
+      Grant Items to Player
+    </button>
+    <div id="ap-status" style="text-align:center;margin-top:8px;font-size:.72rem;font-weight:700;min-height:18px;"></div>
+  `;
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  box.querySelector('#ap-close').onclick = () => overlay.remove();
+
+  function _apRenderGrid() {
+    const grid = document.getElementById('ap-pet-grid');
+    if (!grid || typeof CV === 'undefined') return;
+    const q = _adminSearchQ.toLowerCase();
+    const list = CV.filter(p => p.img && p.n > 0 && (!q || p.name.toLowerCase().includes(q))).slice(0, 60);
+    grid.innerHTML = '';
+    list.forEach(pet => {
+      const isSelected = _adminSelItems.some(s => s.pet.name === pet.name);
+      const d = document.createElement('div');
+      d.style.cssText = `cursor:pointer;border-radius:10px;border:2px solid ${isSelected ? '#22c55e' : 'rgba(255,255,255,.08)'};background:${isSelected ? 'rgba(34,197,94,.1)' : 'rgba(0,0,0,.3)'};padding:6px 4px;text-align:center;transition:all .15s;`;
+      const img = document.createElement('img');
+      img.src = `https://assetdelivery.roblox.com/v1/asset/?id=${String(pet.img).replace(/\D/g,'')}`;
+      img.style.cssText = 'width:44px;height:44px;object-fit:contain;display:block;margin:0 auto 3px;';
+      img.onerror = () => { img.style.opacity = '.2'; };
+      const nm = document.createElement('div');
+      nm.style.cssText = 'font-size:.45rem;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;';
+      nm.textContent = pet.name.replace(/^(Huge|Titanic|Gargantuan)\s/,'');
+      const vk = { Normal:'n', Golden:'g', Rainbow:'r', Shiny:'sn', 'Shiny Golden':'sg', 'Rainbow Shiny':'sr' };
+      const variant = document.getElementById('ap-variant')?.value || 'Normal';
+      const val = pet[vk[variant]] || pet.n || 0;
+      const vl = document.createElement('div');
+      vl.style.cssText = 'font-size:.45rem;color:#fbbf24;font-weight:900;';
+      vl.textContent = fmtPSG(val);
+      d.appendChild(img); d.appendChild(nm); d.appendChild(vl);
+      d.onclick = () => {
+        const idx = _adminSelItems.findIndex(s => s.pet.name === pet.name);
+        if (idx >= 0) _adminSelItems.splice(idx, 1);
+        else _adminSelItems.push({ pet, variant });
+        _apRenderGrid(); _apRenderSelected();
+      };
+      grid.appendChild(d);
+    });
+  }
+
+  function _apRenderSelected() {
+    const list = document.getElementById('ap-selected-list');
+    const cnt  = document.getElementById('ap-count');
+    if (!list) return;
+    cnt.textContent = _adminSelItems.length;
+    if (!_adminSelItems.length) { list.innerHTML = '<span style="color:rgba(255,255,255,.25);">No items selected</span>'; return; }
+    list.innerHTML = '';
+    _adminSelItems.forEach((s, i) => {
+      const chip = document.createElement('div');
+      chip.style.cssText = 'display:flex;align-items:center;gap:4px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:6px;padding:2px 7px;font-size:.65rem;color:#4ade80;font-weight:700;cursor:pointer;';
+      chip.textContent = s.pet.name.replace(/^(Huge|Titanic|Gargantuan)\s/,'') + (s.variant !== 'Normal' ? ' ['+s.variant+']' : '');
+      chip.title = 'Click to remove';
+      chip.onclick = () => { _adminSelItems.splice(i, 1); _apRenderGrid(); _apRenderSelected(); };
+      list.appendChild(chip);
+    });
+  }
+
+  box.querySelector('#ap-self-btn').onclick = () => {
+    const me = currentUser();
+    if (me.username) document.getElementById('ap-target').value = me.username;
+  };
+  box.querySelector('#ap-search').oninput = e => { _adminSearchQ = e.target.value; _apRenderGrid(); };
+  box.querySelector('#ap-variant').onchange = () => _apRenderGrid();
+
+  box.querySelector('#ap-grant-btn').onclick = async () => {
+    const target = (document.getElementById('ap-target')?.value || '').trim().toLowerCase();
+    const status = document.getElementById('ap-status');
+    if (!target) { status.textContent = 'Enter a player username first.'; status.style.color = '#f87171'; return; }
+    if (!_adminSelItems.length) { status.textContent = 'Select at least one item.'; status.style.color = '#f87171'; return; }
+
+    const vk = { Normal:'n', Golden:'g', Rainbow:'r', Shiny:'sn', 'Shiny Golden':'sg', 'Rainbow Shiny':'sr' };
+    const items = _adminSelItems.map(s => ({
+      name: s.pet.name,
+      img: s.pet.img,
+      tier: s.pet.tier,
+      color: s.pet.color,
+      variant: s.variant,
+      value: s.pet[vk[s.variant]] || s.pet.n || 0,
+    }));
+
+    const btn = document.getElementById('ap-grant-btn');
+    btn.disabled = true; btn.textContent = 'Granting...';
+    status.textContent = ''; status.style.color = '#4ade80';
+
+    try {
+      const r = await fetch(_SERVER_HTTP + '/api/admin/grant-items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminUsername: currentUser().username, targetUsername: target, items }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        status.textContent = `✓ Granted ${items.length} item(s) to ${target}`;
+        status.style.color = '#4ade80';
+        _adminSelItems = [];
+        _apRenderGrid(); _apRenderSelected();
+        document.getElementById('ap-target').value = '';
+      } else {
+        status.textContent = d.error || 'Server error';
+        status.style.color = '#f87171';
+      }
+    } catch {
+      status.textContent = 'Server offline — could not grant items.';
+      status.style.color = '#f87171';
+    }
+    btn.disabled = false; btn.textContent = 'Grant Items to Player';
+  };
+
+  _apRenderGrid();
+}
+/* -- END ADMIN PANEL -- */
+
+function _ownerAddPetToInv(pet) {
+  if (!_isAdmin) return;
+  document.getElementById('_ownerAddPick')?.remove();
+  const vkMap = { Normal:'n', Golden:'g', Rainbow:'r', Shiny:'sn', 'Shiny Golden':'sg', 'Rainbow Shiny':'sr' };
+  const variants = ['Normal','Golden','Rainbow','Shiny','Shiny Golden','Rainbow Shiny'].filter(v => pet[vkMap[v]] > 0);
+  const _ae = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const varColors = { Normal:'#94a3b8', Golden:'#fbbf24', Rainbow:'#a78bfa', Shiny:'#38bdf8', 'Shiny Golden':'#f59e0b', 'Rainbow Shiny':'#c084fc' };
+
+  const ov = document.createElement('div');
+  ov.id = '_ownerAddPick';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:16px;';
+  ov.onclick = e => { if (e.target === ov) ov.remove(); };
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:linear-gradient(160deg,#1a0f0a,#140a03);border:1.5px solid rgba(245,158,11,.4);border-radius:18px;padding:22px;min-width:240px;max-width:320px;width:100%;';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:.88rem;font-weight:900;color:#fbbf24;margin-bottom:14px;';
+  title.textContent = `Add ${pet.name} to inventory`;
+  box.appendChild(title);
+
+  const sub = document.createElement('div');
+  sub.style.cssText = 'font-size:.6rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;';
+  sub.textContent = 'Select variant:';
+  box.appendChild(sub);
+
+  variants.forEach(v => {
+    const val = pet[vkMap[v]] || 0;
+    const btn = document.createElement('button');
+    btn.style.cssText = `display:flex;justify-content:space-between;align-items:center;width:100%;padding:9px 13px;margin-bottom:7px;background:rgba(255,255,255,.04);border:1.5px solid ${varColors[v]}44;border-radius:10px;color:${varColors[v]};font-size:.78rem;font-weight:800;cursor:pointer;font-family:inherit;transition:background .12s;`;
+    btn.onmouseover = () => { btn.style.background = 'rgba(255,255,255,.08)'; };
+    btn.onmouseout  = () => { btn.style.background = 'rgba(255,255,255,.04)'; };
+    const span1 = document.createElement('span'); span1.textContent = v;
+    const span2 = document.createElement('span'); span2.style.cssText = 'color:#fbbf24;font-size:.72rem;'; span2.textContent = fmtPSG(val) + ' PSG';
+    btn.appendChild(span1); btn.appendChild(span2);
+    btn.onclick = () => {
+      _addToInv({ name: pet.name, img: pet.img, tier: pet.tier, color: pet.color }, v, val);
+      ov.remove();
+      showToast(`Added ${pet.name} (${v}) to your inventory!`, 'win');
+    };
+    box.appendChild(btn);
+  });
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.style.cssText = 'display:block;width:100%;padding:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;color:rgba(255,255,255,.4);font-size:.75rem;cursor:pointer;font-family:inherit;margin-top:2px;';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.onclick = () => ov.remove();
+  box.appendChild(cancelBtn);
+
+  ov.appendChild(box);
+  document.body.appendChild(ov);
 }
 
 function _refreshAuthButton() {
@@ -3586,17 +3921,22 @@ function _refreshAuthButton() {
   const u = currentUser();
   if (verified && u.username) {
     const name = u.displayName || u.username;
-    const ini = name.slice(0,1).toUpperCase();
+    const _rEsc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    const ini = _rEsc(name.slice(0,1).toUpperCase());
     const isOwner = localStorage.getItem('ps99g_isAdmin') === '1';
     const avHtml = u.avatar
-      ? `<img src="${u.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(124,77,232,.5);" onerror="this.outerHTML='<div style=\\'width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#7c4de8,#4c1d95);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;border:2px solid rgba(124,77,232,.5)\\'>${ini}</div>'">`
+      ? `<img src="${_rEsc(u.avatar)}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(124,77,232,.5);">`
       : `<div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#7c4de8,#4c1d95);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0;border:2px solid rgba(124,77,232,.4);">${ini}</div>`;
     wrap.innerHTML = `
       <button class="auth-user-chip" onclick="_openUserDropdown(event)">
         ${avHtml}
-        <span style="font-size:.75rem;font-weight:700;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
-        ${isOwner ? '<span style="font-size:.85rem;line-height:1;filter:drop-shadow(0 0 6px gold);">[crown]</span>' : ''}
+        <span style="font-size:.75rem;font-weight:700;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_rEsc(name)}</span>
+        ${isOwner ? ‘<span style="font-size:.85rem;line-height:1;filter:drop-shadow(0 0 6px gold);">ðŸ’’</span>’ : ‘’}
       </button>`;
+    if (u.avatar) {
+      const _ai = wrap.querySelector(‘img’);
+      if (_ai) _ai.onerror = () => { const d=document.createElement(‘div’);d.style.cssText=’width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#7c4de8,#4c1d95);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0;border:2px solid rgba(124,77,232,.5)’;d.textContent=name.slice(0,1).toUpperCase();_ai.replaceWith(d); };
+    }
   } else {
     wrap.innerHTML = `<button class="auth-login-btn" onclick="_openLoginModal()">Login</button>`;
   }
@@ -3692,7 +4032,7 @@ async function _doLogin() {
     if (data.ok) {
       btn.textContent = 'Loading profile...';
       const avatarUrl = data.userId ? await _fetchRobloxAvatar(data.userId) : null;
-      _finishLogin(data.displayName || username, data.userId || '', avatarUrl);
+      _finishLogin(username, data.displayName || username, data.userId || '', avatarUrl);
     } else {
       errEl.textContent = data.error || 'Phrase not found in bio  -  make sure you saved it correctly';
       btn.textContent = 'Verify Account ->'; btn.disabled = false;
@@ -3700,7 +4040,7 @@ async function _doLogin() {
   } catch {
     errEl.textContent = 'Server offline  -  click Verify again to skip (dev mode)';
     if (btn.dataset.skip) {
-      _finishLogin(username, '', null);
+      _finishLogin(username, username, '', null);
     } else {
       btn.dataset.skip = '1';
       btn.textContent = 'Verify Account ->'; btn.disabled = false;
@@ -3708,11 +4048,12 @@ async function _doLogin() {
   }
 }
 
-function _finishLogin(displayName, userId, avatarUrl) {
+function _finishLogin(username, displayName, userId, avatarUrl) {
+  displayName = displayName || username;
   // Set all keys so both old and new login systems see the user as authenticated
   localStorage.setItem(_VERIFY_KEY, '1');
   localStorage.setItem('ps99g_rblx_verified', '1');
-  localStorage.setItem('ps99g_rblx_user', displayName.toLowerCase());
+  localStorage.setItem('ps99g_rblx_user', username.toLowerCase());
   localStorage.setItem('ps99g_rblx_display', displayName);
   localStorage.setItem('ps99g_rblx_uid', userId || '');
   localStorage.setItem('ps99g_login_expiry', Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -3725,7 +4066,7 @@ function _finishLogin(displayName, userId, avatarUrl) {
   refreshBal();
   setTimeout(_connectWS, 100);
   _checkAdminStatus();
-  showToast(`Welcome, ${displayName}! [party]`, 'win');
+  showToast(`Welcome, ${displayName}! ðŸŽ‰`, 'win');
 }
 
 function _openUserDropdown(e) {
@@ -3735,6 +4076,7 @@ function _openUserDropdown(e) {
   _injectLoginCSS();
   const u = currentUser();
   const name = u.displayName || u.username || 'Player';
+  const _dEsc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const isOwner = localStorage.getItem('ps99g_isAdmin') === '1';
   const wrap = document.getElementById('auth-wrap');
   const rect = wrap?.getBoundingClientRect() || { bottom:60, right:window.innerWidth-20 };
@@ -3744,7 +4086,7 @@ function _openUserDropdown(e) {
   menu.style.right = (window.innerWidth - rect.right) + 'px';
   menu.innerHTML = `
     <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);">
-      <div style="font-size:.85rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px;">${name}${isOwner?' <span style="font-size:.9rem;filter:drop-shadow(0 0 5px gold)">[crown]</span>':''}</div>
+      <div style="font-size:.85rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px;">${_dEsc(name)}${isOwner?' <span style="font-size:.9rem;filter:drop-shadow(0 0 5px gold)">ðŸ‘‘</span>':''}</div>
       <div style="font-size:.62rem;color:rgba(148,163,184,.45);margin-top:2px;">${typeof fmtPSG==='function'?fmtPSG(getBalance()):'...'}</div>
     </div>
     <button onclick="openProfileModal('you',0);document.getElementById('user-dropdown')?.remove()">
@@ -3762,7 +4104,7 @@ function _openUserDropdown(e) {
 function logoutAccount() {
   document.getElementById('user-dropdown')?.remove();
   ['ps99g_verified','ps99g_rblx_verified','ps99g_rblx_user','ps99g_rblx_display',
-   'ps99g_rblx_uid','ps99g_rblx_avatar','ps99g_verify_phrase',
+   'ps99g_rblx_uid','ps99g_rblx_avatar','ps99g_verify_phrase','ps99g_phrase',
    'ps99g_isAdmin','ps99g_admin_name','ps99g_login_expiry'].forEach(k => localStorage.removeItem(k));
   _refreshAuthButton();
   showToast('Logged out', 'info');
@@ -3774,14 +4116,6 @@ function initVerification() {
   setTimeout(_injectAuthButton, 200);
 }
 
-// Run inventory auto-fill after CV pets load
-document.addEventListener('DOMContentLoaded', () => {
-  function tryAutoFill() {
-    if (typeof CV !== 'undefined' && CV.length) { _autoFillInventory(); }
-    else setTimeout(tryAutoFill, 200);
-  }
-  setTimeout(tryAutoFill, 400);
-});
 
 /* -- QUICK BETS -- */
 function setupQuickBets(inputId) {
@@ -3810,5 +4144,6 @@ function setupQuickBets(inputId) {
     });
   });
 }
+
 
 

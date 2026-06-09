@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>99Depo &mdash; Roulette</title>
-  <link rel="stylesheet" href="style.css?v=207">
+  <link rel="stylesheet" href="style.css?v=212">
   <style>
     /*  ROULETTE WHEEL TRACK  */
     .rl-wheel-wrap {
@@ -387,7 +387,7 @@
   </div>
 </div>
 
-<script src="app.js?v=207"></script>
+<script src="app.js?v=213"></script>
 <script>
 /*  Helpers  */
 function qbet(v) { document.getElementById('rl-bet').value = v; }
@@ -542,14 +542,17 @@ function showResult(result, betAmt) {
   document.getElementById('round-num').textContent = ++roundNum;
 
   if (won) {
-    addBal(winAmt); refreshBal();
-    recordWin(winAmt);
+    const rlTax = Math.floor(winAmt * _HOUSE_TAX_RATE);
+    const rlPayout = winAmt - rlTax;
+    addBal(rlPayout); refreshBal();
+    _sendHouseTax(rlTax);
+    recordWin(rlPayout - betAmt);
     bar.className = 'rl-result-bar win';
-    bar.innerHTML = `<span>${label}</span><span style="opacity:.5;">&middot;</span><span>Won ${fmtB(winAmt)}!</span>`;
-    wins++; netPL += winAmt - betAmt;
+    bar.innerHTML = `<span>${label}</span><span style="opacity:.5;">&middot;</span><span>Won ${fmtB(rlPayout)}!</span>`;
+    wins++; netPL += rlPayout - betAmt;
     const flash = document.getElementById('rl-win-flash');
-    document.getElementById('rl-win-label').textContent = `${label} &mdash; YOU WIN!`;
-    document.getElementById('rl-win-amount').textContent = `+${fmtB(winAmt)}`;
+    document.getElementById('rl-win-label').textContent = `${label} — YOU WIN!`;
+    document.getElementById('rl-win-amount').textContent = `+${fmtB(rlPayout)}`;
     flash.classList.add('show');
     setTimeout(() => flash.classList.remove('show'), 2000);
     burstParticles(window.innerWidth/2, window.innerHeight/2, true);
@@ -596,7 +599,6 @@ function showResult(result, betAmt) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  startChat();
   refreshBal();
   document.getElementById('chat-count').textContent = (Math.floor(Math.random()*400)+300)+' online';
   seedLiveBets();
@@ -606,4 +608,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
