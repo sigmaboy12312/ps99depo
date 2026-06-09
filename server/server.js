@@ -545,6 +545,23 @@ wss.on('connection', (ws) => {
         broadcastAll({ type: 'giveaway_count', count: activeGiveaway.entries.size });
       }
 
+      if (msg.type === 'start_giveaway') {
+        const client = wsClients.get(wsId);
+        const u = client?.username;
+        if (!u || isBanned(u) || isTimedOut(u)) return;
+        if (activeGiveaway) { client.ws.send(JSON.stringify({ type: 'chat', username: '__system', text: 'A giveaway is already active!', isSystem: true })); return; }
+        const secs = [30, 60, 120, 180].includes(msg.durationSecs) ? msg.durationSecs : 60;
+        const inv = getInventory(u);
+        const item = inv.find(i => i.id === msg.itemId);
+        if (!item) return;
+        removeInventoryItem(u, item.id);
+        pushToUser(u, { type: 'session_data', balance: getBalance(u), inventory: getInventory(u) });
+        const endsAt = Date.now() + secs * 1000;
+        activeGiveaway = { item, host: u, endsAt, entries: new Set(), timer: setTimeout(endGiveaway, secs * 1000) };
+        broadcastAll({ type: 'giveaway_start', item, host: u, endsAt, durationSecs: secs });
+        console.log(`[Giveaway] ${u} started: ${item.name} (${secs}s)`);
+      }
+
     } catch {}
   });
 
