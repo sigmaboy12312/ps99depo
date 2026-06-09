@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -387,7 +387,7 @@
   </div>
 </div>
 
-<script src="app.js?v=213"></script>
+<script src="app.js?v=214"></script>
 <script>
 /*  Helpers  */
 function qbet(v) { document.getElementById('rl-bet').value = v; }
@@ -551,7 +551,7 @@ function showResult(result, betAmt) {
     bar.innerHTML = `<span>${label}</span><span style="opacity:.5;">&middot;</span><span>Won ${fmtB(rlPayout)}!</span>`;
     wins++; netPL += rlPayout - betAmt;
     const flash = document.getElementById('rl-win-flash');
-    document.getElementById('rl-win-label').textContent = `${label} � YOU WIN!`;
+    document.getElementById('rl-win-label').textContent = `${label} — YOU WIN!`;
     document.getElementById('rl-win-amount').textContent = `+${fmtB(rlPayout)}`;
     flash.classList.add('show');
     setTimeout(() => flash.classList.remove('show'), 2000);

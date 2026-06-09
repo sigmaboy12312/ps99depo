@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     #jp-canvas { position:fixed;inset:0;pointer-events:none;z-index:800; }
     #jp-flash  { position:fixed;inset:0;background:#fbbf24;pointer-events:none;opacity:0;z-index:750;transition:opacity .08s ease; }
 
-    /* ── Winner overlay ── */
+    /* â”€â”€ Winner overlay â”€â”€ */
     #jp-winner {
       position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;
       background:rgba(5,3,16,.92);backdrop-filter:blur(14px);
@@ -43,7 +43,7 @@
     .jp-win-actions { margin-top:24px;animation:fadeUp .4s ease .7s both; }
     @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
-    /* ── Deposit modal ── */
+    /* â”€â”€ Deposit modal â”€â”€ */
     .dep-overlay { position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:700;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .2s; }
     .dep-overlay.open { opacity:1;pointer-events:all; }
     .dep-box { background:linear-gradient(145deg,var(--bg-card),var(--bg-card2));border:2px solid rgba(124,77,232,.45);border-radius:20px;padding:32px 36px;min-width:320px;box-shadow:0 0 80px rgba(124,77,232,.15),0 30px 80px rgba(0,0,0,.8);animation:modalIn .35s cubic-bezier(.34,1.56,.64,1); }
@@ -51,7 +51,7 @@
     .dep-close  { background:none;border:none;color:var(--text-muted);font-size:1.4rem;cursor:pointer;line-height:1; }
     .dep-close:hover { color:#fff; }
 
-    /* ── Arena card ── */
+    /* â”€â”€ Arena card â”€â”€ */
     .jp-arena-card {
       height:180px;border-radius:12px;overflow:hidden;
       border:1px solid rgba(255,255,255,.08);position:relative;
@@ -101,7 +101,7 @@
     @keyframes spinPulse { from{opacity:.5} to{opacity:1;color:#fbbf24} }
     .jp-arena-card.spinning .jp-arena-status-title { animation:spinPulse .5s ease-in-out infinite alternate; }
 
-    /* ── Join modal item cards ── */
+    /* â”€â”€ Join modal item cards â”€â”€ */
     .join-item-card {
       display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 6px;
       background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);
@@ -114,7 +114,7 @@
       box-shadow:0 0 12px rgba(124,77,232,.35);
     }
 
-    /* ── POT ITEMS row ── */
+    /* â”€â”€ POT ITEMS row â”€â”€ */
     .jp-pot-items {
       background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:12px 16px;
     }
@@ -139,7 +139,7 @@
     .jp-pot-name { font-size:.6rem;font-weight:800;color:#fff;text-align:center;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
     .jp-pot-val  { font-size:.58rem;color:#fbbf24;font-weight:900; }
 
-    /* ── JACKPOT counter bar ── */
+    /* â”€â”€ JACKPOT counter bar â”€â”€ */
     .jp-counter-bar {
       display:flex;align-items:center;justify-content:center;
       padding:10px 0;background:rgba(0,0,0,.25);
@@ -155,7 +155,7 @@
     .jp-counter-gem { color:#7c4de8; }
     .jp-counter-val { font-size:1.2rem;font-weight:900;color:#fff; }
 
-    /* ── Stats strip ── */
+    /* â”€â”€ Stats strip â”€â”€ */
     .jp-stats-strip {
       display:flex;align-items:center;gap:0;
       background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.05);border-radius:10px;
@@ -172,7 +172,7 @@
     }
     .jp-deposit-btn:hover { transform:translateY(-1px);box-shadow:0 0 22px rgba(124,77,232,.55); }
 
-    /* ── Active wagers ── */
+    /* â”€â”€ Active wagers â”€â”€ */
     .jp-wagers { background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.05);border-radius:10px;overflow:hidden; }
     .jp-wagers-header {
       padding:10px 16px;font-size:.6rem;font-weight:900;letter-spacing:.18em;
@@ -196,7 +196,7 @@
     .jp-wr-pet  { width:28px;height:28px;border-radius:6px;overflow:hidden;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);flex-shrink:0; }
     .jp-wr-pet img { width:100%;height:100%;object-fit:contain; }
 
-    /* ── 24h stats bar ── */
+    /* â”€â”€ 24h stats bar â”€â”€ */
     .jp-24h {
       display:flex;align-items:center;gap:0;
       background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.05);border-radius:10px;overflow:hidden;
@@ -216,7 +216,7 @@
     .jp-24h-val   { font-size:.88rem;font-weight:900;color:#fff; }
     .jp-24h-sub   { font-size:.6rem;color:var(--text-muted);margin-top:1px; }
 
-    /* ── Page layout ── */
+    /* â”€â”€ Page layout â”€â”€ */
     .jp-main-content { display:flex;flex-direction:column;gap:8px;flex:1;overflow-y:auto;padding:14px 16px;min-height:0; }
 
   </style>
@@ -265,7 +265,7 @@
     <!-- selected value bar -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,0,0,.3);border-radius:10px;margin-bottom:12px;">
       <span style="font-size:.7rem;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;">Selected Value</span>
-      <span id="join-total-val" style="font-size:1rem;font-weight:900;color:#fbbf24;">—</span>
+      <span id="join-total-val" style="font-size:1rem;font-weight:900;color:#fbbf24;">â€”</span>
     </div>
     <!-- item grid -->
     <div id="join-inv-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:320px;overflow-y:auto;margin-bottom:12px;padding-right:2px;scrollbar-width:thin;"></div>
@@ -389,7 +389,7 @@
   </div>
 </div>
 
-<script src="app.js?v=213"></script>
+<script src="app.js?v=214"></script>
 <script>
   const COLORS = ['#7c4de8','#ef4444','#06b6d4','#10b981','#f59e0b','#ec4899','#6366f1','#f97316','#a855f7','#14b8a6'];
   const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -404,7 +404,7 @@
     return imgNum ? `https://assetdelivery.roblox.com/v1/asset/?id=${imgNum}` : '';
   }
 
-  // Bot bets tied to their pet's actual (normal) value ±30%
+  // Bot bets tied to their pet's actual (normal) value Â±30%
   let players     = [];
   let userDeposit = 0;
   let spinning    = false;
@@ -439,7 +439,7 @@
 
   function getTotalPot() { return players.reduce((s, p) => s + p.bet, 0); }
 
-  // ── Deposit ──────────────────────────────────────────────
+  // â”€â”€ Deposit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let _joinSelected  = new Set(); // selected item ids
   let _pendingJoinIds = new Set(); // items sent to server, waiting confirmation
 
@@ -513,7 +513,7 @@
   function _updateJoinTotal() {
     const inv   = ((typeof getInventory === 'function') ? getInventory() : []).filter(i => !_pendingJoinIds.has(i.id));
     const total = inv.filter(i => _joinSelected.has(i.id)).reduce((s,i) => s + (i.value||0), 0);
-    document.getElementById('join-total-val').textContent = total > 0 ? fmtB(total) : '—';
+    document.getElementById('join-total-val').textContent = total > 0 ? fmtB(total) : 'â€”';
     document.getElementById('join-btn').disabled = total < 1;
   }
 
@@ -550,7 +550,7 @@
     }
   }
 
-  // ── Arena render ──────────────────────────────────────────
+  // â”€â”€ Arena render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function render() {
     const total = getTotalPot();
     document.getElementById('jp-counter-val').textContent = fmtPSG(total);
@@ -569,7 +569,7 @@
       const cvImgNum = String(p.cvPet.img||'').replace(/\D/g,'');
       const imgHtml  = thumbUrl
         ? `<img src="${thumbUrl}" loading="lazy" style="width:100%;height:100%;object-fit:contain;" onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='https://db.biggames.io/api/thumbnails/asset/${cvImgNum}';}else{this.style.opacity='.1';}">`
-        : `<span style="font-size:1.6rem;">🪙</span>`;
+        : `<span style="font-size:1.6rem;">ðŸª™</span>`;
       return `<div class="jp-pot-card" style="border-color:${p.color}33;">
         <div class="jp-pot-img" style="border-color:${p.color}55;">${imgHtml}</div>
         <div class="jp-pot-name" style="color:${p.color};">${_e(p.name)}</div>
@@ -589,7 +589,7 @@
       const thumbUrl = petThumbUrl(p.cvPet);
       const petHtml  = thumbUrl
         ? `<div class="jp-wr-pet"><img src="${thumbUrl}" loading="lazy" onerror="this.style.display='none'"></div>`
-        : `<div class="jp-wr-pet" style="display:flex;align-items:center;justify-content:center;font-size:1rem;">🪙</div>`;
+        : `<div class="jp-wr-pet" style="display:flex;align-items:center;justify-content:center;font-size:1rem;">ðŸª™</div>`;
       const wrAvInner = p.avatar
         ? `<img src="${_e(p.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" data-fb="${_e((p.name[0]||'?').toUpperCase())}" onerror="this.outerHTML=this.getAttribute('data-fb')">`
         : _e((p.name[0]||'?').toUpperCase());
@@ -603,8 +603,8 @@
     }).join('');
   }
 
-  // ── Timer ──────────────────────────────────────────────
-  // ── Server state → local render ───────────────────────────
+  // â”€â”€ Timer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ Server state â†’ local render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function applyServerState(round) {
     // Update local players from server
     players = (round.players || []).map(p => ({
@@ -666,13 +666,13 @@
     }
   }
 
-  // ── Receive server messages ───────────────────────────────
+  // â”€â”€ Receive server messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   window._wsPageHandler = function(msg) {
     if (msg.type === 'jackpot_state') {
       applyServerState(msg.round);
 
     } else if (msg.type === 'jackpot_complete') {
-      // Show winner overlay — find winner in local players
+      // Show winner overlay â€” find winner in local players
       const wp = players.find(p => p.name === msg.winnerDisplay) ||
                  { name: msg.winnerDisplay || msg.winnerUsername, color: '#fbbf24', bet: 0, items: [] };
       const total = players.reduce((s,p) => s+p.bet, 0);
@@ -689,18 +689,18 @@
       update24h(wp.name, msg.prize, total > 0 ? Math.round(wp.bet/total*100) : 0);
 
     } else if (msg.type === 'jackpot_won') {
-      // We won — add items to local inventory
+      // We won â€” add items to local inventory
       (msg.items || []).forEach(item => {
         if (typeof _addToInv === 'function') _addToInv({ name:item.name, img:item.img, tier:item.tier, color:item.color }, item.variant||'Normal', item.value||0);
       });
       showToast(`JACKPOT! Won ${msg.items?.length||0} items (${fmtB(msg.prize||0)})!`, 'win');
 
     } else if (msg.type === 'jackpot_refund') {
-      // Nobody else joined — add items back to local inventory
+      // Nobody else joined â€” add items back to local inventory
       (msg.items || []).forEach(item => {
         if (typeof _addToInv === 'function') _addToInv(item, item.variant || 'Normal', item.value || 0);
       });
-      showToast('No other players joined — items returned to your inventory.', 'info');
+      showToast('No other players joined â€” items returned to your inventory.', 'info');
 
     } else if (msg.type === 'jackpot_error') {
       showToast(msg.msg || 'Error joining jackpot', 'info');
@@ -709,10 +709,10 @@
     }
   };
 
-  // ── Build tape (proportional widths) ──────────────────────
+  // â”€â”€ Build tape (proportional widths) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const LAP_W = 3000; // target lap width; actual may differ due to rounding
   function getSegWidths(total) {
-    // No minimum — pure proportional so actual lap = LAP_W exactly after adjustment
+    // No minimum â€” pure proportional so actual lap = LAP_W exactly after adjustment
     const raw = players.map(p => Math.round((p.bet / total) * LAP_W));
     // Fix rounding drift so they always sum to exactly LAP_W
     const diff = LAP_W - raw.reduce((a,b) => a+b, 0);
@@ -748,8 +748,8 @@
     }
   }
 
-  // ── Spin ─────────────────────────────────────────────────
-  // ── Spin animation (driven by server winner) ─────────────
+  // â”€â”€ Spin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ Spin animation (driven by server winner) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function _doSpinAnimation(serverWinner) {
     const tape  = document.getElementById('jp-tape');
     const arena = document.getElementById('jp-arena-card');
@@ -793,21 +793,21 @@
     setTimeout(() => showWinner(winner, total), 700);
   }
 
-  // ── Collect all pot items from all players ─────────────
+  // â”€â”€ Collect all pot items from all players â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function collectPotItems() {
     const all = [];
     players.forEach(p => {
       if (p.items && p.items.length) {
         p.items.forEach(item => all.push({ ...item }));
       } else if (p.cvPet) {
-        // Bot item — synthesise an inventory-style object
+        // Bot item â€” synthesise an inventory-style object
         all.push({ id: 'bot_' + Math.random().toString(36).slice(2), name: p.cvPet.name, img: p.cvPet.img, tier: p.cvPet.tier, color: p.color, variant: 'Normal', value: p.cvPet.n || 0 });
       }
     });
     return all;
   }
 
-  // ── Tax: take 10% by value, gems first then lowest-value pets ──
+  // â”€â”€ Tax: take 10% by value, gems first then lowest-value pets â”€â”€
   function applyTax(allItems) {
     const totalVal  = allItems.reduce((s,i) => s + (i.value||0), 0);
     let   taxTarget = Math.floor(totalVal * 0.10);
@@ -837,7 +837,7 @@
     return { winnerItems: keepItems, taxItems };
   }
 
-  // ── Winner reveal (called from _wsPageHandler with server data) ──
+  // â”€â”€ Winner reveal (called from _wsPageHandler with server data) â”€â”€
   function showWinner(winner, prize, winnerItems) {
     const total = players.reduce((s,p) => s+p.bet, 0);
     const pct   = total > 0 ? Math.round((winner.bet / total) * 100) : 0;
@@ -882,7 +882,7 @@
         img.style.cssText = 'width:100%;height:100%;object-fit:contain;';
         img.onerror = function() { if (!this.dataset.fb) { this.dataset.fb=1; this.src=`https://db.biggames.io/api/thumbnails/asset/${item.img}`; } else { this.style.opacity='.2'; } };
         wrap.appendChild(img);
-      } else { wrap.innerHTML = '🪙'; }
+      } else { wrap.innerHTML = 'ðŸª™'; }
       const valTag = document.createElement('div');
       valTag.style.cssText = 'font-size:.5rem;color:rgba(255,255,255,.5);';
       valTag.textContent = fmtB(item.value||0);
@@ -911,7 +911,7 @@
     render(); // server will push new jackpot_state after reset
   }
 
-  // ── 24h stats ──────────────────────────────────────────
+  // â”€â”€ 24h stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const _24hData = { biggest:{val:0,name:''}, lowestPct:{pct:100,val:0,name:''}, streak:{count:0,name:''} };
   function update24h(winnerName, prize, pct) {
     if (prize > _24hData.biggest.val) { _24hData.biggest.val = prize; _24hData.biggest.name = winnerName; }
@@ -922,15 +922,15 @@
   }
   function render24h() {
     const d = _24hData;
-    document.getElementById('jp-24h-biggest').textContent      = d.biggest.val ? fmtB(d.biggest.val) : '—';
-    document.getElementById('jp-24h-biggest-name').textContent = d.biggest.name || '—';
-    document.getElementById('jp-24h-lowest-pct').textContent   = d.lowestPct.pct < 100 ? d.lowestPct.pct + '%' : '—';
-    document.getElementById('jp-24h-lowest-sub').textContent   = d.lowestPct.name ? `${d.lowestPct.name} - ${fmtB(d.lowestPct.val)}` : '—';
+    document.getElementById('jp-24h-biggest').textContent      = d.biggest.val ? fmtB(d.biggest.val) : 'â€”';
+    document.getElementById('jp-24h-biggest-name').textContent = d.biggest.name || 'â€”';
+    document.getElementById('jp-24h-lowest-pct').textContent   = d.lowestPct.pct < 100 ? d.lowestPct.pct + '%' : 'â€”';
+    document.getElementById('jp-24h-lowest-sub').textContent   = d.lowestPct.name ? `${d.lowestPct.name} - ${fmtB(d.lowestPct.val)}` : 'â€”';
     document.getElementById('jp-24h-streak').textContent       = d.streak.count || '0';
-    document.getElementById('jp-24h-streak-name').textContent  = d.streak.name || '—';
+    document.getElementById('jp-24h-streak-name').textContent  = d.streak.name || 'â€”';
   }
 
-  // ── Particles ─────────────────────────────────────────
+  // â”€â”€ Particles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const canvas = document.getElementById('jp-canvas');
   const ctx    = canvas.getContext('2d');
   let particles = [], rafId = null;
@@ -985,7 +985,7 @@
     if (!rafId) rafId = requestAnimationFrame(animParticles);
   }
 
-  // ── Init ───────────────────────────────────────────────
+  // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   render(); // empty state until server sends jackpot_state
 
 </script>

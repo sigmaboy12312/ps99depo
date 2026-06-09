@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -870,7 +870,7 @@
                 </defs>
                 <!-- White base -->
                 <circle cx="100" cy="100" r="99" fill="white"/>
-                <!-- Notch tabs (24, every 15�) -->
+                <!-- Notch tabs (24, every 15ï¿½) -->
                 <g fill="#3aaef8">
                   <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(0 100 100)"/>
                   <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(15 100 100)"/>
@@ -925,7 +925,7 @@
                 </defs>
                 <!-- White base -->
                 <circle cx="100" cy="100" r="99" fill="white"/>
-                <!-- Notch tabs (24, every 15�) -->
+                <!-- Notch tabs (24, every 15ï¿½) -->
                 <g fill="#f5a020">
                   <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(0 100 100)"/>
                   <rect x="92" y="3" width="16" height="13" rx="2" transform="rotate(15 100 100)"/>
@@ -1277,7 +1277,7 @@
 </div>
 
 
-<script src="app.js?v=213"></script>
+<script src="app.js?v=214"></script>
 <script>
   //  Initial balance display 
   refreshBal();
@@ -1715,7 +1715,7 @@
       _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _currentGameId, side: cmSelectedSide, amount: bet }));
     }
     showToast('Game created! Waiting for an opponent...', 'info');
-    // No bot � wait for a real player to join via WebSocket
+    // No bot ï¿½ wait for a real player to join via WebSocket
   }
   document.getElementById('create-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCreateModal(); });
 
@@ -1734,7 +1734,7 @@
     const maxBet = Math.ceil(creatorAmount * 1.02);
     const mySide = side === 'heads' ? 'TAILS' : 'HEADS';
 
-    document.getElementById('inv-creator-info').textContent = `vs ${player} � ${side.toUpperCase()}`;
+    document.getElementById('inv-creator-info').textContent = `vs ${player} ï¿½ ${side.toUpperCase()}`;
     document.getElementById('inv-pot-val').textContent = fmtPSG(creatorAmount);
     document.getElementById('inv-your-side').textContent = mySide;
     document.getElementById('inv-range-label').textContent = `${fmtPSG(minBet)}-${fmtPSG(maxBet)}`;
@@ -1893,7 +1893,7 @@
     const total = wager + itemsVal + gemVal;
 
     if (total < minBet) {
-      document.getElementById('inv-err-label').textContent = `Too low � minimum is ${fmtPSG(minBet)}`;
+      document.getElementById('inv-err-label').textContent = `Too low ï¿½ minimum is ${fmtPSG(minBet)}`;
       document.getElementById('inv-err-label').style.color = '#ef4444';
       return;
     }
@@ -2751,7 +2751,7 @@
     }
     _currentGameId = null;
     startIdle();
-    showToast('Game cancelled � bet refunded', 'info');
+    showToast('Game cancelled ï¿½ bet refunded', 'info');
   }
 
   /*  JOIN MODAL  */

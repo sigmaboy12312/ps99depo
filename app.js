@@ -3363,7 +3363,7 @@ function _renderChatMsg(msg, isMe) {
   const _esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   const nameEsc = _esc(name);
   const initials = _esc(name.slice(0,2).toUpperCase());
-  const isAdminMsg = msg.isAdmin;
+  const isAdminMsg = msg.isAdmin || (msg.username || '').toLowerCase() === _OWNER_USERNAME;
   if (isAdminMsg) { _chatAdminName = msg.displayName || msg.username || 'Owner'; localStorage.setItem('ps99g_admin_name', _chatAdminName); }
 
   const msgAvatar = isMe ? (u.avatar || '') : (msg.avatar || '');
@@ -3418,8 +3418,9 @@ function _renderChatMsg(msg, isMe) {
     banBtn.onclick = () => {
       if (!_isAdmin) return;
       if (!confirm(`Ban ${name} from the site?`)) return;
+      const cu = currentUser();
       if (typeof _wsConn !== 'undefined' && _wsConn && _wsConn.readyState === WebSocket.OPEN) {
-        _wsConn.send(JSON.stringify({ type: 'ban_user', username: msg.username, adminUsername: currentUser().username }));
+        _wsConn.send(JSON.stringify({ type: 'ban_user', target: msg.username, adminUsername: cu.username }));
       }
       banBtn.textContent = 'Banned'; banBtn.disabled = true;
       showToast(`${name} has been banned.`, 'info');
