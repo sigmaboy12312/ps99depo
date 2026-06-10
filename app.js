@@ -374,6 +374,7 @@ function _connectWS() {
         // On first session_data (login/refresh), trust server balance to clear stale localStorage.
         // After that, use max to preserve in-session wins until server catches up.
         const _srvBal = typeof msg.balance === 'number' && msg.balance >= 0 ? msg.balance : 0;
+        window._rawSrvBal = _srvBal; // track pure server cash for balance-wager sections
         if (!window._balInitialized) {
           window._balInitialized = true;
           _bal = Math.max(_srvBal, _invTotal());

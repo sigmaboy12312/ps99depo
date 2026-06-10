@@ -1285,7 +1285,7 @@
 </div>
 
 
-<script src="app.js?v=220"></script>
+<script src="app.js?v=221"></script>
 <script>
   //  Initial balance display 
   refreshBal();
@@ -1705,11 +1705,11 @@
     const balWagerInp  = document.getElementById('cm-bal-wager');
     const balAvailEl   = document.getElementById('cm-bal-avail');
     const maxBalBtn    = document.getElementById('cm-bal-max');
-    const curBal = getBalance();
+    const curBal = window._rawSrvBal ?? 0;
     if (balAvailEl) balAvailEl.textContent = fmtPSG(curBal);
     if (balWagerInp) { balWagerInp.value = ''; balWagerInp.max = curBal; }
     if (balWagerWrap) balWagerWrap.style.display = curBal > 0 ? 'block' : 'none';
-    if (maxBalBtn) maxBalBtn.onclick = () => { if (balWagerInp) { balWagerInp.value = curBal; cmUpdateTotal(); } };
+    if (maxBalBtn) maxBalBtn.onclick = () => { const b = window._rawSrvBal ?? 0; if (balWagerInp) { balWagerInp.value = b; cmUpdateTotal(); } };
     if (balWagerInp) balWagerInp.oninput = cmUpdateTotal;
 
     // Gem inventory section (only if user has gem items in inventory)
@@ -1782,7 +1782,7 @@
     const balWager   = Math.max(0, parseInt(document.getElementById('cm-bal-wager')?.value || '0') || 0);
     const bet = itemsTotal + gemPickVal + balWager;
     if (bet < 1) return showToast('Enter a bet amount or select items', 'info');
-    if (balWager > getBalance()) return showToast('Not enough balance!', 'lose');
+    if (balWager > (window._rawSrvBal ?? 0)) return showToast('Not enough balance!', 'lose');
     // Only deduct raw balance portion — items are removed separately below
     if (balWager > 0) deductBal(balWager);
     const _wIds = [..._cmSelInv].map(i => pets[i]?.id).filter(Boolean);
