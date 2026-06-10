@@ -3887,7 +3887,7 @@ function _openWalletPanel(e) {
 
 /* -- ADMIN MANUAL DEPOSIT PANEL -- */
 function _openAdminPanel() {
-  if (!_isAdmin) return;
+  if ((currentUser().username || '').toLowerCase() !== _OWNER_USERNAME) return;
   if (document.getElementById('admin-panel-overlay')) return;
 
   const _aE = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
