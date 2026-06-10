@@ -636,7 +636,7 @@
 
 </div>
 
-<script src="app.js?v=222"></script>
+<script src="app.js?v=223"></script>
 <script>
   refreshBal();
   const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -937,10 +937,10 @@
     const bet=itemsTotal+gemDenomTotal+balWager;
     if(bet<1) return showToast('Enter a bet amount','info');
     if(balWager>(window._rawSrvBal??0)) return showToast('Not enough balance!','lose');
-    // Only deduct raw balance portion — items removed separately
     if(balWager>0) deductBal(balWager);
     const _wIds=selPets.map(i=>i.id).filter(Boolean);
     _popFromInvSilent(_wIds);
+    if(itemsTotal>0){_bal=Math.max(0,_bal-itemsTotal);try{localStorage.setItem('ps99g_bal',_bal);}catch{}refreshBal();}
     const _gemSel={'1B Gems':_dcGems.b,'100M Gems':_dcGems.h,'10M Gems':_dcGems.t,'1M Gems':_dcGems.o};
     // Collect gem item IDs before popping
     const _gemWIds=(()=>{const s=_gemSel;const cur=getInventory();const ids=[];let c={...s};for(const it of cur){if(it.gem&&c[it.name]>0){ids.push(it.id);c[it.name]--;}}return ids;})();

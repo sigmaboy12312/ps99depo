@@ -365,8 +365,12 @@ wss.on('connection', (ws) => {
       if (msg.type === 'game_create' && msg.gameId && typeof msg.amount === 'number') {
         const client = wsClients.get(wsId);
         const player = client?.username || 'Unknown';
-        // Don't remove items yet — keep them in server inventory until a joiner is
-        // matched. This prevents items vanishing if the creator cancels or disconnects.
+        // Remove wagered items immediately (prevents dupes). Snapshot the full
+        // item objects so they can be restored if the game is cancelled.
+        const itemIds = Array.isArray(msg.itemIds) ? msg.itemIds : [];
+        const serverInv = getInventory(player);
+        const wageredItems = serverInv.filter(i => itemIds.includes(i.id));
+        wageredItems.forEach(i => removeInventoryItem(player, i.id));
         activeGames.set(msg.gameId, {
           gameId:        msg.gameId,
           player,
@@ -374,7 +378,8 @@ wss.on('connection', (ws) => {
           gameType:      msg.gameType || 'coinflip',
           amount:        msg.amount,
           balanceAmount: typeof msg.balanceAmount === 'number' ? msg.balanceAmount : msg.amount,
-          itemIds:       Array.isArray(msg.itemIds) ? msg.itemIds : [],
+          itemIds,
+          wageredItems,  // full objects for restoration on cancel
           createdAt:     Date.now(),
         });
         broadcastGames();
@@ -385,8 +390,12 @@ wss.on('connection', (ws) => {
         const game = activeGames.get(msg.gameId);
         const client = wsClients.get(wsId);
         if (game && game.player === (client?.username || '')) {
+          // Restore wagered items to creator's inventory
+          (game.wageredItems || []).forEach(item => addInventoryItem(game.player, item));
           activeGames.delete(msg.gameId);
           broadcastGames();
+          // Push fresh session_data so client inventory/balance syncs
+          pushToUser(game.player, { type: 'session_data', balance: getBalance(game.player), inventory: getInventory(game.player) });
         }
       }
 
@@ -400,10 +409,7 @@ wss.on('connection', (ws) => {
         activeGames.delete(msg.gameId);
         broadcastGames();
 
-        // Now that the game is locked in, remove both parties' wagered items
-        if (Array.isArray(game.itemIds) && game.itemIds.length > 0) {
-          game.itemIds.forEach(id => removeInventoryItem(game.player, id));
-        }
+        // Creator items already removed at game_create — only remove joiner's now
         if (Array.isArray(msg.itemIds) && msg.itemIds.length > 0) {
           msg.itemIds.forEach(id => removeInventoryItem(joiner, id));
         }
@@ -598,11 +604,15 @@ wss.on('connection', (ws) => {
     for (const [code, s] of depositSessions.entries()) {
       if (s.wsId === wsId) depositSessions.delete(code);
     }
-    // Remove any games this player had open
+    // Remove any games this player had open and restore their wagered items
     if (closedUsername) {
       let changed = false;
       for (const [gid, g] of activeGames.entries()) {
-        if (g.player === closedUsername) { activeGames.delete(gid); changed = true; }
+        if (g.player === closedUsername) {
+          (g.wageredItems || []).forEach(item => addInventoryItem(g.player, item));
+          activeGames.delete(gid);
+          changed = true;
+        }
       }
       if (changed) broadcastGames();
     }
