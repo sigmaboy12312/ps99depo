@@ -368,6 +368,7 @@ wss.on('connection', (ws) => {
           gameId:    msg.gameId,
           player,
           side:      msg.side || 'heads',
+          gameType:  msg.gameType || 'coinflip',
           amount:    msg.amount,
           createdAt: Date.now(),
         });
@@ -385,9 +386,52 @@ wss.on('connection', (ws) => {
       }
 
       if (msg.type === 'game_join' && msg.gameId) {
-        if (activeGames.has(msg.gameId)) {
-          activeGames.delete(msg.gameId);
-          broadcastGames();
+        const game = activeGames.get(msg.gameId);
+        if (!game) return;
+        const joinerClient = wsClients.get(wsId);
+        const joiner = joinerClient?.username;
+        if (!joiner || joiner === game.player) return;
+
+        activeGames.delete(msg.gameId);
+        broadcastGames();
+
+        // Generate result, update balances, notify both players
+        const joinerAmount = typeof msg.amount === 'number' ? msg.amount : game.amount;
+        const GAME_TAX = 0.10;
+        function _settleGame(creatorWon) {
+          const winner = creatorWon ? game.player : joiner;
+          const loser  = creatorWon ? joiner : game.player;
+          const winnerBet = creatorWon ? game.amount : joinerAmount;
+          const loserBet  = creatorWon ? joinerAmount : game.amount;
+          const prize  = game.amount + joinerAmount;
+          const tax    = Math.floor(prize * GAME_TAX);
+          const payout = prize - tax;
+          // Deduct both bets (server balance was never deducted when they wagered client-side)
+          addBalance(game.player, -game.amount);
+          addBalance(joiner, -joinerAmount);
+          // Credit winner and house
+          addBalance(winner, payout);
+          addBalance(ADMIN_USER, tax);
+          console.log(`[Game] ${winner} wins ${payout} (tax ${tax}), ${loser} loses ${loserBet}`);
+        }
+        if (game.gameType === 'dice') {
+          const creatorRoll = Math.ceil(Math.random() * 6);
+          const joinerRoll  = Math.ceil(Math.random() * 6);
+          const creatorWon  = creatorRoll > joinerRoll || (creatorRoll === joinerRoll && Math.random() < 0.5);
+          _settleGame(creatorWon);
+          const matchData   = { type: 'game_matched', gameId: msg.gameId, gameType: 'dice', creator: game.player, joiner, creatorAmount: game.amount, joinerAmount, creatorRoll, joinerRoll, creatorWon };
+          pushToUser(game.player, matchData);
+          pushToUser(joiner, matchData);
+          console.log(`[Dice] ${game.player} vs ${joiner}: ${creatorRoll} vs ${joinerRoll} → ${creatorWon ? game.player : joiner} wins`);
+        } else {
+          // coinflip
+          const result    = Math.random() < 0.5 ? 'heads' : 'tails';
+          const creatorWon = result === game.side;
+          _settleGame(creatorWon);
+          const matchData  = { type: 'game_matched', gameId: msg.gameId, gameType: 'coinflip', result, creatorSide: game.side, creator: game.player, joiner, creatorAmount: game.amount, joinerAmount, creatorWon };
+          pushToUser(game.player, matchData);
+          pushToUser(joiner, matchData);
+          console.log(`[Coinflip] ${game.player}(${game.side}) vs ${joiner}: ${result} → ${creatorWon ? game.player : joiner} wins`);
         }
       }
 

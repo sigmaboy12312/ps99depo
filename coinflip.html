@@ -1764,8 +1764,9 @@
     if (typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
       _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _currentGameId, side: cmSelectedSide, amount: bet }));
     }
+    buildActiveList();
     showToast('Game created! Waiting for an opponent...', 'info');
-    // No bot ï¿½ wait for a real player to join via WebSocket
+    // No bot — wait for a real player to join via WebSocket
   }
   document.getElementById('create-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCreateModal(); });
 
@@ -2109,6 +2110,33 @@
   function buildActiveList() {
     const list = document.getElementById('active-game-list');
     list.innerHTML = '';
+
+    // Show "your game is waiting" card if creator is pending
+    if (inGame && pendingBet && _currentGameId) {
+      const myName = (typeof currentUser === 'function' ? currentUser().username : '') || 'You';
+      const mySide = (typeof selectedSide !== 'undefined' ? selectedSide : 'heads');
+      const waitRow = document.createElement('div');
+      waitRow.className = 'bs-row';
+      waitRow.style.cssText = 'border-color:rgba(249,115,22,.55);background:rgba(249,115,22,.06);';
+      waitRow.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+          <div class="bs-avatars">
+            <div class="bs-av bs-av-you">${myName[0].toUpperCase()}</div>
+            <div class="bs-av bs-av-wait" style="animation:pulse 1.2s ease-in-out infinite;">?</div>
+          </div>
+        </div>
+        <div class="bs-items">
+          <div class="bs-val">${fmtPSG(pendingBet)} <span style="font-size:.5rem;font-weight:900;background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.4);color:#fb923c;padding:1px 6px;border-radius:20px;margin-left:4px;">YOUR GAME</span></div>
+          <div class="bs-range" style="color:#fb923c;">Waiting for an opponent — ${mySide.toUpperCase()}</div>
+        </div>
+        <div style="text-align:center;flex-shrink:0;">
+          <div class="bs-pot-lbl">Win up to</div>
+          <div class="bs-pot-val">+${fmtPSG(pendingBet * 2)}</div>
+        </div>
+        <div class="bs-badge" style="background:rgba(249,115,22,.15);border-color:rgba(249,115,22,.4);color:#fb923c;">${mySide === 'heads' ? 'H' : 'T'}</div>
+        <div class="bs-actions"><button class="bs-join" style="background:#ef4444;box-shadow:none;" onclick="cancelGame()">Cancel</button></div>`;
+      list.appendChild(waitRow);
+    }
 
     // Show real player games first, then bot games
     const allGames = [
@@ -2805,7 +2833,8 @@
     }
     _currentGameId = null;
     startIdle();
-    showToast('Game cancelled ï¿½ bet refunded', 'info');
+    buildActiveList();
+    showToast('Game cancelled — bet refunded', 'info');
   }
 
   /*  JOIN MODAL  */

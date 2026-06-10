@@ -371,8 +371,15 @@ function _connectWS() {
         if (Array.isArray(msg.inventory)) {
           try { localStorage.setItem('ps99g_inv', JSON.stringify(msg.inventory)); } catch {}
         }
-        // Use max so initial load sets bal from inventory, but game wins aren't wiped on reconnect.
-        _bal = Math.max(_bal, _invTotal());
+        // On first session_data (login/refresh), trust server balance to clear stale localStorage.
+        // After that, use max to preserve in-session wins until server catches up.
+        const _srvBal = typeof msg.balance === 'number' && msg.balance >= 0 ? msg.balance : 0;
+        if (!window._balInitialized) {
+          window._balInitialized = true;
+          _bal = Math.max(_srvBal, _invTotal());
+        } else {
+          _bal = Math.max(_bal, _srvBal, _invTotal());
+        }
         try { localStorage.setItem(BAL_KEY, _bal); } catch {}
         _updateNavInvBadge();
         refreshBal();
@@ -4148,8 +4155,8 @@ function _ownerAddPetToInv(pet) {
     btn.appendChild(span1); btn.appendChild(span2);
     btn.onclick = () => {
       const item = { name: pet.name, img: pet.img, tier: pet.tier, color: pet.color, variant: v, value: val };
-      _addToInv({ name: pet.name, img: pet.img, tier: pet.tier, color: pet.color }, v, val);
       const u = currentUser();
+      // Only grant server-side; session_data pushback updates inventory + balance (no local double-add)
       fetch(_SERVER_HTTP + '/api/admin/grant-items', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ adminUsername: u.username, targetUsername: u.username, items: [item] })
