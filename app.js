@@ -3903,34 +3903,40 @@ function _openAdminPanel() {
   box.style.cssText = 'background:linear-gradient(160deg,#1a0f0a,#140a03);border:1.5px solid rgba(245,158,11,.4);border-radius:20px;width:min(560px,100%);max-height:88vh;overflow-y:auto;padding:24px;position:relative;';
 
   box.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-      <div style="font-size:1rem;font-weight:900;color:#fbbf24;display:flex;align-items:center;gap:8px;">&#128081; Admin Panel &mdash; Manual Deposit</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="font-size:1rem;font-weight:900;color:#fbbf24;">&#128081; Admin Panel</div>
       <button id="ap-close" style="background:rgba(255,255,255,.07);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:1rem;line-height:1;">&#10005;</button>
     </div>
 
     <!-- Target player -->
     <div style="margin-bottom:14px;">
-      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);margin-bottom:5px;">Target Player Username</div>
+      <div style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);margin-bottom:5px;">Target Player</div>
       <div style="display:flex;gap:6px;">
-        <input id="ap-target" type="text" placeholder="Enter Roblox username..." autocomplete="off"
+        <input id="ap-target" type="text" placeholder="Roblox username..." autocomplete="off"
           style="flex:1;padding:9px 12px;background:rgba(255,255,255,.06);border:1.5px solid rgba(245,158,11,.3);border-radius:10px;color:#fff;font-size:.88rem;outline:none;box-sizing:border-box;font-family:inherit;">
-        <button id="ap-self-btn" style="padding:9px 13px;background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);border-radius:10px;color:#fbbf24;font-size:.75rem;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;">Give to Myself</button>
+        <button id="ap-self-btn" style="padding:9px 13px;background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);border-radius:10px;color:#fbbf24;font-size:.75rem;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;">Me</button>
       </div>
     </div>
 
-    <!-- Gems grant -->
+    <!-- Quick gems -->
     <div style="margin-bottom:14px;">
-      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);margin-bottom:5px;">Grant Gems (optional)</div>
+      <div style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#38bdf8;margin-bottom:7px;">&#128142; Quick Gems</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;">
+        <button class="ap-qgem" data-v="1000000"    style="padding:8px 4px;background:rgba(56,189,248,.1);border:1.5px solid rgba(56,189,248,.3);border-radius:9px;color:#38bdf8;font-size:.72rem;font-weight:900;cursor:pointer;font-family:inherit;">+1M</button>
+        <button class="ap-qgem" data-v="10000000"   style="padding:8px 4px;background:rgba(56,189,248,.1);border:1.5px solid rgba(56,189,248,.3);border-radius:9px;color:#38bdf8;font-size:.72rem;font-weight:900;cursor:pointer;font-family:inherit;">+10M</button>
+        <button class="ap-qgem" data-v="100000000"  style="padding:8px 4px;background:rgba(56,189,248,.1);border:1.5px solid rgba(56,189,248,.3);border-radius:9px;color:#38bdf8;font-size:.72rem;font-weight:900;cursor:pointer;font-family:inherit;">+100M</button>
+        <button class="ap-qgem" data-v="1000000000" style="padding:8px 4px;background:rgba(56,189,248,.1);border:1.5px solid rgba(56,189,248,.3);border-radius:9px;color:#38bdf8;font-size:.72rem;font-weight:900;cursor:pointer;font-family:inherit;">+1B</button>
+      </div>
       <div style="display:flex;gap:6px;align-items:center;">
-        <input id="ap-gems" type="number" min="0" step="1" placeholder="0" autocomplete="off"
-          style="width:160px;padding:9px 12px;background:rgba(255,255,255,.06);border:1.5px solid rgba(99,202,255,.25);border-radius:10px;color:#fff;font-size:.88rem;outline:none;box-sizing:border-box;font-family:inherit;">
-        <span style="color:#38bdf8;font-size:.8rem;font-weight:800;">💎 gems</span>
+        <input id="ap-gems" type="number" min="0" step="1" placeholder="Custom amount..." autocomplete="off"
+          style="flex:1;padding:8px 12px;background:rgba(255,255,255,.06);border:1.5px solid rgba(56,189,248,.2);border-radius:9px;color:#fff;font-size:.82rem;outline:none;box-sizing:border-box;font-family:inherit;">
+        <button id="ap-gem-custom-btn" style="padding:8px 12px;background:rgba(56,189,248,.15);border:1.5px solid rgba(56,189,248,.4);border-radius:9px;color:#38bdf8;font-size:.72rem;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap;">Grant</button>
       </div>
     </div>
 
     <!-- Variant picker -->
-    <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);">Variant:</div>
+    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+      <div style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);">Variant:</div>
       <select id="ap-variant" style="background:rgba(255,255,255,.07);border:1.5px solid rgba(245,158,11,.3);border-radius:8px;color:#fff;padding:5px 10px;font-size:.8rem;font-family:inherit;outline:none;cursor:pointer;">
         <option value="Normal">Normal</option>
         <option value="Golden">Golden</option>
@@ -3942,23 +3948,23 @@ function _openAdminPanel() {
     </div>
 
     <!-- Pet search -->
-    <div style="margin-bottom:10px;">
-      <input id="ap-search" type="text" placeholder="Search pets..." autocomplete="off"
+    <div style="margin-bottom:8px;">
+      <input id="ap-search" type="text" placeholder="Search all pets..." autocomplete="off"
         style="width:100%;padding:8px 12px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:9px;color:#fff;font-size:.82rem;outline:none;box-sizing:border-box;font-family:inherit;">
     </div>
 
-    <!-- Pet grid -->
-    <div id="ap-pet-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:240px;overflow-y:auto;margin-bottom:14px;padding:2px;"></div>
+    <!-- Pet grid — all pets, scrollable -->
+    <div id="ap-pet-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-height:300px;overflow-y:auto;margin-bottom:12px;padding:2px;scrollbar-width:thin;scrollbar-color:rgba(245,158,11,.3) transparent;"></div>
 
     <!-- Selected items -->
-    <div style="margin-bottom:14px;">
-      <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);margin-bottom:6px;">Selected Items (<span id="ap-count">0</span>)</div>
-      <div id="ap-selected-list" style="min-height:36px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px;font-size:.72rem;color:rgba(255,255,255,.35);display:flex;flex-wrap:wrap;gap:5px;">No items selected</div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);margin-bottom:5px;">Selected (<span id="ap-count">0</span>)</div>
+      <div id="ap-selected-list" style="min-height:32px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:7px;font-size:.72rem;color:rgba(255,255,255,.3);display:flex;flex-wrap:wrap;gap:5px;">None selected</div>
     </div>
 
-    <!-- Grant button -->
-    <button id="ap-grant-btn" style="width:100%;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:11px;color:#fff;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 0 18px rgba(34,197,94,.3);">
-      Grant Items to Player
+    <!-- Grant pets button -->
+    <button id="ap-grant-btn" style="width:100%;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:11px;color:#fff;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 0 16px rgba(34,197,94,.25);">
+      Grant Pets to Player
     </button>
     <div id="ap-status" style="text-align:center;margin-top:8px;font-size:.72rem;font-weight:700;min-height:18px;"></div>
   `;
@@ -3974,7 +3980,7 @@ function _openAdminPanel() {
     const grid = document.getElementById('ap-pet-grid');
     if (!grid || typeof CV === 'undefined') return;
     const q = _adminSearchQ.toLowerCase();
-    const list = CV.filter(p => p.img && p.n > 0 && (!q || p.name.toLowerCase().includes(q))).slice(0, 60);
+    const list = CV.filter(p => p.img && p.n > 0 && (!q || p.name.toLowerCase().includes(q)));
     grid.innerHTML = '';
     list.forEach(pet => {
       const isSelected = _adminSelItems.some(s => s.pet.name === pet.name);
@@ -4028,6 +4034,30 @@ function _openAdminPanel() {
   box.querySelector('#ap-search').oninput = e => { _adminSearchQ = e.target.value; _apRenderGrid(); };
   box.querySelector('#ap-variant').onchange = () => _apRenderGrid();
 
+  const _apGrantGems = async (gems) => {
+    const target = (document.getElementById('ap-target')?.value || '').trim().toLowerCase();
+    const status = document.getElementById('ap-status');
+    if (!target) { status.textContent = 'Enter a target username first.'; status.style.color = '#f87171'; return; }
+    status.textContent = 'Granting...'; status.style.color = '#fbbf24';
+    try {
+      const r = await fetch(_SERVER_HTTP + '/api/admin/grant-items', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminUsername: currentUser().username, targetUsername: target, items: [], gems }),
+      });
+      const d = await r.json();
+      if (d.ok) { status.textContent = `✓ +${fmtPSG(gems)} gems → ${target}`; status.style.color = '#4ade80'; }
+      else { status.textContent = d.error || 'Error'; status.style.color = '#f87171'; }
+    } catch { status.textContent = 'Server offline'; status.style.color = '#f87171'; }
+  };
+
+  box.querySelectorAll('.ap-qgem').forEach(btn => {
+    btn.onclick = () => _apGrantGems(parseInt(btn.dataset.v));
+  });
+  box.querySelector('#ap-gem-custom-btn').onclick = () => {
+    const v = Math.floor(parseFloat(document.getElementById('ap-gems')?.value) || 0);
+    if (v > 0) _apGrantGems(v);
+  };
+
   box.querySelector('#ap-grant-btn').onclick = async () => {
     const target = (document.getElementById('ap-target')?.value || '').trim().toLowerCase();
     const status = document.getElementById('ap-status');
@@ -4064,7 +4094,7 @@ function _openAdminPanel() {
         status.style.color = '#4ade80';
         _adminSelItems = [];
         _apRenderGrid(); _apRenderSelected();
-        document.getElementById('ap-target').value = '';
+        const _apMe = currentUser(); if (_apMe.username) document.getElementById('ap-target').value = _apMe.username;
         const gi = document.getElementById('ap-gems'); if (gi) gi.value = '';
       } else {
         status.textContent = d.error || 'Server error';
