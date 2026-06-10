@@ -1195,6 +1195,14 @@
         <div id="cm-inv-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:7px;max-height:150px;overflow-y:auto;margin-bottom:4px;"></div>
       </div>
       <div style="font-size:.63rem;color:var(--text-muted);margin-bottom:8px;" id="cm-inv-hint">Select pets or gems to wager.</div>
+      <!-- Gem balance wager -->
+      <div id="cm-bal-wager-wrap" style="display:none;margin-bottom:10px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:#22d3ee;margin-bottom:6px;">Gem Balance &mdash; Available: <b id="cm-bal-avail">0</b></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="number" id="cm-bal-wager" min="0" placeholder="0" style="flex:1;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:6px;color:#fff;padding:5px 8px;font-size:.8rem;font-family:inherit;">
+          <button id="cm-bal-max" style="background:rgba(34,211,238,.2);border:1px solid rgba(34,211,238,.5);border-radius:6px;color:#22d3ee;font-size:.7rem;font-weight:800;padding:5px 10px;cursor:pointer;white-space:nowrap;">MAX</button>
+        </div>
+      </div>
       <div style="margin-top:8px;font-size:.75rem;font-weight:800;color:#fbbf24;" id="cm-total-display">Total: 0</div>
     </div>
 
@@ -1277,7 +1285,7 @@
 </div>
 
 
-<script src="app.js?v=218"></script>
+<script src="app.js?v=219"></script>
 <script>
   //  Initial balance display 
   refreshBal();
@@ -1671,7 +1679,8 @@
     const inv = getInventory();
     const petVal = [..._cmSelInv].reduce((s,i)=>s+(inv.filter(x=>!x.gem)[i]?.value||0),0);
     const gemVal = _cmGemPicker ? _cmGemPicker.getTotal() : 0;
-    const total  = petVal + gemVal;
+    const balWager = parseInt(document.getElementById('cm-bal-wager')?.value || '0') || 0;
+    const total  = petVal + gemVal + balWager;
     const el = document.getElementById('cm-total-display');
     if (el) el.textContent = total ? 'Total: ' + fmtPSG(total) : '';
   }
@@ -1683,25 +1692,37 @@
     _cmSelInv = new Set();
     _cmGemPicker = null;
     cmRenderSide();
-    setTimeout(() => {
-      drawPreviewCoin(document.getElementById('cm-prev-heads'), true);
-      drawPreviewCoin(document.getElementById('cm-prev-tails'), false);
-      const inv  = getInventory();
-      const gems = inv.filter(i => i.gem);
-      const pets = inv.filter(i => !i.gem);
-      const hint = document.getElementById('cm-inv-hint');
+    // No setTimeout — build immediately to avoid race condition on fast clicks
+    drawPreviewCoin(document.getElementById('cm-prev-heads'), true);
+    drawPreviewCoin(document.getElementById('cm-prev-tails'), false);
+    const inv  = getInventory();
+    const gems = inv.filter(i => i.gem);
+    const pets = inv.filter(i => !i.gem);
+    const hint = document.getElementById('cm-inv-hint');
 
-      // Gem section
-      const gemSec    = document.getElementById('cm-gem-section');
-      const gemPicker = document.getElementById('cm-gem-picker');
-      if (gems.length > 0) {
-        gemPicker.innerHTML = '';
-        _cmGemPicker = buildGemPicker(gemPicker, inv, cmUpdateTotal);
-        if (gemSec) gemSec.style.display = 'block';
-      } else {
-        if (gemSec) gemSec.style.display = 'none';
-        _cmGemPicker = null;
-      }
+    // Gem balance wager (always shown so users can wager raw gem balance)
+    const balWagerWrap = document.getElementById('cm-bal-wager-wrap');
+    const balWagerInp  = document.getElementById('cm-bal-wager');
+    const balAvailEl   = document.getElementById('cm-bal-avail');
+    const maxBalBtn    = document.getElementById('cm-bal-max');
+    const curBal = getBalance();
+    if (balAvailEl) balAvailEl.textContent = fmtPSG(curBal);
+    if (balWagerInp) { balWagerInp.value = ''; balWagerInp.max = curBal; }
+    if (balWagerWrap) balWagerWrap.style.display = curBal > 0 ? 'block' : 'none';
+    if (maxBalBtn) maxBalBtn.onclick = () => { if (balWagerInp) { balWagerInp.value = curBal; cmUpdateTotal(); } };
+    if (balWagerInp) balWagerInp.oninput = cmUpdateTotal;
+
+    // Gem inventory section (only if user has gem items in inventory)
+    const gemSec    = document.getElementById('cm-gem-section');
+    const gemPicker = document.getElementById('cm-gem-picker');
+    if (gems.length > 0) {
+      gemPicker.innerHTML = '';
+      _cmGemPicker = buildGemPicker(gemPicker, inv, cmUpdateTotal);
+      if (gemSec) gemSec.style.display = 'block';
+    } else {
+      if (gemSec) gemSec.style.display = 'none';
+      _cmGemPicker = null;
+    }
 
       // Pet section
       const petSec = document.getElementById('cm-pets-section');
@@ -1734,7 +1755,6 @@
         else if (hint) hint.style.display = 'none';
       }
       cmUpdateTotal();
-    }, 10);
   }
   function closeCreateModal() { const m=document.getElementById('create-modal'); m.classList.remove('open'); m.style.display='none'; }
 
@@ -1757,12 +1777,12 @@
   function confirmCreate() {
     const inv = getInventory();
     const pets = inv.filter(i => !i.gem);
-    const itemsTotal = [..._cmSelInv].reduce((s,i)=>s+(pets[i]?.value||0),0);
+    const itemsTotal = [..._cmSelInv].reduce((s,i)=>s+(Number(pets[i]?.value)||0),0);
     const gemPickVal = _cmGemPicker ? _cmGemPicker.getTotal() : 0;
-    const bet = itemsTotal + gemPickVal;
+    const balWager   = Math.max(0, parseInt(document.getElementById('cm-bal-wager')?.value || '0') || 0);
+    const bet = itemsTotal + gemPickVal + balWager;
     if (bet < 1) return showToast('Enter a bet amount or select items', 'info');
     if (!deductBal(bet)) return showToast('Not enough balance!', 'lose');
-    // Remove wagered items from inventory so they can't be double-spent
     const _wIds = [..._cmSelInv].map(i => pets[i]?.id).filter(Boolean);
     _popFromInvSilent(_wIds);
     if (_cmGemPicker) _popGemsFromInv(_cmGemPicker.getSelections());

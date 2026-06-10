@@ -475,6 +475,15 @@
       </div>
     </div>
 
+    <!-- Gem balance wager -->
+    <div id="dc-bal-wager-wrap" style="display:none;margin-bottom:12px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);border-radius:8px;padding:8px 10px;">
+      <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:#22d3ee;margin-bottom:6px;">Gem Balance &mdash; Available: <b id="dc-bal-avail">0</b></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="number" id="dc-bal-wager" min="0" placeholder="0" style="flex:1;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:6px;color:#fff;padding:5px 8px;font-size:.8rem;font-family:inherit;">
+        <button id="dc-bal-max" style="background:rgba(34,211,238,.2);border:1px solid rgba(34,211,238,.5);border-radius:6px;color:#22d3ee;font-size:.7rem;font-weight:800;padding:5px 10px;cursor:pointer;white-space:nowrap;">MAX</button>
+      </div>
+    </div>
+
     <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <span style="font-size:.68rem;color:var(--text-muted);font-weight:700;">Total Wager</span>
       <span style="font-size:.95rem;font-weight:900;color:#fbbf24;" id="dc-create-total">0</span>
@@ -627,7 +636,7 @@
 
 </div>
 
-<script src="app.js?v=218"></script>
+<script src="app.js?v=219"></script>
 <script>
   refreshBal();
   const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -861,7 +870,8 @@
     const inv=getInventory();
     const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(inv[i]?.value||0),0);
     const gemTotal=dcGemTotal();
-    const total=itemsTotal+gemTotal;
+    const balWager=Math.max(0,parseInt(document.getElementById('dc-bal-wager')?.value||'0')||0);
+    const total=itemsTotal+gemTotal+balWager;
     const el=document.getElementById('dc-create-total');
     if(el) el.textContent=''+fmtPSG(total);
   }
@@ -874,6 +884,16 @@
       if (c) c.textContent = '0';
       if (t) t.textContent = '0';
     });
+    // Gem balance wager section
+    const curBal = getBalance();
+    const balWagerWrap = document.getElementById('dc-bal-wager-wrap');
+    const balWagerInp  = document.getElementById('dc-bal-wager');
+    const balAvailEl   = document.getElementById('dc-bal-avail');
+    const maxBalBtn    = document.getElementById('dc-bal-max');
+    if (balAvailEl) balAvailEl.textContent = fmtPSG(curBal);
+    if (balWagerInp) { balWagerInp.value = ''; balWagerInp.max = curBal; balWagerInp.oninput = dcUpdateCreateTotal; }
+    if (balWagerWrap) balWagerWrap.style.display = curBal > 0 ? 'block' : 'none';
+    if (maxBalBtn) maxBalBtn.onclick = () => { if (balWagerInp) { balWagerInp.value = curBal; dcUpdateCreateTotal(); } };
     const inv = getInventory();
     const grid = document.getElementById('dc-create-inv');
     const hint = document.getElementById('dc-create-hint');
@@ -913,7 +933,8 @@
     const inv=getInventory();
     const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(inv[i]?.value||0),0);
     const gemDenomTotal=dcGemTotal();
-    const bet=itemsTotal+gemDenomTotal;
+    const balWager=Math.max(0,parseInt(document.getElementById('dc-bal-wager')?.value||'0')||0);
+    const bet=itemsTotal+gemDenomTotal+balWager;
     if(bet<1) return showToast('Enter a bet amount','info');
     if(!deductBal(bet)) return showToast('Not enough balance!','lose');
     const _wIds=[..._dcCreateSelInv].map(i=>inv[i]?.id).filter(Boolean);
