@@ -1285,7 +1285,7 @@
 </div>
 
 
-<script src="app.js?v=222"></script>
+<script src="app.js?v=223"></script>
 <script>
   //  Initial balance display 
   refreshBal();
@@ -1781,10 +1781,11 @@
     const bet = itemsTotal + gemPickVal + balWager;
     if (bet < 1) return showToast('Enter a bet amount or select items', 'info');
     if (balWager > (window._rawSrvBal ?? 0)) return showToast('Not enough balance!', 'lose');
-    // Only deduct raw balance portion — items are removed separately below
     if (balWager > 0) deductBal(balWager);
     const _wIds = selPets.map(i => i.id).filter(Boolean);
     _popFromInvSilent(_wIds);
+    // Also reduce _bal by item value so nav balance reflects wagered items
+    if (itemsTotal > 0) { _bal = Math.max(0, _bal - itemsTotal); try { localStorage.setItem('ps99g_bal', _bal); } catch {} refreshBal(); }
     if (_cmGemPicker) _popGemsFromInv(_cmGemPicker.getSelections());
     // Collect all item IDs (pets + gem inventory) to send to server for removal
     const _gemWIds = _cmGemPicker ? (() => {
