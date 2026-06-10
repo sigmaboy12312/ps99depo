@@ -1704,7 +1704,9 @@
         pets.forEach((item, idx) => {
           const short = (item.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
           const d = document.createElement('div');
-          d.style.cssText='background:var(--bg-card2);border:1.5px solid var(--border);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
+          // Auto-select all items on open — click to deselect
+          _cmSelInv.add(idx);
+          d.style.cssText='background:rgba(124,77,232,.14);border:1.5px solid var(--purple);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
           const _cImg=document.createElement('div');_cImg.style.cssText='width:46px;height:46px;margin:0 auto 4px;';const _cI2=document.createElement('img');_cI2.src=`https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}`;_cI2.style.cssText='width:100%;height:100%;object-fit:contain;';_cI2.onerror=()=>{_cI2.style.opacity='.3';};_cImg.appendChild(_cI2);
           const _cNm=document.createElement('div');_cNm.style.cssText='font-size:.56rem;font-weight:700;line-height:1.2;';_cNm.textContent=short;
           const _cVl=document.createElement('div');_cVl.style.cssText='font-size:.58rem;color:var(--purple-b);font-weight:800;';_cVl.textContent=fmtPSG(item.value);
