@@ -1285,7 +1285,7 @@
 </div>
 
 
-<script src="app.js?v=223"></script>
+<script src="app.js?v=224"></script>
 <script>
   //  Initial balance display 
   refreshBal();
@@ -1296,10 +1296,19 @@
   let _cfPendingJoin = null; // { player, bet, side, pet, creatorAmount }
 
   function _handleServerGames(games) {
-    _serverGames = games.filter(g => {
-      const u = (typeof currentUser === 'function' ? currentUser() : {}).username || '';
-      return g.gameType !== 'dice' && g.player !== u;
-    });
+    const u = (typeof currentUser === 'function' ? currentUser() : {}).username || '';
+    // If we were waiting but our game is gone (e.g. WS reconnect deleted it),
+    // reset state. Guard with a small delay so game_matched can arrive first.
+    if (inGame && _currentGameId && !games.find(g => g.gameId === _currentGameId)) {
+      setTimeout(() => {
+        if (inGame && _currentGameId && !_serverGames.find(g => g.gameId === _currentGameId)) {
+          inGame = false; pendingBet = 0; _currentGameId = null;
+          buildActiveList();
+          showToast('Connection dropped — your items were returned', 'info');
+        }
+      }, 800);
+    }
+    _serverGames = games.filter(g => g.gameType !== 'dice' && g.player !== u);
     buildActiveList();
   }
 
@@ -1781,13 +1790,15 @@
     const bet = itemsTotal + gemPickVal + balWager;
     if (bet < 1) return showToast('Enter a bet amount or select items', 'info');
     if (balWager > (window._rawSrvBal ?? 0)) return showToast('Not enough balance!', 'lose');
+    // Gate: must have live WS before touching inventory or balance
+    if (typeof _wsConn === 'undefined' || _wsConn?.readyState !== WebSocket.OPEN) {
+      return showToast('Not connected — wait a moment and try again', 'info');
+    }
     if (balWager > 0) deductBal(balWager);
     const _wIds = selPets.map(i => i.id).filter(Boolean);
     _popFromInvSilent(_wIds);
-    // Also reduce _bal by item value so nav balance reflects wagered items
-    if (itemsTotal > 0) { _bal = Math.max(0, _bal - itemsTotal); try { localStorage.setItem('ps99g_bal', _bal); } catch {} refreshBal(); }
+    if (itemsTotal > 0) setBalance(Math.max(0, _bal - itemsTotal));
     if (_cmGemPicker) _popGemsFromInv(_cmGemPicker.getSelections());
-    // Collect all item IDs (pets + gem inventory) to send to server for removal
     const _gemWIds = _cmGemPicker ? (() => {
       const sel = _cmGemPicker.getSelections(); const inv2 = getInventory();
       const ids = []; let counts = { ...sel };
@@ -1799,11 +1810,8 @@
     inGame = true;
     stopIdle();
     closeCreateModal();
-    // Broadcast to server so friends can see and join
     _currentGameId = generateSeed();
-    if (typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
-      _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _currentGameId, gameType: 'coinflip', side: cmSelectedSide, amount: bet, itemIds: [..._wIds, ..._gemWIds], balanceAmount: balWager }));
-    }
+    _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _currentGameId, gameType: 'coinflip', side: cmSelectedSide, amount: bet, itemIds: [..._wIds, ..._gemWIds], balanceAmount: balWager }));
     buildActiveList();
     showToast('Game created! Waiting for an opponent...', 'info');
   }
