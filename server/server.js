@@ -291,6 +291,7 @@ wss.on('connection', (ws) => {
         const inventory = getInventory(u);
         ws.send(JSON.stringify({ type: 'session_data', balance, inventory }));
         ws.send(JSON.stringify({ type: 'jackpot_state', round: _jpPub() }));
+        ws.send(JSON.stringify({ type: 'games_update', games: [...activeGames.values()] }));
         console.log(`[WS] ${u} identified — balance: ${balance}`);
       }
 
@@ -364,16 +365,21 @@ wss.on('connection', (ws) => {
       if (msg.type === 'game_create' && msg.gameId && typeof msg.amount === 'number') {
         const client = wsClients.get(wsId);
         const player = client?.username || 'Unknown';
+        // Remove wagered items from server inventory so session_data doesn't restore them
+        if (Array.isArray(msg.itemIds) && msg.itemIds.length > 0) {
+          msg.itemIds.forEach(id => removeInventoryItem(player, id));
+        }
         activeGames.set(msg.gameId, {
-          gameId:    msg.gameId,
+          gameId:       msg.gameId,
           player,
-          side:      msg.side || 'heads',
-          gameType:  msg.gameType || 'coinflip',
-          amount:    msg.amount,
-          createdAt: Date.now(),
+          side:         msg.side || 'heads',
+          gameType:     msg.gameType || 'coinflip',
+          amount:       msg.amount,
+          balanceAmount: typeof msg.balanceAmount === 'number' ? msg.balanceAmount : msg.amount,
+          createdAt:    Date.now(),
         });
         broadcastGames();
-        console.log(`[Game] ${player} created game ${msg.gameId} for ${msg.amount}`);
+        console.log(`[Game] ${player} created game ${msg.gameId} for ${msg.amount} (balance: ${msg.balanceAmount ?? msg.amount})`);
       }
 
       if (msg.type === 'game_cancel' && msg.gameId) {
@@ -395,27 +401,31 @@ wss.on('connection', (ws) => {
         activeGames.delete(msg.gameId);
         broadcastGames();
 
+        // Remove joiner's wagered items from server inventory
+        if (Array.isArray(msg.itemIds) && msg.itemIds.length > 0) {
+          msg.itemIds.forEach(id => removeInventoryItem(joiner, id));
+        }
+
         // Generate result, update balances, notify both players
         const joinerAmount = typeof msg.amount === 'number' ? msg.amount : game.amount;
+        const joinerBalanceAmount = typeof msg.balanceAmount === 'number' ? msg.balanceAmount : joinerAmount;
         const GAME_TAX = 0.10;
         function _settleGame(creatorWon) {
           const winner = creatorWon ? game.player : joiner;
           const loser  = creatorWon ? joiner : game.player;
-          const winnerBet = creatorWon ? game.amount : joinerAmount;
-          const loserBet  = creatorWon ? joinerAmount : game.amount;
           const prize  = game.amount + joinerAmount;
           const tax    = Math.floor(prize * GAME_TAX);
           const payout = prize - tax;
-          // Deduct both bets (server balance was never deducted when they wagered client-side)
-          addBalance(game.player, -game.amount);
-          addBalance(joiner, -joinerAmount);
+          // Only deduct the balance portion (items already removed from inventory above)
+          addBalance(game.player, -(game.balanceAmount !== undefined ? game.balanceAmount : game.amount));
+          addBalance(joiner, -joinerBalanceAmount);
           // Credit winner and house
           addBalance(winner, payout);
           addBalance(ADMIN_USER, tax);
-          // Push updated balances so next refresh is accurate
+          // Push updated state — inventory is now correct (wagered items already removed)
           pushToUser(game.player, { type: 'session_data', balance: getBalance(game.player), inventory: getInventory(game.player) });
           pushToUser(joiner,      { type: 'session_data', balance: getBalance(joiner),      inventory: getInventory(joiner) });
-          console.log(`[Game] ${winner} wins ${payout} (tax ${tax}), ${loser} loses ${loserBet}`);
+          console.log(`[Game] ${winner} wins ${payout} (tax ${tax}), ${loser} loses`);
         }
         if (game.gameType === 'dice') {
           const creatorRoll = Math.ceil(Math.random() * 6);
@@ -438,13 +448,6 @@ wss.on('connection', (ws) => {
         }
       }
 
-      if (msg.type === 'house_rake' && typeof msg.amount === 'number' && msg.amount > 0) {
-        if (ADMIN_USER) {
-          addBalance(ADMIN_USER, Math.round(msg.amount));
-          console.log(`[Rake] +${msg.amount} (${msg.game || 'game'}) → ${ADMIN_USER}`);
-        }
-      }
-
       // ── Owner ban command ──────────────────────────────
       if (msg.type === 'ban_user') {
         const client = wsClients.get(wsId);
@@ -461,31 +464,6 @@ wss.on('connection', (ws) => {
         broadcastAll({ type: 'chat', username: '__system', displayName: 'System', avatar: null,
           text: `🔨 ${target} was banned by the owner.`, ts: Date.now(), isSystem: true });
         console.log(`[Ban] ${target} banned by ${client.username}`);
-      }
-
-      // ── Jackpot result: distribute items to winner + tax to admin ──
-      if (msg.type === 'jackpot_result') {
-        const winnerUser = msg.winnerUsername?.toLowerCase();
-        const winnerItems = Array.isArray(msg.winnerItems) ? msg.winnerItems : [];
-        const taxItems    = Array.isArray(msg.taxItems)    ? msg.taxItems    : [];
-
-        if (winnerUser) {
-          winnerItems.forEach(item => addInventoryItem(winnerUser, item));
-          pushToUser(winnerUser, {
-            type:  'jackpot_won',
-            items: winnerItems,
-            prize: msg.prize || 0,
-          });
-          console.log(`[Jackpot] ${winnerUser} won ${winnerItems.length} items (prize ${msg.prize})`);
-        }
-
-        const TAX_USER = 'vexyboiog';
-        taxItems.forEach(item => addInventoryItem(TAX_USER, item));
-        if (taxItems.length) {
-          const taxVal = taxItems.reduce((s,i) => s + (i.value||0), 0);
-          console.log(`[Jackpot Tax] ${taxItems.length} items (${taxVal}) → ${TAX_USER}`);
-          pushToUser(TAX_USER, { type: 'jackpot_tax', items: taxItems, totalValue: taxVal });
-        }
       }
 
       if (msg.type === 'chat' && msg.text) {

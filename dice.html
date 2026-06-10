@@ -475,6 +475,15 @@
       </div>
     </div>
 
+    <!-- Gem balance wager -->
+    <div id="dc-bal-wager-wrap" style="display:none;margin-bottom:12px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);border-radius:8px;padding:8px 10px;">
+      <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:#22d3ee;margin-bottom:6px;">Gem Balance &mdash; Available: <b id="dc-bal-avail">0</b></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="number" id="dc-bal-wager" min="0" placeholder="0" style="flex:1;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:6px;color:#fff;padding:5px 8px;font-size:.8rem;font-family:inherit;">
+        <button id="dc-bal-max" style="background:rgba(34,211,238,.2);border:1px solid rgba(34,211,238,.5);border-radius:6px;color:#22d3ee;font-size:.7rem;font-weight:800;padding:5px 10px;cursor:pointer;white-space:nowrap;">MAX</button>
+      </div>
+    </div>
+
     <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <span style="font-size:.68rem;color:var(--text-muted);font-weight:700;">Total Wager</span>
       <span style="font-size:.95rem;font-weight:900;color:#fbbf24;" id="dc-create-total">0</span>
@@ -627,7 +636,7 @@
 
 </div>
 
-<script src="app.js?v=218"></script>
+<script src="app.js?v=220"></script>
 <script>
   refreshBal();
   const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -859,9 +868,11 @@
   function dcSetBet(v) {}
   function dcUpdateCreateTotal() {
     const inv=getInventory();
-    const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(inv[i]?.value||0),0);
+    const pets=inv.filter(i=>!i.gem);
+    const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(pets[i]?.value||0),0);
     const gemTotal=dcGemTotal();
-    const total=itemsTotal+gemTotal;
+    const balWager=Math.max(0,parseInt(document.getElementById('dc-bal-wager')?.value||'0')||0);
+    const total=itemsTotal+gemTotal+balWager;
     const el=document.getElementById('dc-create-total');
     if(el) el.textContent=''+fmtPSG(total);
   }
@@ -874,15 +885,26 @@
       if (c) c.textContent = '0';
       if (t) t.textContent = '0';
     });
+    // Gem balance wager section
+    const curBal = getBalance();
+    const balWagerWrap = document.getElementById('dc-bal-wager-wrap');
+    const balWagerInp  = document.getElementById('dc-bal-wager');
+    const balAvailEl   = document.getElementById('dc-bal-avail');
+    const maxBalBtn    = document.getElementById('dc-bal-max');
+    if (balAvailEl) balAvailEl.textContent = fmtPSG(curBal);
+    if (balWagerInp) { balWagerInp.value = ''; balWagerInp.max = curBal; balWagerInp.oninput = dcUpdateCreateTotal; }
+    if (balWagerWrap) balWagerWrap.style.display = curBal > 0 ? 'block' : 'none';
+    if (maxBalBtn) maxBalBtn.onclick = () => { if (balWagerInp) { balWagerInp.value = curBal; dcUpdateCreateTotal(); } };
     const inv = getInventory();
+    const pets = inv.filter(i => !i.gem); // gems handled by denom spinners, not pet grid
     const grid = document.getElementById('dc-create-inv');
     const hint = document.getElementById('dc-create-hint');
     grid.innerHTML = '';
-    if (!inv.length) {
-      hint.textContent = 'No items deposited &mdash; deposit pets to play.';
+    if (!pets.length) {
+      hint.textContent = inv.length ? 'No pet items — use gem balance or denom spinners above.' : 'No items deposited — deposit pets to play.';
     } else {
       hint.textContent = 'All items auto-selected — click to deselect.';
-      inv.forEach((item, idx) => {
+      pets.forEach((item, idx) => {
         const short = (item.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
         const d = document.createElement('div');
         // Auto-select all items on open
@@ -911,22 +933,28 @@
   function confirmDiceCreate() {
     if (_diceInGame) return showToast('Finish current game first', 'info');
     const inv=getInventory();
-    const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(inv[i]?.value||0),0);
+    const pets=inv.filter(i=>!i.gem);
+    const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(pets[i]?.value||0),0);
     const gemDenomTotal=dcGemTotal();
-    const bet=itemsTotal+gemDenomTotal;
+    const balWager=Math.max(0,parseInt(document.getElementById('dc-bal-wager')?.value||'0')||0);
+    const bet=itemsTotal+gemDenomTotal+balWager;
     if(bet<1) return showToast('Enter a bet amount','info');
-    if(!deductBal(bet)) return showToast('Not enough balance!','lose');
-    const _wIds=[..._dcCreateSelInv].map(i=>inv[i]?.id).filter(Boolean);
+    if(balWager>getBalance()) return showToast('Not enough balance!','lose');
+    // Only deduct raw balance portion — items removed separately
+    if(balWager>0) deductBal(balWager);
+    const _wIds=[..._dcCreateSelInv].map(i=>pets[i]?.id).filter(Boolean);
     _popFromInvSilent(_wIds);
     const _gemSel={'1B Gems':_dcGems.b,'100M Gems':_dcGems.h,'10M Gems':_dcGems.t,'1M Gems':_dcGems.o};
+    // Collect gem item IDs before popping
+    const _gemWIds=(()=>{const s=_gemSel;const cur=getInventory();const ids=[];let c={...s};for(const it of cur){if(it.gem&&c[it.name]>0){ids.push(it.id);c[it.name]--;}}return ids;})();
     _popGemsFromInv(_gemSel);
     closeDiceCreate();
     _diceGameId = generateDiceGameId();
     _dicePendingBet = bet;
-    _dicePendingItems = [..._dcCreateSelInv].map(i => inv[i]).filter(Boolean);
+    _dicePendingItems = [..._dcCreateSelInv].map(i => pets[i]).filter(Boolean);
     _diceInGame = true;
     if (typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
-      _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _diceGameId, gameType: 'dice', amount: bet }));
+      _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _diceGameId, gameType: 'dice', amount: bet, itemIds: [..._wIds,..._gemWIds], balanceAmount: balWager }));
     }
     showToast('Match created! Waiting for an opponent...', 'info');
   }
@@ -950,7 +978,7 @@
   }
 
   function _djRenderGrid() {
-    const inv   = typeof getInventory === 'function' ? getInventory() : [];
+    const inv   = (typeof getInventory === 'function' ? getInventory() : []).filter(i => !i.gem);
     const grid  = document.getElementById('dj-inv-grid');
     const empty = document.getElementById('dj-empty');
     grid.innerHTML = '';
@@ -979,7 +1007,7 @@
 
   function _djUpdateTotal() {
     if (!_djCtx) return;
-    const inv   = typeof getInventory === 'function' ? getInventory() : [];
+    const inv   = (typeof getInventory === 'function' ? getInventory() : []).filter(i => !i.gem);
     const total = [..._djSelInv].reduce((s,i) => s + (inv[i]?.value||0), 0);
     const { g }  = _djCtx;
     const min    = Math.floor(g.amount * .9), max = Math.ceil(g.amount * 1.05);
@@ -1013,7 +1041,7 @@
 
   function confirmDiceJoin() {
     if (!_djCtx) return;
-    const inv    = typeof getInventory === 'function' ? getInventory() : [];
+    const inv    = (typeof getInventory === 'function' ? getInventory() : []).filter(i => !i.gem);
     const selected = [..._djSelInv].map(i => inv[i]).filter(Boolean);
     const total  = selected.reduce((s,i) => s + (i.value||0), 0);
     const { g }  = _djCtx;
@@ -1021,13 +1049,14 @@
     if (total < min) { document.getElementById('dj-err').textContent = `Need at least ${fmtPSG(min)}`; return; }
     document.getElementById('dj-err').textContent = '';
     const proceed = () => {
-      if (!deductBal(total)) { showToast('Not enough balance!', 'lose'); return; }
-      _popFromInvSilent(selected.map(i => i.id));
+      // Items are not balance — just remove from inventory, no deductBal needed
+      const itemIds = selected.map(i => i.id);
+      _popFromInvSilent(itemIds);
       closeDiceJoin();
       const topPet = selected.reduce((a,b) => (b.value||0) > (a.value||0) ? b : a, selected[0]);
       if (g.gameId && typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
         _dicePendingJoin = { bet: total, g, youItems: selected };
-        _wsConn.send(JSON.stringify({ type: 'game_join', gameId: g.gameId, amount: total }));
+        _wsConn.send(JSON.stringify({ type: 'game_join', gameId: g.gameId, amount: total, itemIds, balanceAmount: 0 }));
         showToast('Joining match…', 'info');
       } else {
         runDiceGame('You', total, g.player, g.amount, g.pet || null, topPet, selected, null);
