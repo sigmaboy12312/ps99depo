@@ -636,7 +636,7 @@
 
 </div>
 
-<script src="app.js?v=221"></script>
+<script src="app.js?v=222"></script>
 <script>
   refreshBal();
   const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -864,12 +864,10 @@
   }
 
   //  CREATE MATCH 
-  let _dcCreateSelInv = new Set();
+  let _dcCreateSelInv = new Map(); // id -> item object
   function dcSetBet(v) {}
   function dcUpdateCreateTotal() {
-    const inv=getInventory();
-    const pets=inv.filter(i=>!i.gem);
-    const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(pets[i]?.value||0),0);
+    const itemsTotal=[..._dcCreateSelInv.values()].reduce((s,i)=>s+(Number(i.value)||0),0);
     const gemTotal=dcGemTotal();
     const balWager=Math.max(0,parseInt(document.getElementById('dc-bal-wager')?.value||'0')||0);
     const total=itemsTotal+gemTotal+balWager;
@@ -877,7 +875,7 @@
     if(el) el.textContent=''+fmtPSG(total);
   }
   function openDiceCreate() {
-    _dcCreateSelInv = new Set();
+    _dcCreateSelInv = new Map();
     _dcGems = { b: 0, h: 0, t: 0, o: 0 };
     ['b','h','t','o'].forEach(k => {
       const c = document.getElementById('dc-gem-'+k+'-count');
@@ -904,19 +902,19 @@
       hint.textContent = inv.length ? 'No pet items — use gem balance or denom spinners above.' : 'No items deposited — deposit pets to play.';
     } else {
       hint.textContent = 'All items auto-selected — click to deselect.';
-      pets.forEach((item, idx) => {
+      pets.forEach((item) => {
         const short = (item.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
         const d = document.createElement('div');
         // Auto-select all items on open
-        _dcCreateSelInv.add(idx);
+        _dcCreateSelInv.set(item.id, item);
         d.style.cssText='background:rgba(124,77,232,.14);border:1.5px solid var(--purple);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
         const _dcImg=document.createElement('div');_dcImg.style.cssText='width:46px;height:46px;margin:0 auto 4px;';const _dcI2=document.createElement('img');_dcI2.src=`https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}`;_dcI2.style.cssText='width:100%;height:100%;object-fit:contain;';_dcI2.onerror=()=>{_dcI2.style.opacity='.3';};_dcImg.appendChild(_dcI2);
         const _dcNm=document.createElement('div');_dcNm.style.cssText='font-size:.56rem;font-weight:700;';_dcNm.textContent=short;
         const _dcVl=document.createElement('div');_dcVl.style.cssText='font-size:.58rem;color:var(--purple-b);font-weight:800;';_dcVl.textContent=fmtPSG(item.value);
         d.appendChild(_dcImg);d.appendChild(_dcNm);d.appendChild(_dcVl);
         d.onclick=()=>{
-          if(_dcCreateSelInv.has(idx)){_dcCreateSelInv.delete(idx);d.style.borderColor='var(--border)';d.style.background='var(--bg-card2)';}
-          else{_dcCreateSelInv.add(idx);d.style.borderColor='var(--purple)';d.style.background='rgba(124,77,232,.14)';}
+          if(_dcCreateSelInv.has(item.id)){_dcCreateSelInv.delete(item.id);d.style.borderColor='var(--border)';d.style.background='var(--bg-card2)';}
+          else{_dcCreateSelInv.set(item.id,item);d.style.borderColor='var(--purple)';d.style.background='rgba(124,77,232,.14)';}
           dcUpdateCreateTotal();
         };
         grid.appendChild(d);
@@ -932,9 +930,8 @@
   }
   function confirmDiceCreate() {
     if (_diceInGame) return showToast('Finish current game first', 'info');
-    const inv=getInventory();
-    const pets=inv.filter(i=>!i.gem);
-    const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(pets[i]?.value||0),0);
+    const selPets=[..._dcCreateSelInv.values()];
+    const itemsTotal=selPets.reduce((s,i)=>s+(Number(i.value)||0),0);
     const gemDenomTotal=dcGemTotal();
     const balWager=Math.max(0,parseInt(document.getElementById('dc-bal-wager')?.value||'0')||0);
     const bet=itemsTotal+gemDenomTotal+balWager;
@@ -942,7 +939,7 @@
     if(balWager>(window._rawSrvBal??0)) return showToast('Not enough balance!','lose');
     // Only deduct raw balance portion — items removed separately
     if(balWager>0) deductBal(balWager);
-    const _wIds=[..._dcCreateSelInv].map(i=>pets[i]?.id).filter(Boolean);
+    const _wIds=selPets.map(i=>i.id).filter(Boolean);
     _popFromInvSilent(_wIds);
     const _gemSel={'1B Gems':_dcGems.b,'100M Gems':_dcGems.h,'10M Gems':_dcGems.t,'1M Gems':_dcGems.o};
     // Collect gem item IDs before popping
@@ -951,7 +948,7 @@
     closeDiceCreate();
     _diceGameId = generateDiceGameId();
     _dicePendingBet = bet;
-    _dicePendingItems = [..._dcCreateSelInv].map(i => pets[i]).filter(Boolean);
+    _dicePendingItems = selPets;
     _diceInGame = true;
     if (typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
       _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _diceGameId, gameType: 'dice', amount: bet, itemIds: [..._wIds,..._gemWIds], balanceAmount: balWager }));

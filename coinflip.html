@@ -1285,7 +1285,7 @@
 </div>
 
 
-<script src="app.js?v=221"></script>
+<script src="app.js?v=222"></script>
 <script>
   //  Initial balance display 
   refreshBal();
@@ -1672,12 +1672,11 @@
 
   //  CREATE MODAL 
   let cmSelectedSide = 'heads';
-  let _cmSelInv  = new Set();
+  let _cmSelInv  = new Map(); // id -> item object (snapshot at modal-open)
   let _cmGemPicker = null; // gem stacker result
 
   function cmUpdateTotal() {
-    const inv = getInventory();
-    const petVal = [..._cmSelInv].reduce((s,i)=>s+(inv.filter(x=>!x.gem)[i]?.value||0),0);
+    const petVal = [..._cmSelInv.values()].reduce((s,i)=>s+(Number(i.value)||0),0);
     const gemVal = _cmGemPicker ? _cmGemPicker.getTotal() : 0;
     const balWager = parseInt(document.getElementById('cm-bal-wager')?.value || '0') || 0;
     const total  = petVal + gemVal + balWager;
@@ -1689,7 +1688,7 @@
     const m = document.getElementById('create-modal');
     m.style.display = 'flex'; m.classList.add('open');
     cmSelectedSide = 'heads';
-    _cmSelInv = new Set();
+    _cmSelInv = new Map();
     _cmGemPicker = null;
     cmRenderSide();
     // No setTimeout — build immediately to avoid race condition on fast clicks
@@ -1732,19 +1731,19 @@
       if (pets.length > 0) {
         if (petSec) petSec.style.display = 'block';
         if (hint) hint.textContent = 'Select pets to wager.';
-        pets.forEach((item, idx) => {
+        pets.forEach((item) => {
           const short = (item.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
           const d = document.createElement('div');
           // Auto-select all items on open — click to deselect
-          _cmSelInv.add(idx);
+          _cmSelInv.set(item.id, item);
           d.style.cssText='background:rgba(124,77,232,.14);border:1.5px solid var(--purple);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
           const _cImg=document.createElement('div');_cImg.style.cssText='width:46px;height:46px;margin:0 auto 4px;';const _cI2=document.createElement('img');_cI2.src=`https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}`;_cI2.style.cssText='width:100%;height:100%;object-fit:contain;';_cI2.onerror=()=>{_cI2.style.opacity='.3';};_cImg.appendChild(_cI2);
           const _cNm=document.createElement('div');_cNm.style.cssText='font-size:.56rem;font-weight:700;line-height:1.2;';_cNm.textContent=short;
           const _cVl=document.createElement('div');_cVl.style.cssText='font-size:.58rem;color:var(--purple-b);font-weight:800;';_cVl.textContent=fmtPSG(item.value);
           d.appendChild(_cImg);d.appendChild(_cNm);d.appendChild(_cVl);
           d.onclick=()=>{
-            if(_cmSelInv.has(idx)){_cmSelInv.delete(idx);d.style.borderColor='var(--border)';d.style.background='var(--bg-card2)';}
-            else{_cmSelInv.add(idx);d.style.borderColor='var(--purple)';d.style.background='rgba(124,77,232,.14)';}
+            if(_cmSelInv.has(item.id)){_cmSelInv.delete(item.id);d.style.borderColor='var(--border)';d.style.background='var(--bg-card2)';}
+            else{_cmSelInv.set(item.id,item);d.style.borderColor='var(--purple)';d.style.background='rgba(124,77,232,.14)';}
             cmUpdateTotal();
           };
           grid.appendChild(d);
@@ -1775,9 +1774,8 @@
     }
   }
   function confirmCreate() {
-    const inv = getInventory();
-    const pets = inv.filter(i => !i.gem);
-    const itemsTotal = [..._cmSelInv].reduce((s,i)=>s+(Number(pets[i]?.value)||0),0);
+    const selPets    = [..._cmSelInv.values()];
+    const itemsTotal = selPets.reduce((s,i)=>s+(Number(i.value)||0),0);
     const gemPickVal = _cmGemPicker ? _cmGemPicker.getTotal() : 0;
     const balWager   = Math.max(0, parseInt(document.getElementById('cm-bal-wager')?.value || '0') || 0);
     const bet = itemsTotal + gemPickVal + balWager;
@@ -1785,7 +1783,7 @@
     if (balWager > (window._rawSrvBal ?? 0)) return showToast('Not enough balance!', 'lose');
     // Only deduct raw balance portion — items are removed separately below
     if (balWager > 0) deductBal(balWager);
-    const _wIds = [..._cmSelInv].map(i => pets[i]?.id).filter(Boolean);
+    const _wIds = selPets.map(i => i.id).filter(Boolean);
     _popFromInvSilent(_wIds);
     if (_cmGemPicker) _popGemsFromInv(_cmGemPicker.getSelections());
     // Collect all item IDs (pets + gem inventory) to send to server for removal
