@@ -365,18 +365,17 @@ wss.on('connection', (ws) => {
       if (msg.type === 'game_create' && msg.gameId && typeof msg.amount === 'number') {
         const client = wsClients.get(wsId);
         const player = client?.username || 'Unknown';
-        // Remove wagered items from server inventory so session_data doesn't restore them
-        if (Array.isArray(msg.itemIds) && msg.itemIds.length > 0) {
-          msg.itemIds.forEach(id => removeInventoryItem(player, id));
-        }
+        // Don't remove items yet — keep them in server inventory until a joiner is
+        // matched. This prevents items vanishing if the creator cancels or disconnects.
         activeGames.set(msg.gameId, {
-          gameId:       msg.gameId,
+          gameId:        msg.gameId,
           player,
-          side:         msg.side || 'heads',
-          gameType:     msg.gameType || 'coinflip',
-          amount:       msg.amount,
+          side:          msg.side || 'heads',
+          gameType:      msg.gameType || 'coinflip',
+          amount:        msg.amount,
           balanceAmount: typeof msg.balanceAmount === 'number' ? msg.balanceAmount : msg.amount,
-          createdAt:    Date.now(),
+          itemIds:       Array.isArray(msg.itemIds) ? msg.itemIds : [],
+          createdAt:     Date.now(),
         });
         broadcastGames();
         console.log(`[Game] ${player} created game ${msg.gameId} for ${msg.amount} (balance: ${msg.balanceAmount ?? msg.amount})`);
@@ -401,7 +400,10 @@ wss.on('connection', (ws) => {
         activeGames.delete(msg.gameId);
         broadcastGames();
 
-        // Remove joiner's wagered items from server inventory
+        // Now that the game is locked in, remove both parties' wagered items
+        if (Array.isArray(game.itemIds) && game.itemIds.length > 0) {
+          game.itemIds.forEach(id => removeInventoryItem(game.player, id));
+        }
         if (Array.isArray(msg.itemIds) && msg.itemIds.length > 0) {
           msg.itemIds.forEach(id => removeInventoryItem(joiner, id));
         }

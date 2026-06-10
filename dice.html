@@ -636,7 +636,7 @@
 
 </div>
 
-<script src="app.js?v=220"></script>
+<script src="app.js?v=221"></script>
 <script>
   refreshBal();
   const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -886,7 +886,7 @@
       if (t) t.textContent = '0';
     });
     // Gem balance wager section
-    const curBal = getBalance();
+    const curBal = window._rawSrvBal ?? 0;
     const balWagerWrap = document.getElementById('dc-bal-wager-wrap');
     const balWagerInp  = document.getElementById('dc-bal-wager');
     const balAvailEl   = document.getElementById('dc-bal-avail');
@@ -894,7 +894,7 @@
     if (balAvailEl) balAvailEl.textContent = fmtPSG(curBal);
     if (balWagerInp) { balWagerInp.value = ''; balWagerInp.max = curBal; balWagerInp.oninput = dcUpdateCreateTotal; }
     if (balWagerWrap) balWagerWrap.style.display = curBal > 0 ? 'block' : 'none';
-    if (maxBalBtn) maxBalBtn.onclick = () => { if (balWagerInp) { balWagerInp.value = curBal; dcUpdateCreateTotal(); } };
+    if (maxBalBtn) maxBalBtn.onclick = () => { const b = window._rawSrvBal ?? 0; if (balWagerInp) { balWagerInp.value = b; dcUpdateCreateTotal(); } };
     const inv = getInventory();
     const pets = inv.filter(i => !i.gem); // gems handled by denom spinners, not pet grid
     const grid = document.getElementById('dc-create-inv');
@@ -939,7 +939,7 @@
     const balWager=Math.max(0,parseInt(document.getElementById('dc-bal-wager')?.value||'0')||0);
     const bet=itemsTotal+gemDenomTotal+balWager;
     if(bet<1) return showToast('Enter a bet amount','info');
-    if(balWager>getBalance()) return showToast('Not enough balance!','lose');
+    if(balWager>(window._rawSrvBal??0)) return showToast('Not enough balance!','lose');
     // Only deduct raw balance portion — items removed separately
     if(balWager>0) deductBal(balWager);
     const _wIds=[..._dcCreateSelInv].map(i=>pets[i]?.id).filter(Boolean);
