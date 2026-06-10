@@ -648,6 +648,49 @@
   const DICE_BOT_NAMES = ['xR4Zy','NovaPro','GemLord','TitanicX','Sk1yRdr','HugeGang','PurpleKing','CrystalFly'];
   const DICE_MATCHES = []; // Real games come from server; no fake bots
 
+  // P2P game state
+  let _diceInGame = false;
+  let _diceGameId = null;
+  let _dicePendingBet = 0;
+  let _dicePendingItems = [];
+  let _dicePendingJoin = null; // { bet, g, youItems }
+
+  function generateDiceGameId() {
+    const c = '0123456789abcdef'; let s = '';
+    for (let i = 0; i < 32; i++) s += c[Math.floor(Math.random() * 16)];
+    return s;
+  }
+
+  function _handleServerGames(games) {
+    const myUser = (typeof currentUser === 'function' ? currentUser().username : '') || '';
+    const diceGames = (games || []).filter(g => g.gameType === 'dice' && g.player !== myUser);
+    const existing = {};
+    DICE_MATCHES.forEach(g => { if (g.gameId) existing[g.gameId] = g; });
+    DICE_MATCHES.length = 0;
+    diceGames.forEach(g => { DICE_MATCHES.push(existing[g.gameId] || g); });
+    buildDiceList();
+  }
+
+  window._wsPageHandler = function(msg) {
+    if (msg.type !== 'game_matched' || msg.gameType !== 'dice') return;
+    const myUser = (typeof currentUser === 'function' ? currentUser().username : '') || '';
+    const iAmCreator = msg.creator === myUser;
+    const iAmJoiner  = msg.joiner  === myUser;
+    if (!iAmCreator && !iAmJoiner) return;
+    const iWon = iAmCreator ? msg.creatorWon : !msg.creatorWon;
+    if (iAmCreator) {
+      if (!_diceInGame || !_dicePendingBet) return;
+      const bet = _dicePendingBet, items = _dicePendingItems;
+      _diceInGame = false; _dicePendingBet = 0; _dicePendingItems = []; _diceGameId = null;
+      runDiceGame('You', bet, msg.joiner, msg.joinerAmount || bet, null, null, items, null, iWon);
+    } else if (iAmJoiner && _dicePendingJoin) {
+      const { bet, g, youItems } = _dicePendingJoin;
+      _dicePendingJoin = null;
+      const topPet = youItems && youItems.length ? youItems.reduce((a,b) => (b.value||0)>(a.value||0)?b:a, youItems[0]) : null;
+      runDiceGame('You', bet, g.player, g.amount, g.pet || null, topPet, youItems, null, iWon);
+    }
+  };
+
   //  Lobby stats 
   function updateDiceStats() {
     const total = DICE_MATCHES.reduce((s,g)=>s+g.amount,0);
@@ -864,23 +907,26 @@
     cm.classList.remove('open'); cm.style.display = 'none';
   }
   function confirmDiceCreate() {
+    if (_diceInGame) return showToast('Finish current game first', 'info');
     const inv=getInventory();
     const itemsTotal=[..._dcCreateSelInv].reduce((s,i)=>s+(inv[i]?.value||0),0);
     const gemDenomTotal=dcGemTotal();
     const bet=itemsTotal+gemDenomTotal;
     if(bet<1) return showToast('Enter a bet amount','info');
     if(!deductBal(bet)) return showToast('Not enough balance!','lose');
-    // Remove wagered items so they can't be double-spent
     const _wIds=[..._dcCreateSelInv].map(i=>inv[i]?.id).filter(Boolean);
     _popFromInvSilent(_wIds);
     const _gemSel={'1B Gems':_dcGems.b,'100M Gems':_dcGems.h,'10M Gems':_dcGems.t,'1M Gems':_dcGems.o};
     _popGemsFromInv(_gemSel);
     closeDiceCreate();
-    showToast('Match created! Finding opponent...','info');
-    const botName = DICE_BOT_NAMES[Math.floor(Math.random()*DICE_BOT_NAMES.length)];
-    const botPet = randomOpponentPet();
-    const youItems = [..._dcCreateSelInv].map(i => inv[i]).filter(Boolean);
-    setTimeout(() => runDiceGame('You', bet, botName, bet, botPet, null, youItems, null), 1200);
+    _diceGameId = generateDiceGameId();
+    _dicePendingBet = bet;
+    _dicePendingItems = [..._dcCreateSelInv].map(i => inv[i]).filter(Boolean);
+    _diceInGame = true;
+    if (typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
+      _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _diceGameId, gameType: 'dice', amount: bet }));
+    }
+    showToast('Match created! Waiting for an opponent...', 'info');
   }
   document.getElementById('dice-create-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeDiceCreate(); });
 
@@ -894,7 +940,7 @@
     const min = Math.floor(g.amount * .9), max = Math.ceil(g.amount * 1.05);
     document.getElementById('dj-creator-info').textContent = `vs ${g.player}`;
     document.getElementById('dj-creator-bet').textContent = fmtPSG(g.amount);
-    document.getElementById('dj-range').textContent = `${fmtPSG(min)} â€“ ${fmtPSG(max)}`;
+    document.getElementById('dj-range').textContent = `${fmtPSG(min)} – ${fmtPSG(max)}`;
     document.getElementById('dj-err').textContent = '';
     _djRenderGrid();
     const jm = document.getElementById('dice-join-modal');
@@ -938,7 +984,7 @@
     const totalEl = document.getElementById('dj-total-val');
     const btn     = document.getElementById('dj-join-btn');
     const err     = document.getElementById('dj-err');
-    totalEl.textContent = total > 0 ? fmtPSG(total) : 'â€”';
+    totalEl.textContent = total > 0 ? fmtPSG(total) : '—';
     if (!_djSelInv.size) {
       err.textContent = '';
       btn.disabled = true;
@@ -977,7 +1023,13 @@
       _popFromInvSilent(selected.map(i => i.id));
       closeDiceJoin();
       const topPet = selected.reduce((a,b) => (b.value||0) > (a.value||0) ? b : a, selected[0]);
-      runDiceGame('You', total, g.player, g.amount, g.pet || null, topPet, selected, null);
+      if (g.gameId && typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
+        _dicePendingJoin = { bet: total, g, youItems: selected };
+        _wsConn.send(JSON.stringify({ type: 'game_join', gameId: g.gameId, amount: total }));
+        showToast('Joining match…', 'info');
+      } else {
+        runDiceGame('You', total, g.player, g.amount, g.pet || null, topPet, selected, null);
+      }
     };
     if (total > max) {
       showOverbidWarning(total, g.amount, proceed);
@@ -988,7 +1040,7 @@
   document.getElementById('dice-join-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeDiceJoin(); });
 
   //  DICE CINEMATIC
-  function runDiceGame(youName, youBet, oppName, oppBet, oppPet, youPet, youItems, oppItems) {
+  function runDiceGame(youName, youBet, oppName, oppBet, oppPet, youPet, youItems, oppItems, forcedWin) {
     const cin = document.getElementById('dice-cin');
     const dieIds = ['dc-die-you-1','dc-die-you-2','dc-die-opp-1','dc-die-opp-2'];
 
@@ -1079,8 +1131,17 @@
 
     setTimeout(() => {
       clearInterval(rollInterval);
-      const y1=Math.floor(Math.random()*6)+1, y2=Math.floor(Math.random()*6)+1;
-      const o1=Math.floor(Math.random()*6)+1, o2=Math.floor(Math.random()*6)+1;
+      let y1,y2,o1,o2,_a=0;
+      if (forcedWin === true) {
+        do{y1=Math.ceil(Math.random()*6);y2=Math.ceil(Math.random()*6);o1=Math.ceil(Math.random()*6);o2=Math.ceil(Math.random()*6);_a++;}while(y1+y2<=o1+o2&&_a<50);
+        if(y1+y2<=o1+o2){y1=6;y2=5;o1=1;o2=2;}
+      } else if (forcedWin === false) {
+        do{y1=Math.ceil(Math.random()*6);y2=Math.ceil(Math.random()*6);o1=Math.ceil(Math.random()*6);o2=Math.ceil(Math.random()*6);_a++;}while(y1+y2>=o1+o2&&_a<50);
+        if(y1+y2>=o1+o2){y1=1;y2=2;o1=6;o2=5;}
+      } else {
+        y1=Math.ceil(Math.random()*6);y2=Math.ceil(Math.random()*6);
+        o1=Math.ceil(Math.random()*6);o2=Math.ceil(Math.random()*6);
+      }
       const youTotal=y1+y2, oppTotal=o1+o2;
       const tied = youTotal===oppTotal;
       const won  = youTotal>oppTotal;
@@ -1131,8 +1192,8 @@
         ['dc-die-opp-1','dc-die-opp-2'].forEach(id => document.getElementById(id).classList.add('win-die'));
         recordLoss(youBet); recordWager(youBet);
         res.className = 'dc-result lose show';
-        res.textContent = youTotal + ' vs ' + oppTotal + '  â€”  Better luck!';
-        showToast('Rolled ' + youTotal + ' vs ' + oppTotal + ' â€” Lost ' + fmtPSG(youBet), 'lose');
+        res.textContent = youTotal + ' vs ' + oppTotal + '  —  Better luck!';
+        showToast('Rolled ' + youTotal + ' vs ' + oppTotal + ' — Lost ' + fmtPSG(youBet), 'lose');
         updateSessionStats(false, youBet);
       }
       setTimeout(() => {

@@ -1282,17 +1282,67 @@
   //  Initial balance display 
   refreshBal();
 
-  //  Server game state 
+  //  Server game state
   let _currentGameId = null;
   let _serverGames   = []; // real games from connected players
+  let _cfPendingJoin = null; // { player, bet, side, pet, creatorAmount }
 
   function _handleServerGames(games) {
     _serverGames = games.filter(g => {
       const u = (typeof currentUser === 'function' ? currentUser() : {}).username || '';
-      return g.player !== u; // don't show our own game in the join list
+      return g.gameType !== 'dice' && g.player !== u;
     });
     buildActiveList();
   }
+
+  window._wsPageHandler = function(msg) {
+    if (msg.type !== 'game_matched' || msg.gameType !== 'coinflip') return;
+    const myUser = (typeof currentUser === 'function' ? currentUser().username : '') || '';
+    const iAmCreator = msg.creator === myUser;
+    const iAmJoiner  = msg.joiner  === myUser;
+    if (!iAmCreator && !iAmJoiner) return;
+    const iWon = iAmCreator ? msg.creatorWon : !msg.creatorWon;
+    const result = msg.result;
+
+    if (iAmCreator) {
+      if (!inGame || !pendingBet) return;
+      const bet = pendingBet;
+      const oppSide = selectedSide === 'heads' ? 'tails' : 'heads';
+      const oppPet = randomOpponentPet();
+      openCinematic(selectedPet, selectedSide, bet);
+      revealCinematicOpponent(msg.joiner, oppPet, oppSide, msg.joinerAmount || bet);
+      setTimeout(() => {
+        runCinematicCountdown(result, iWon, () => {
+          showCinematicResult(iWon, bet, result);
+          startFlip(document.getElementById('coinCanvas'), result, 1400, () => {
+            showResult(iWon, bet);
+            if (iWon) burstParticles(window.innerWidth/2, window.innerHeight/2, true);
+            pendingBet = 0; inGame = false; _currentGameId = null;
+            setTimeout(() => startIdle(), 1500);
+          });
+        });
+      }, 400);
+    } else if (iAmJoiner && _cfPendingJoin) {
+      const { player, bet, side: theirSide, pet: theirPet, creatorAmount } = _cfPendingJoin;
+      _cfPendingJoin = null;
+      selectedSide = theirSide === 'heads' ? 'tails' : 'heads';
+      inGame = true;
+      stopIdle();
+      openCinematic(selectedPet, selectedSide, bet);
+      revealCinematicOpponent(player, theirPet, theirSide, creatorAmount || bet);
+      setTimeout(() => {
+        runCinematicCountdown(result, iWon, () => {
+          showCinematicResult(iWon, bet, result, creatorAmount);
+          startFlip(document.getElementById('coinCanvas'), result, 1400, () => {
+            showResult(iWon, bet, creatorAmount);
+            if (iWon) burstParticles(window.innerWidth/2, window.innerHeight/2, true);
+            inGame = false;
+            setTimeout(() => startIdle(), 1500);
+          });
+        });
+      }, 400);
+    }
+  };
 
   // 
   //  COIN RENDERING (redesigned)
@@ -1909,9 +1959,13 @@
       if (_invGemPicker) _popGemsFromInv(_invGemPicker.getSelections());
       closeInvJoinModal();
       if (_invJoinCtx?.gameId && typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
-        _wsConn.send(JSON.stringify({ type: 'game_join', gameId: _invJoinCtx.gameId }));
+        _cfPendingJoin = { player, bet: total, side, pet: pet || randomOpponentPet(), creatorAmount };
+        inGame = true;
+        _wsConn.send(JSON.stringify({ type: 'game_join', gameId: _invJoinCtx.gameId, amount: total }));
+        showToast('Joining game — waiting for result…', 'info');
+      } else {
+        joinGame(player, total, side, pet || randomOpponentPet(), creatorAmount);
       }
-      joinGame(player, total, side, pet || randomOpponentPet(), creatorAmount);
     };
 
     if (total > maxBet) showOverbidWarning(total, creatorAmount, proceed);
