@@ -627,7 +627,7 @@
 
 </div>
 
-<script src="app.js?v=217"></script>
+<script src="app.js?v=218"></script>
 <script>
   refreshBal();
   const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1247,6 +1247,17 @@
     buildDcPets();
   }
 
+  // Timeout fallbacks: unblock stuck pending states after 15s
+  setInterval(() => {
+    if (_dicePendingJoin) {
+      _dicePendingJoin = null;
+      showToast('Match timed out — please try again', 'info');
+    }
+    if (_diceInGame && _dicePendingBet && !_diceGameId) {
+      _diceInGame = false; _dicePendingBet = 0; _dicePendingItems = [];
+    }
+  }, 15000);
+
   // Scrolling live feed
   (function() {
     const ticker = document.getElementById('feed-ticker');
@@ -1365,6 +1376,7 @@
 </script>
 </body>
 </html>
+
 
 
 

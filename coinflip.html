@@ -1277,7 +1277,7 @@
 </div>
 
 
-<script src="app.js?v=217"></script>
+<script src="app.js?v=218"></script>
 <script>
   //  Initial balance display 
   refreshBal();
@@ -1307,6 +1307,8 @@
     if (iAmCreator) {
       if (!inGame || !pendingBet) return;
       const bet = pendingBet;
+      pendingBet = 0; inGame = false; _currentGameId = null;
+      buildActiveList(); // remove "YOUR GAME" waiting card
       const oppSide = selectedSide === 'heads' ? 'tails' : 'heads';
       const oppPet = randomOpponentPet();
       openCinematic(selectedPet, selectedSide, bet);
@@ -1317,7 +1319,6 @@
           startFlip(document.getElementById('coinCanvas'), result, 1400, () => {
             showResult(iWon, bet);
             if (iWon) burstParticles(window.innerWidth/2, window.innerHeight/2, true);
-            pendingBet = 0; inGame = false; _currentGameId = null;
             setTimeout(() => startIdle(), 1500);
           });
         });
@@ -1343,6 +1344,15 @@
       }, 400);
     }
   };
+
+  // Timeout fallback: if joiner's game_matched never arrives, unblock after 15s
+  setInterval(() => {
+    if (_cfPendingJoin) {
+      _cfPendingJoin = null;
+      inGame = false;
+      showToast('Match timed out — please try again', 'info');
+    }
+  }, 15000);
 
   // 
   //  COIN RENDERING (redesigned)
@@ -1764,11 +1774,10 @@
     // Broadcast to server so friends can see and join
     _currentGameId = generateSeed();
     if (typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
-      _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _currentGameId, side: cmSelectedSide, amount: bet }));
+      _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _currentGameId, gameType: 'coinflip', side: cmSelectedSide, amount: bet }));
     }
     buildActiveList();
     showToast('Game created! Waiting for an opponent...', 'info');
-    // No bot — wait for a real player to join via WebSocket
   }
   document.getElementById('create-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCreateModal(); });
 
@@ -3127,6 +3136,7 @@
 </script>
 </body>
 </html>
+
 
 
 
