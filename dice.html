@@ -881,11 +881,13 @@
     if (!inv.length) {
       hint.textContent = 'No items deposited &mdash; deposit pets to play.';
     } else {
-      hint.textContent = 'Select items to include in the wager.';
+      hint.textContent = 'All items auto-selected — click to deselect.';
       inv.forEach((item, idx) => {
         const short = (item.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
         const d = document.createElement('div');
-        d.style.cssText='background:var(--bg-card2);border:1.5px solid var(--border);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
+        // Auto-select all items on open
+        _dcCreateSelInv.add(idx);
+        d.style.cssText='background:rgba(124,77,232,.14);border:1.5px solid var(--purple);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
         const _dcImg=document.createElement('div');_dcImg.style.cssText='width:46px;height:46px;margin:0 auto 4px;';const _dcI2=document.createElement('img');_dcI2.src=`https://assetdelivery.roblox.com/v1/asset/?id=${item.img||''}`;_dcI2.style.cssText='width:100%;height:100%;object-fit:contain;';_dcI2.onerror=()=>{_dcI2.style.opacity='.3';};_dcImg.appendChild(_dcI2);
         const _dcNm=document.createElement('div');_dcNm.style.cssText='font-size:.56rem;font-weight:700;';_dcNm.textContent=short;
         const _dcVl=document.createElement('div');_dcVl.style.cssText='font-size:.58rem;color:var(--purple-b);font-weight:800;';_dcVl.textContent=fmtPSG(item.value);
