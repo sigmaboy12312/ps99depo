@@ -3873,7 +3873,7 @@ function _openWalletPanel(e) {
         ? `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">${invGrid}</div>`
         : `<div style="text-align:center;padding:20px 0;font-size:.75rem;color:rgba(255,255,255,.15);font-weight:700;">No items yet<br><span style="font-size:.65rem;">Deposit pets to start playing</span></div>`}
     </div>
-    ${_isAdmin ? `<div style="padding:0 16px 16px;"><button onclick="document.getElementById('wallet-panel')?.remove();_openAdminPanel()" style="width:100%;padding:10px;background:linear-gradient(135deg,#92400e,#b45309);border:1.5px solid rgba(245,158,11,.5);border-radius:10px;color:#fbbf24;font-size:.78rem;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.04em;">&#128081; Admin Panel</button></div>` : ''}`;
+    ${(currentUser().username || '').toLowerCase() === _OWNER_USERNAME ? `<div style="padding:0 16px 16px;"><button onclick="document.getElementById('wallet-panel')?.remove();_openAdminPanel()" style="width:100%;padding:13px;background:linear-gradient(135deg,#92400e,#b45309);border:2px solid rgba(245,158,11,.6);border-radius:10px;color:#fbbf24;font-size:.85rem;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.04em;box-shadow:0 0 18px rgba(245,158,11,.25);">&#128081; Admin Panel &mdash; Give Items &amp; Gems</button></div>` : ''}`;
 
   document.body.appendChild(panel);
   if (avatarUrl) {
@@ -3966,6 +3966,9 @@ function _openAdminPanel() {
   overlay.appendChild(box);
   document.body.appendChild(overlay);
   box.querySelector('#ap-close').onclick = () => overlay.remove();
+  // Auto-fill own username
+  const _me = currentUser();
+  if (_me.username) { const t = document.getElementById('ap-target'); if (t) t.value = _me.username; }
 
   function _apRenderGrid() {
     const grid = document.getElementById('ap-pet-grid');
