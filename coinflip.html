@@ -1285,7 +1285,7 @@
 </div>
 
 
-<script src="app.js?v=219"></script>
+<script src="app.js?v=220"></script>
 <script>
   //  Initial balance display 
   refreshBal();
@@ -1782,10 +1782,19 @@
     const balWager   = Math.max(0, parseInt(document.getElementById('cm-bal-wager')?.value || '0') || 0);
     const bet = itemsTotal + gemPickVal + balWager;
     if (bet < 1) return showToast('Enter a bet amount or select items', 'info');
-    if (!deductBal(bet)) return showToast('Not enough balance!', 'lose');
+    if (balWager > getBalance()) return showToast('Not enough balance!', 'lose');
+    // Only deduct raw balance portion — items are removed separately below
+    if (balWager > 0) deductBal(balWager);
     const _wIds = [..._cmSelInv].map(i => pets[i]?.id).filter(Boolean);
     _popFromInvSilent(_wIds);
     if (_cmGemPicker) _popGemsFromInv(_cmGemPicker.getSelections());
+    // Collect all item IDs (pets + gem inventory) to send to server for removal
+    const _gemWIds = _cmGemPicker ? (() => {
+      const sel = _cmGemPicker.getSelections(); const inv2 = getInventory();
+      const ids = []; let counts = { ...sel };
+      for (const item of inv2) { if (item.gem && counts[item.name] > 0) { ids.push(item.id); counts[item.name]--; } }
+      return ids;
+    })() : [];
     selectedSide = cmSelectedSide;
     pendingBet = bet;
     inGame = true;
@@ -1794,7 +1803,7 @@
     // Broadcast to server so friends can see and join
     _currentGameId = generateSeed();
     if (typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
-      _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _currentGameId, gameType: 'coinflip', side: cmSelectedSide, amount: bet }));
+      _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _currentGameId, gameType: 'coinflip', side: cmSelectedSide, amount: bet, itemIds: [..._wIds, ..._gemWIds], balanceAmount: balWager }));
     }
     buildActiveList();
     showToast('Game created! Waiting for an opponent...', 'info');
@@ -1984,16 +1993,24 @@
     }
 
     const proceed = () => {
-      if (!deductBal(total)) { showToast('Not enough balance!', 'lose'); return; }
-      // Remove wagered items so they can't be double-spent
+      if (wager > getBalance()) { showToast('Not enough balance!', 'lose'); return; }
+      // Only deduct raw balance portion — items removed separately
+      if (wager > 0) deductBal(wager);
       const _wIds = [..._invSelected].map(i => pets[i]?.id).filter(Boolean);
       _popFromInvSilent(_wIds);
+      // Collect gem inventory item IDs
+      const _gemWIds = _invGemPicker ? (() => {
+        const sel = _invGemPicker.getSelections(); const inv2 = getInventory();
+        const ids = []; let counts = { ...sel };
+        for (const item of inv2) { if (item.gem && counts[item.name] > 0) { ids.push(item.id); counts[item.name]--; } }
+        return ids;
+      })() : [];
       if (_invGemPicker) _popGemsFromInv(_invGemPicker.getSelections());
       closeInvJoinModal();
       if (_invJoinCtx?.gameId && typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
         _cfPendingJoin = { player, bet: total, side, pet: pet || randomOpponentPet(), creatorAmount };
         inGame = true;
-        _wsConn.send(JSON.stringify({ type: 'game_join', gameId: _invJoinCtx.gameId, amount: total }));
+        _wsConn.send(JSON.stringify({ type: 'game_join', gameId: _invJoinCtx.gameId, amount: total, itemIds: [..._wIds, ..._gemWIds], balanceAmount: wager }));
         showToast('Joining game — waiting for result…', 'info');
       } else {
         joinGame(player, total, side, pet || randomOpponentPet(), creatorAmount);
@@ -2363,7 +2380,7 @@
 
     document.getElementById('gv-join-btn').onclick = () => {
       closeGameView();
-      openInvJoinModal(game.player, game.amount, game.side, pet, game.mode);
+      openInvJoinModal(game.player, game.amount, game.side, pet, game.mode, game.gameId || null);
     };
     document.getElementById('gv-overlay').classList.add('open');
     _gvAngle = 0; _gvShimmer = 0;
