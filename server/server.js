@@ -107,7 +107,7 @@ function getBalance(username) {
 function addBalance(username, amount) {
   const db = loadDB();
   ensureUser(db, username);
-  db.users[username].balance += amount;
+  db.users[username].balance = Math.max(0, (db.users[username].balance || 0) + amount);
   saveDB(db);
   return db.users[username].balance;
 }
@@ -412,6 +412,9 @@ wss.on('connection', (ws) => {
           // Credit winner and house
           addBalance(winner, payout);
           addBalance(ADMIN_USER, tax);
+          // Push updated balances so next refresh is accurate
+          pushToUser(game.player, { type: 'session_data', balance: getBalance(game.player), inventory: getInventory(game.player) });
+          pushToUser(joiner,      { type: 'session_data', balance: getBalance(joiner),      inventory: getInventory(joiner) });
           console.log(`[Game] ${winner} wins ${payout} (tax ${tax}), ${loser} loses ${loserBet}`);
         }
         if (game.gameType === 'dice') {
