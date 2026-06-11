@@ -1782,7 +1782,7 @@
       hEl.querySelector('div').style.color='var(--text-muted)';
     }
   }
-  function confirmCreate() {
+  function confirmCreate() { try {
     const selPets    = [..._cmSelInv.values()];
     const itemsTotal = selPets.reduce((s,i)=>s+(Number(i.value)||0),0);
     const gemPickVal = _cmGemPicker ? _cmGemPicker.getTotal() : 0;
@@ -1824,19 +1824,19 @@
     }
     buildActiveList();
     showToast('Game created! Waiting for an opponent...', 'info');
-  }
+  } catch(err) { showToast('Error: ' + (err?.message || 'unknown error'), 'lose'); console.error('[confirmCreate]', err); } }
   document.getElementById('create-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCreateModal(); });
 
   //  INVENTORY JOIN MODAL (redesigned)
-  let _invJoinCtx  = null;
-  let _invSelected = new Set();
-  let _invGemPicker = null;
+  let _invJoinCtx     = null;
+  let _invJoinSelInv  = new Map(); // id → item snapshot (like _cmSelInv)
+  let _invGemPicker   = null;
 
   function openInvJoinModal(player, creatorAmount, side, pet, mode, gameId) {
     if (inGame) return showToast('Finish current game first', 'info');
-    _invJoinCtx  = { player, creatorAmount, side, pet, mode, gameId };
-    _invSelected = new Set();
-    _invGemPicker = null;
+    _invJoinCtx    = { player, creatorAmount, side, pet, mode, gameId };
+    _invJoinSelInv = new Map();
+    _invGemPicker  = null;
 
     const minBet = Math.max(1, Math.floor(creatorAmount * 0.98));
     const maxBet = Math.ceil(creatorAmount * 1.02);
@@ -1883,21 +1883,21 @@
         const _autoTarget = _invJoinCtx ? _invJoinCtx.creatorAmount : 0;
         const _autoMax    = Math.ceil(_autoTarget * 1.05);
         let   _autoRunning = 0;
-        const sortedByVal = [...pets.entries()].sort((a,b) => (b[1].value||0) - (a[1].value||0));
-        for (const [idx, item] of sortedByVal) {
+        const sortedByVal = [...pets].sort((a,b) => (b.value||0) - (a.value||0));
+        for (const item of sortedByVal) {
           if (_autoRunning >= _autoTarget) break;
           if (_autoRunning + (item.value||0) <= _autoMax) {
-            _invSelected.add(idx);
+            _invJoinSelInv.set(item.id, item);
             _autoRunning += (item.value||0);
           }
         }
         // Set wager input to the gap not covered by items (avoid over-betting)
         wagerInput.value = Math.max(0, Math.min(creatorAmount - _autoRunning, getBalance()));
 
-        pets.forEach((item, idx) => {
+        pets.forEach((item) => {
           const short = (item.name || '').replace(/^(Huge|Titanic|Gargantuan)\s/, '');
           const d = document.createElement('div');
-          const isSel = _invSelected.has(idx);
+          const isSel = _invJoinSelInv.has(item.id);
           d.style.cssText = isSel
             ? 'background:rgba(124,77,232,.14);border:1.5px solid rgba(124,77,232,.6);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .15s;'
             : 'background:rgba(0,0,0,.3);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .15s;';
@@ -1906,8 +1906,8 @@
           const _jVl=document.createElement('div');_jVl.style.cssText='font-size:.58rem;color:#4ade80;font-weight:800;';_jVl.textContent=fmtPSG(item.value);
           d.appendChild(_jImg);d.appendChild(_jNm);d.appendChild(_jVl);
           d.onclick = () => {
-            if (_invSelected.has(idx)) { _invSelected.delete(idx); d.style.borderColor='rgba(255,255,255,.1)'; d.style.background='rgba(0,0,0,.3)'; }
-            else { _invSelected.add(idx); d.style.borderColor='rgba(124,77,232,.6)'; d.style.background='rgba(124,77,232,.14)'; }
+            if (_invJoinSelInv.has(item.id)) { _invJoinSelInv.delete(item.id); d.style.borderColor='rgba(255,255,255,.1)'; d.style.background='rgba(0,0,0,.3)'; }
+            else { _invJoinSelInv.set(item.id, item); d.style.borderColor='rgba(124,77,232,.6)'; d.style.background='rgba(124,77,232,.14)'; }
             invUpdateUI();
           };
           grid.appendChild(d);
@@ -1940,20 +1940,18 @@
 
   function invUpdateUI() {
     if (!_invJoinCtx) return;
-    const inv = getInventory();
     const { creatorAmount } = _invJoinCtx;
     const RANGE = 0.02;
     const minBet = Math.max(1, Math.floor(creatorAmount * (1 - RANGE)));
     const maxBet = Math.ceil(creatorAmount * (1 + RANGE));
-    const pets     = inv.filter(i => !i.gem);
-    const itemsVal = [..._invSelected].reduce((s, i) => s + (pets[i]?.value || 0), 0);
+    const itemsVal = [..._invJoinSelInv.values()].reduce((s, i) => s + (Number(i.value) || 0), 0);
     const gemVal   = _invGemPicker ? _invGemPicker.getTotal() : 0;
     const wagerInput = parseInt(document.getElementById('inv-wager-input').value) || 0;
     const total = wagerInput + itemsVal + gemVal;
 
     // Update count
     const countEl = document.getElementById('inv-items-selected-count');
-    if (countEl) countEl.textContent = _invSelected.size > 0 ? `(${_invSelected.size} selected)` : '';
+    if (countEl) countEl.textContent = _invJoinSelInv.size > 0 ? `(${_invJoinSelInv.size} selected)` : '';
 
     // Update balance display
     document.getElementById('inv-bal-show').textContent = '' + fmtPSG(getBalance());
@@ -1994,8 +1992,7 @@
     const { player, creatorAmount, side, pet } = _invJoinCtx;
     const minBet = Math.max(1, Math.floor(creatorAmount * 0.98));
     const maxBet = Math.ceil(creatorAmount * 1.02);
-    const pets     = inv.filter(i => !i.gem);
-    const itemsVal = [..._invSelected].reduce((s, i) => s + (pets[i]?.value || 0), 0);
+    const itemsVal = [..._invJoinSelInv.values()].reduce((s, i) => s + (Number(i.value) || 0), 0);
     const gemVal   = _invGemPicker ? _invGemPicker.getTotal() : 0;
     const wager = parseInt(document.getElementById('inv-wager-input').value) || 0;
     const total = wager + itemsVal + gemVal;
@@ -2011,10 +2008,13 @@
 
     const proceed = () => {
       if (wager > getBalance()) { showToast('Not enough balance!', 'lose'); return; }
-      // Only deduct raw balance portion — items removed separately
+      if (typeof _wsConn === 'undefined' || _wsConn?.readyState !== WebSocket.OPEN) {
+        return showToast('Not connected — wait a moment and try again', 'info');
+      }
       if (wager > 0) deductBal(wager);
-      const _wIds = [..._invSelected].map(i => pets[i]?.id).filter(Boolean);
+      const _wIds = [..._invJoinSelInv.values()].map(i => i.id).filter(Boolean);
       _popFromInvSilent(_wIds);
+      if (itemsVal > 0) setBalance(Math.max(0, _bal - itemsVal));
       // Collect gem inventory item IDs
       const _gemWIds = _invGemPicker ? (() => {
         const sel = _invGemPicker.getSelections(); const inv2 = getInventory();
@@ -2024,11 +2024,20 @@
       })() : [];
       if (_invGemPicker) _popGemsFromInv(_invGemPicker.getSelections());
       closeInvJoinModal();
-      if (_invJoinCtx?.gameId && typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
+      if (_invJoinCtx?.gameId) {
         _cfPendingJoin = { player, bet: total, side, pet: pet || randomOpponentPet(), creatorAmount };
         inGame = true;
-        _wsConn.send(JSON.stringify({ type: 'game_join', gameId: _invJoinCtx.gameId, amount: total, itemIds: [..._wIds, ..._gemWIds], balanceAmount: wager }));
-        showToast('Joining game — waiting for result…', 'info');
+        try {
+          _wsConn.send(JSON.stringify({ type: 'game_join', gameId: _invJoinCtx.gameId, amount: total, itemIds: [..._wIds, ..._gemWIds], balanceAmount: wager }));
+          showToast('Joining game — waiting for result…', 'info');
+        } catch (e) {
+          inGame = false; _cfPendingJoin = null;
+          const cur = getInventory();
+          [..._invJoinSelInv.values()].forEach(item => { if (!cur.find(i => i.id === item.id)) cur.unshift(item); });
+          _saveInv(cur);
+          setBalance(_bal + itemsVal + wager);
+          showToast('Connection lost — items restored, please try again', 'info');
+        }
       } else {
         joinGame(player, total, side, pet || randomOpponentPet(), creatorAmount);
       }
