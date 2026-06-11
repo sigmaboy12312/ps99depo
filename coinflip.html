@@ -1285,7 +1285,7 @@
 </div>
 
 
-<script src="app.js?v=224"></script>
+<script src="app.js?v=225"></script>
 <script>
   //  Initial balance display 
   refreshBal();
@@ -1811,7 +1811,17 @@
     stopIdle();
     closeCreateModal();
     _currentGameId = generateSeed();
-    _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _currentGameId, gameType: 'coinflip', side: cmSelectedSide, amount: bet, itemIds: [..._wIds, ..._gemWIds], balanceAmount: balWager }));
+    try {
+      _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _currentGameId, gameType: 'coinflip', side: cmSelectedSide, amount: bet, itemIds: [..._wIds, ..._gemWIds], balanceAmount: balWager }));
+    } catch (e) {
+      // WS closed between check and send — restore everything
+      inGame = false; pendingBet = 0; _currentGameId = null;
+      const cur = getInventory();
+      selPets.forEach(item => { if (!cur.find(i => i.id === item.id)) cur.unshift(item); });
+      _saveInv(cur);
+      setBalance(_bal + itemsTotal + balWager);
+      return showToast('Connection lost — items restored, please try again', 'info');
+    }
     buildActiveList();
     showToast('Game created! Waiting for an opponent...', 'info');
   }
