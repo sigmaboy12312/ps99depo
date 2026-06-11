@@ -636,7 +636,7 @@
 
 </div>
 
-<script src="app.js?v=224"></script>
+<script src="app.js?v=225"></script>
 <script>
   refreshBal();
   const _e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -951,7 +951,16 @@
     _dicePendingBet = bet;
     _dicePendingItems = selPets;
     _diceInGame = true;
-    _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _diceGameId, gameType: 'dice', amount: bet, itemIds: [..._wIds,..._gemWIds], balanceAmount: balWager }));
+    try {
+      _wsConn.send(JSON.stringify({ type: 'game_create', gameId: _diceGameId, gameType: 'dice', amount: bet, itemIds: [..._wIds,..._gemWIds], balanceAmount: balWager }));
+    } catch(e) {
+      _diceInGame=false; _dicePendingBet=0; _diceGameId=null;
+      const cur=getInventory();
+      selPets.forEach(item=>{if(!cur.find(i=>i.id===item.id))cur.unshift(item);});
+      _saveInv(cur);
+      setBalance(_bal+itemsTotal+balWager);
+      return showToast('Connection lost — items restored, please try again','info');
+    }
     showToast('Match created! Waiting for an opponent...', 'info');
   }
   document.getElementById('dice-create-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeDiceCreate(); });
