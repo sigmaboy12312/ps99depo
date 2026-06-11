@@ -1308,9 +1308,20 @@
 
   function _handleServerGames(games) {
     const u = (typeof currentUser === 'function' ? currentUser() : {}).username || '';
-    // If we were waiting but our game is gone (e.g. WS reconnect deleted it),
-    // reset state. Guard with a small delay so game_matched can arrive first.
-    if (inGame && _currentGameId && !games.find(g => g.gameId === _currentGameId)) {
+    // Show ALL coinflip games including creator's own (so game is always visible)
+    _serverGames = games.filter(g => g.gameType !== 'dice');
+
+    // Restore inGame state from server if page was refreshed and we lost it
+    const myGame = _serverGames.find(g => g.player === u);
+    if (myGame && !inGame) {
+      inGame = true;
+      pendingBet = myGame.amount || 0;
+      _currentGameId = myGame.gameId || null;
+      selectedSide = myGame.side || 'heads';
+    }
+
+    // If we had a game but it's gone, reset
+    if (inGame && _currentGameId && !_serverGames.find(g => g.gameId === _currentGameId)) {
       setTimeout(() => {
         if (inGame && _currentGameId && !_serverGames.find(g => g.gameId === _currentGameId)) {
           inGame = false; pendingBet = 0; _currentGameId = null;
@@ -1319,7 +1330,6 @@
         }
       }, 800);
     }
-    _serverGames = games.filter(g => g.gameType !== 'dice' && g.player !== u);
     buildActiveList();
   }
 
@@ -2201,9 +2211,10 @@
     const list = document.getElementById('active-game-list');
     list.innerHTML = '';
 
-    // Show "your game is waiting" card if creator is pending
-    if (inGame && pendingBet && _currentGameId) {
-      const myName = (typeof currentUser === 'function' ? currentUser().username : '') || 'You';
+    const _cfMyUser = (typeof currentUser === 'function' ? currentUser().username : '') || '';
+    // Show waiting card only while server hasn't confirmed the game yet
+    if (inGame && pendingBet && _currentGameId && !_serverGames.find(g => g.player === _cfMyUser)) {
+      const myName = _cfMyUser || 'You';
       const mySide = selectedSide || 'heads';
       const waitRow = document.createElement('div');
       waitRow.className = 'bs-row';
@@ -2290,12 +2301,16 @@
         if (gb.o) itemsHtml += `<div style="display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border-radius:20px;background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.26);font-size:.54rem;font-weight:900;color:#4ade80;white-space:nowrap;">${cfGemSvg}${gb.o}x1M</div>`;
       }
 
-      const realBadge = g.isReal ? `<span style="font-size:.5rem;font-weight:900;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;padding:1px 5px;border-radius:20px;margin-left:4px;">LIVE</span>` : '';
+      const isOwnGame = g.isReal && g.player === _cfMyUser;
+      const realBadge = isOwnGame
+        ? `<span style="font-size:.5rem;font-weight:900;background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.4);color:#fb923c;padding:1px 5px;border-radius:20px;margin-left:4px;">YOUR GAME</span>`
+        : (g.isReal ? `<span style="font-size:.5rem;font-weight:900;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;padding:1px 5px;border-radius:20px;margin-left:4px;">LIVE</span>` : '');
 
       const row = document.createElement('div');
       row.className = 'bs-row';
       row.style.animation = `cfRowIn .3s ease ${idx * 0.07}s both`;
-      if (g.isReal) row.style.borderColor = 'rgba(34,197,94,0.3)';
+      if (isOwnGame) { row.style.borderColor = 'rgba(249,115,22,.55)'; row.style.background = 'rgba(249,115,22,.04)'; }
+      else if (g.isReal) row.style.borderColor = 'rgba(34,197,94,0.3)';
       row.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
           <div class="bs-avatars">
@@ -2316,25 +2331,31 @@
         <div class="bs-actions"></div>`;
 
       const actions = row.querySelector('.bs-actions');
-      const joinBtn = document.createElement('button');
-      joinBtn.className = 'bs-join';
-      joinBtn.textContent = 'Join';
-      joinBtn.onclick = () => {
-        if (g.isReal && g.gameId) {
-          // Mark for removal when join is confirmed
-          openInvJoinModal(g.player, g.amount, g.side, pets[0], g.mode || 'gems', g.gameId);
-        } else {
-          openInvJoinModal(g.player, g.amount, g.side, pets[0], g.mode || 'gems');
-        }
-      };
-
-      const viewBtn = document.createElement('button');
-      viewBtn.className = 'bs-view';
-      viewBtn.textContent = 'View';
-      viewBtn.onclick = () => openGameView(g, pets[0], false);
-
-      actions.appendChild(joinBtn);
-      actions.appendChild(viewBtn);
+      if (isOwnGame) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'bs-join';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = 'background:#ef4444;box-shadow:none;';
+        cancelBtn.onclick = () => cancelServerGame(g.gameId, g.amount);
+        actions.appendChild(cancelBtn);
+      } else {
+        const joinBtn = document.createElement('button');
+        joinBtn.className = 'bs-join';
+        joinBtn.textContent = 'Join';
+        joinBtn.onclick = () => {
+          if (g.isReal && g.gameId) {
+            openInvJoinModal(g.player, g.amount, g.side, pets[0], g.mode || 'gems', g.gameId);
+          } else {
+            openInvJoinModal(g.player, g.amount, g.side, pets[0], g.mode || 'gems');
+          }
+        };
+        const viewBtn = document.createElement('button');
+        viewBtn.className = 'bs-view';
+        viewBtn.textContent = 'View';
+        viewBtn.onclick = () => openGameView(g, pets[0], false);
+        actions.appendChild(joinBtn);
+        actions.appendChild(viewBtn);
+      }
       list.appendChild(row);
     });
 
@@ -2946,6 +2967,17 @@
         });
       });
     }, 400);
+  }
+
+  function cancelServerGame(gameId, amount) {
+    if (typeof _wsConn === 'undefined' || _wsConn?.readyState !== WebSocket.OPEN) {
+      return showToast('Not connected', 'info');
+    }
+    _wsConn.send(JSON.stringify({ type: 'game_cancel', gameId }));
+    inGame = false; pendingBet = 0; _currentGameId = null;
+    startIdle();
+    buildActiveList();
+    showToast('Game cancelled — items returned', 'info');
   }
 
   function cancelGame() {

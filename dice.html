@@ -718,11 +718,21 @@
 
   function _handleServerGames(games) {
     const myUser = (typeof currentUser === 'function' ? currentUser().username : '') || '';
-    const diceGames = (games || []).filter(g => g.gameType === 'dice' && g.player !== myUser);
+    // Include own game so creator always sees it in lobby
+    const diceGames = (games || []).filter(g => g.gameType === 'dice');
     const existing = {};
     DICE_MATCHES.forEach(g => { if (g.gameId) existing[g.gameId] = g; });
     DICE_MATCHES.length = 0;
     diceGames.forEach(g => { DICE_MATCHES.push(existing[g.gameId] || g); });
+
+    // Restore _diceInGame state if page was refreshed
+    const myGame = diceGames.find(g => g.player === myUser);
+    if (myGame && !_diceInGame) {
+      _diceInGame = true;
+      _dicePendingBet = myGame.amount || 0;
+      _diceGameId = myGame.gameId || null;
+    }
+
     buildDiceList();
   }
 
@@ -829,6 +839,7 @@
       return;
     }
 
+    const _dcMyUser = (typeof currentUser === 'function' ? currentUser().username : '') || '';
     DICE_MATCHES.forEach((g, idx) => {
       // Use real wagered items for display if available; else stable random pets
       if (!g.pets) {
@@ -839,10 +850,12 @@
       const min = Math.floor(g.amount * 0.95), max = Math.ceil(g.amount * 1.05);
       const potWin = Math.floor(g.amount * 2 * 0.985);
       const face1 = randDiceFace(), face2 = randDiceFace();
+      const isOwnDice = g.player === _dcMyUser;
 
       const row = document.createElement('div');
       row.className = 'dc-match-row';
       row.style.animation = `rowSlideIn .32s ease ${idx * 0.07}s both`;
+      if (isOwnDice) { row.style.borderColor = 'rgba(249,115,22,.55)'; row.style.background = 'rgba(249,115,22,.04)'; }
 
       // Build items bar: show actual wagered items (pets + grouped gems), fall back to breakdown
       const gemSvg = `<svg viewBox="0 0 12 12" width="9" height="9" fill="none"><polygon points="11,6 8.5,10 3.5,10 1,6 3.5,2 8.5,2" fill="#7c4de8"/><polygon points="6,3.5 8.5,6 6,8.5 3.5,6" fill="white" opacity=".9"/></svg>`;
@@ -887,7 +900,7 @@
             <div class="dc-row-av">${g.player[0].toUpperCase()}</div>
             <div>
               <div style="font-size:.84rem;font-weight:900;color:#fff;white-space:nowrap;">${g.player}</div>
-              <div style="font-size:.58rem;color:var(--text-muted);">Waiting for player</div>
+              <div style="font-size:.58rem;color:${isOwnDice ? '#fb923c' : 'var(--text-muted)'};">${isOwnDice ? 'YOUR GAME' : 'Waiting for player'}</div>
             </div>
           </div>
           <div class="dc-row-items-bar">${itemsBarHtml}</div>
@@ -904,13 +917,22 @@
         <div style="display:flex;gap:6px;flex-shrink:0;" class="dc-row-btns"></div>`;
 
       const btns = row.querySelector('.dc-row-btns');
-      const join = document.createElement('button');
-      join.className = 'dc-btn-join'; join.textContent = 'Join & Roll';
-      join.onclick = () => openDiceJoin(g, pets[0]);
-      const view = document.createElement('button');
-      view.className = 'dc-btn-view'; view.textContent = 'View';
-      view.onclick = () => openDiceView(g);
-      btns.appendChild(join); btns.appendChild(view);
+      if (isOwnDice) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'dc-btn-join';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = 'background:#ef4444;box-shadow:none;';
+        cancelBtn.onclick = () => cancelDiceGame(g.gameId);
+        btns.appendChild(cancelBtn);
+      } else {
+        const join = document.createElement('button');
+        join.className = 'dc-btn-join'; join.textContent = 'Join & Roll';
+        join.onclick = () => openDiceJoin(g, pets[0]);
+        const view = document.createElement('button');
+        view.className = 'dc-btn-view'; view.textContent = 'View';
+        view.onclick = () => openDiceView(g);
+        btns.appendChild(join); btns.appendChild(view);
+      }
       list.appendChild(row);
     });
   }
@@ -924,6 +946,16 @@
     if (hp) { hp.style.display = isCreate ? 'none' : 'block'; hp.innerHTML = '<div style="text-align:center;padding:32px 0;color:rgba(255,255,255,.2);font-size:.8rem;">No match history yet.</div>'; }
     document.getElementById('dc-create-btn').classList.toggle('active', isCreate);
     document.getElementById('dc-hist-btn').classList.toggle('active', !isCreate);
+  }
+
+  function cancelDiceGame(gameId) {
+    if (typeof _wsConn === 'undefined' || _wsConn?.readyState !== WebSocket.OPEN) {
+      return showToast('Not connected', 'info');
+    }
+    _wsConn.send(JSON.stringify({ type: 'game_cancel', gameId }));
+    _diceInGame = false; _dicePendingBet = 0; _diceGameId = null;
+    buildDiceList();
+    showToast('Game cancelled — items returned', 'info');
   }
 
   //  DICE VIEW MODAL
