@@ -2423,30 +2423,40 @@
     ig.innerHTML = '';
     ig.style.cssText = 'display:flex;flex-direction:column;gap:6px;width:100%;';
     const _gemSvgLg = `<svg viewBox="0 0 20 20" width="26" height="26" fill="none"><polygon points="19,10 14,18 6,18 1,10 6,2 14,2" fill="#7c4de8"/><polygon points="10,5 15,10 10,15 5,10" fill="white" opacity=".85"/></svg>`;
-    const items = (game.wageredItems && game.wageredItems.length > 0) ? game.wageredItems : [];
-    if (items.length > 0) {
-      // Group gems by denomination
-      const gemCounts = {}; const pets = [];
-      items.forEach(i => { if (i.gem) gemCounts[i.name] = (gemCounts[i.name]||0)+1; else pets.push(i); });
-      const _rowStyle = 'display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;';
-      pets.forEach(p => {
-        const row = document.createElement('div'); row.style.cssText = _rowStyle;
-        const imgB = document.createElement('div'); imgB.style.cssText = 'width:40px;height:40px;border-radius:8px;overflow:hidden;flex-shrink:0;background:rgba(0,0,0,.3);';
-        const img = document.createElement('img'); img.src = `https://assetdelivery.roblox.com/v1/asset/?id=${p.img||''}`;
-        img.style.cssText = 'width:100%;height:100%;object-fit:contain;'; img.onerror = () => { img.style.opacity='.2'; };
-        imgB.appendChild(img);
-        row.innerHTML = `<div style="flex:1;font-size:.82rem;font-weight:700;color:#fff;">${p.name||'Item'}</div><div style="font-size:.78rem;font-weight:800;color:#22c55e;">${fmtPSG(p.value||0)}</div>`;
-        row.prepend(imgB); ig.appendChild(row);
-      });
-      Object.entries(gemCounts).forEach(([name, count]) => {
-        const denom = (typeof GEM_DENOMS !== 'undefined') ? GEM_DENOMS.find(d => d.name === name) : null;
-        const val = denom ? denom.value * count : 0;
-        const row = document.createElement('div'); row.style.cssText = _rowStyle;
-        row.innerHTML = `<div style="width:40px;height:40px;border-radius:8px;background:rgba(124,77,232,.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;">${_gemSvgLg}</div><div style="flex:1;font-size:.82rem;font-weight:700;color:#fff;">${name} <span style="color:rgba(255,255,255,.4);">x${count}</span></div><div style="font-size:.78rem;font-weight:800;color:#22c55e;">${fmtPSG(val)}</div>`;
-        ig.appendChild(row);
-      });
-    } else {
-      ig.innerHTML = `<div style="color:rgba(255,255,255,.3);font-size:.78rem;padding:10px 0;">No item details available</div>`;
+    const _rowStyle = 'display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;';
+    const _gemRowStyle = 'display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(124,77,232,.07);border-radius:10px;border:1px solid rgba(124,77,232,.18);';
+    const items = game.wageredItems || [];
+    const balAmt = game.balanceAmount || 0;
+    // Pet items
+    items.filter(i => !i.gem).forEach(p => {
+      const row = document.createElement('div'); row.style.cssText = _rowStyle;
+      const imgB = document.createElement('div'); imgB.style.cssText = 'width:40px;height:40px;border-radius:8px;overflow:hidden;flex-shrink:0;background:rgba(0,0,0,.3);';
+      const img = document.createElement('img'); img.src = `https://assetdelivery.roblox.com/v1/asset/?id=${p.img||''}`;
+      img.style.cssText = 'width:100%;height:100%;object-fit:contain;'; img.onerror = () => { img.style.opacity='.2'; };
+      imgB.appendChild(img);
+      row.innerHTML = `<div style="flex:1;font-size:.82rem;font-weight:700;color:#fff;">${p.name||'Item'}</div><div style="font-size:.78rem;font-weight:800;color:#22c55e;">${fmtPSG(p.value||0)}</div>`;
+      row.prepend(imgB); ig.appendChild(row);
+    });
+    // Gem denomination items (grouped by name)
+    const gemCounts = {}, gemVals = {};
+    items.filter(i => i.gem).forEach(i => { gemCounts[i.name] = (gemCounts[i.name]||0)+1; gemVals[i.name] = i.value||0; });
+    Object.entries(gemCounts).forEach(([name, count]) => {
+      const val = gemVals[name] * count;
+      const row = document.createElement('div'); row.style.cssText = _gemRowStyle;
+      row.innerHTML = `<div style="width:40px;height:40px;border-radius:8px;background:rgba(124,77,232,.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;">${_gemSvgLg}</div><div style="flex:1;font-size:.82rem;font-weight:700;color:#a67dff;">${name} <span style="color:rgba(255,255,255,.4);">×${count}</span></div><div style="font-size:.78rem;font-weight:800;color:#a67dff;">${fmtPSG(val)}</div>`;
+      ig.appendChild(row);
+    });
+    // Gem balance (wagered from balance, not inventory)
+    if (balAmt > 0) {
+      const row = document.createElement('div'); row.style.cssText = _gemRowStyle;
+      row.innerHTML = `<div style="width:40px;height:40px;border-radius:8px;background:rgba(124,77,232,.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;">${_gemSvgLg}</div><div style="flex:1;font-size:.82rem;font-weight:700;color:#a67dff;">Gem Balance</div><div style="font-size:.78rem;font-weight:800;color:#a67dff;">${fmtPSG(balAmt)}</div>`;
+      ig.appendChild(row);
+    }
+    // Fallback: no items and no explicit balance amount (old game or unknown)
+    if (items.length === 0 && balAmt === 0 && game.amount > 0) {
+      const row = document.createElement('div'); row.style.cssText = _gemRowStyle;
+      row.innerHTML = `<div style="width:40px;height:40px;border-radius:8px;background:rgba(124,77,232,.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;">${_gemSvgLg}</div><div style="flex:1;font-size:.82rem;font-weight:700;color:#a67dff;">Gem Balance</div><div style="font-size:.78rem;font-weight:800;color:#a67dff;">${fmtPSG(game.amount)}</div>`;
+      ig.appendChild(row);
     }
 
     document.getElementById('gv-join-btn').onclick = () => {
