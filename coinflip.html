@@ -1295,6 +1295,17 @@
   let _serverGames   = []; // real games from connected players
   let _cfPendingJoin = null; // { player, bet, side, pet, creatorAmount }
 
+  // Restore waiting state when user reconnects (navigated away and back)
+  window._restorePendingGame = function(pg) {
+    if (!pg || pg.gameType !== 'coinflip') return;
+    if (inGame) return; // already in a game on this page
+    inGame = true;
+    pendingBet = pg.amount || 0;
+    _currentGameId = pg.gameId || null;
+    selectedSide = pg.side || 'heads';
+    buildActiveList();
+  };
+
   function _handleServerGames(games) {
     const u = (typeof currentUser === 'function' ? currentUser() : {}).username || '';
     // If we were waiting but our game is gone (e.g. WS reconnect deleted it),
@@ -2235,11 +2246,15 @@
     const cfGemSvg = `<svg viewBox="0 0 12 12" width="9" height="9" fill="none"><polygon points="11,6 8.5,10 3.5,10 1,6 3.5,2 8.5,2" fill="#7c4de8"/><polygon points="6,3.5 8.5,6 6,8.5 3.5,6" fill="white" opacity=".9"/></svg>`;
 
     displayGames.forEach((g, idx) => {
-      // Stable pet assignment (skip for real server games &mdash; no pets)
+      // Use real wagered items for server games if available; else assign stable random pets
       if (!g.pets) {
-        g.pets = [];
-        const count = 1 + Math.floor(Math.random() * 3);
-        for (let i = 0; i < count; i++) { const p = randomOpponentPet(); if (p) g.pets.push(p); }
+        if (g.isReal && g.wageredItems && g.wageredItems.length > 0) {
+          g.pets = g.wageredItems;
+        } else {
+          g.pets = [];
+          const count = 1 + Math.floor(Math.random() * 3);
+          for (let i = 0; i < count; i++) { const p = randomOpponentPet(); if (p) g.pets.push(p); }
+        }
       }
       const pets = g.pets;
       GAME_PETS[idx] = pets[0];
