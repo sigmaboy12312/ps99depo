@@ -1680,6 +1680,11 @@
   startIdle();
 
   //  CREATE MODAL 
+  // Game state — declared here so they're initialized before any user interaction
+  let selectedSide = 'heads';
+  let inGame       = false;
+  let pendingBet   = 0;
+
   let cmSelectedSide = 'heads';
   let _cmSelInv  = new Map(); // id -> item object (snapshot at modal-open)
   let _cmGemPicker = null; // gem stacker result
@@ -2188,7 +2193,7 @@
     // Show "your game is waiting" card if creator is pending
     if (inGame && pendingBet && _currentGameId) {
       const myName = (typeof currentUser === 'function' ? currentUser().username : '') || 'You';
-      const mySide = (typeof selectedSide !== 'undefined' ? selectedSide : 'heads');
+      const mySide = selectedSide || 'heads';
       const waitRow = document.createElement('div');
       waitRow.className = 'bs-row';
       waitRow.style.cssText = 'border-color:rgba(249,115,22,.55);background:rgba(249,115,22,.06);';
@@ -2783,11 +2788,9 @@
     })(start);
   }
 
-  // 
-  //  GAME STATE
-  // 
-  let selectedSide = 'heads';
-  let inGame = false;
+  //
+  //  GAME STATE (selectedSide / inGame / pendingBet declared near top)
+  //
 
   function setStatus() {} // arena removed &mdash; no-op
   function selectSide(side) { if (!inGame) selectedSide = side; }
@@ -2863,8 +2866,6 @@
   }
 
   function resetArenaOpp() {} // arena removed &mdash; no-op
-
-  let pendingBet = 0;
 
   function callBot() {
     if (!inGame || !pendingBet) return;
