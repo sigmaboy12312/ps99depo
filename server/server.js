@@ -572,6 +572,28 @@ wss.on('connection', (ws) => {
         });
       }
 
+      if (msg.type === 'send_gems') {
+        const client = wsClients.get(wsId);
+        const sender = client?.username;
+        if (!sender) return;
+        const to = (msg.to || '').toLowerCase().trim();
+        if (!to || to === sender) return;
+        const amount = Math.floor(Number(msg.amount) || 0);
+        if (amount < 1000000) return; // minimum 1M
+        const senderBal = getBalance(sender);
+        if (senderBal < amount) return;
+        if (!_db.users[sender]) return;
+        _db.users[sender].balance = senderBal - amount;
+        if (!_db.users[to]) _db.users[to] = { balance: 0, createdAt: Date.now() };
+        _db.users[to].balance = (getBalance(to) + amount);
+        saveDB(_db);
+        pushToUser(sender, { type: 'gems_sent', to, amount, balance: getBalance(sender), inventory: getInventory(sender) });
+        pushToUser(to,     { type: 'gems_received', from: sender, amount, balance: getBalance(to), inventory: getInventory(to) });
+        const gemStr = amount >= 1e9 ? `${amount/1e9}B` : amount >= 1e6 ? `${amount/1e6}M` : amount;
+        broadcastAll({ type: 'chat', username: '__system', text: `💎 ${sender} gifted ${gemStr} Gems to ${to}!`, isSystem: true });
+        console.log(`[GemSend] ${sender} → ${to}: ${amount}`);
+      }
+
       if (msg.type === 'tip_player') {
         const client = wsClients.get(wsId);
         const senderUsername = client?.username;

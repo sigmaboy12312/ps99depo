@@ -443,6 +443,16 @@ function _connectWS() {
           _renderChatMsg({ username: '__system', text: 'Giveaway ended with no entries.', isSystem: true }, false);
         }
 
+      } else if (msg.type === 'gems_sent') {
+        showToast(`Gems sent to ${msg.to}! (${fmtPSG(msg.amount)})`, 'win');
+        if (typeof msg.balance === 'number') { _bal = Math.max(msg.balance, _invTotal()); try { localStorage.setItem(BAL_KEY, _bal); } catch {} }
+        refreshBal();
+
+      } else if (msg.type === 'gems_received') {
+        showToast(`💎 ${msg.from} gifted you ${fmtPSG(msg.amount)} Gems!`, 'win');
+        if (typeof msg.balance === 'number') { _bal = Math.max(msg.balance, _invTotal()); try { localStorage.setItem(BAL_KEY, _bal); } catch {} }
+        refreshBal();
+
       } else if (msg.type === 'tip_sent') {
         showToast(`Tip sent! (${fmtPSG(msg.total || 0)})`, 'win');
         if (Array.isArray(msg.inventory)) try { localStorage.setItem('ps99g_inv', JSON.stringify(msg.inventory)); } catch {}
@@ -2489,13 +2499,30 @@ function _openTipModal(toUsername, toDisplayName) {
   };
 
   const _tE = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const _gemSvgSm = `<svg viewBox="0 0 16 16" width="13" height="13" fill="none"><polygon points="15,8 11,14 5,14 1,8 5,2 11,2" fill="#7c4de8"/><polygon points="8,4 12,8 8,12 4,8" fill="white" opacity=".85"/></svg>`;
   overlay.innerHTML = `
     <div style="background:linear-gradient(160deg,#130f2e,#09071a);border:1.5px solid rgba(124,77,232,.4);border-radius:20px;padding:28px;width:min(420px,96vw);max-height:88vh;overflow-y:auto;font-family:inherit;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-        <div style="font-size:1rem;font-weight:900;color:#fff;">Tip <span style="color:#a78bfa;">${_tE(toDisplayName)}</span></div>
+        <div style="font-size:1rem;font-weight:900;color:#fff;">Send to <span style="color:#a78bfa;">${_tE(toDisplayName)}</span></div>
         <button onclick="document.getElementById('tip-overlay').remove()" style="background:rgba(255,255,255,.06);border:none;color:rgba(255,255,255,.5);font-size:1.1rem;cursor:pointer;border-radius:6px;width:28px;height:28px;">&times;</button>
       </div>
-      <div style="font-size:.68rem;color:rgba(148,163,184,.6);margin-bottom:14px;">Select items from your inventory to send</div>
+
+      <!-- SEND GEMS section -->
+      <div style="background:rgba(124,77,232,.08);border:1px solid rgba(124,77,232,.25);border-radius:12px;padding:14px 16px;margin-bottom:18px;">
+        <div style="font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#a67dff;margin-bottom:10px;">Send Gems (Balance)</div>
+        <div style="font-size:.6rem;color:rgba(148,163,184,.6);margin-bottom:8px;">Available: <b id="tip-gem-avail" style="color:#a67dff;">${fmtPSG(window._rawSrvBal || 0)}</b></div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="number" id="tip-gem-input" min="1000000" step="1000000" placeholder="Amount (min 1M)"
+            style="flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(124,77,232,.3);border-radius:8px;color:#fff;padding:7px 10px;font-size:.78rem;font-family:inherit;">
+          <button id="tip-gem-max" style="background:rgba(124,77,232,.2);border:1px solid rgba(124,77,232,.4);border-radius:8px;color:#a67dff;font-size:.68rem;font-weight:900;padding:7px 10px;cursor:pointer;white-space:nowrap;">MAX</button>
+        </div>
+        <button id="tip-gem-btn" style="width:100%;margin-top:10px;padding:10px;background:linear-gradient(135deg,#7c4de8,#5b21b6);border:none;border-radius:10px;color:#fff;font-size:.82rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 0 16px rgba(124,77,232,.35);">
+          Send Gems
+        </button>
+      </div>
+
+      <!-- SEND ITEMS section -->
+      <div style="font-size:.68rem;color:rgba(148,163,184,.6);margin-bottom:10px;">Or send items from your inventory</div>
       <div id="tip-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:18px;"></div>
       <button id="tip-send-btn" disabled
         style="width:100%;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:12px;color:#fff;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 0 20px rgba(34,197,94,.3);transition:opacity .15s;"
@@ -2505,6 +2532,19 @@ function _openTipModal(toUsername, toDisplayName) {
     </div>`;
 
   overlay.querySelector('#tip-send-btn').addEventListener('click', () => _sendTip(toUsername));
+  overlay.querySelector('#tip-gem-max').addEventListener('click', () => {
+    const avail = window._rawSrvBal || 0;
+    overlay.querySelector('#tip-gem-input').value = avail;
+  });
+  overlay.querySelector('#tip-gem-btn').addEventListener('click', () => {
+    const inp = overlay.querySelector('#tip-gem-input');
+    const amount = Math.floor(Number(inp.value) || 0);
+    if (amount < 1000000) return showToast('Minimum 1M Gems', 'info');
+    if (amount > (window._rawSrvBal || 0)) return showToast('Not enough gem balance', 'lose');
+    if (!_wsConn || _wsConn.readyState !== WebSocket.OPEN) return showToast('Not connected', 'info');
+    _wsConn.send(JSON.stringify({ type: 'send_gems', to: toUsername, amount }));
+    overlay.remove();
+  });
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
   renderGrid();
