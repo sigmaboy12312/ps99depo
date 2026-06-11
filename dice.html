@@ -717,7 +717,7 @@
   }
 
   function _handleServerGames(games) {
-    const myUser = (typeof currentUser === 'function' ? currentUser().username : '') || '';
+    const myUser = ((typeof currentUser === 'function' ? currentUser().username : '') || '').toLowerCase();
     // Include own game so creator always sees it in lobby
     const diceGames = (games || []).filter(g => g.gameType === 'dice');
     const existing = {};
@@ -738,7 +738,7 @@
 
   window._wsPageHandler = function(msg) {
     if (msg.type !== 'game_matched' || msg.gameType !== 'dice') return;
-    const myUser = (typeof currentUser === 'function' ? currentUser().username : '') || '';
+    const myUser = ((typeof currentUser === 'function' ? currentUser().username : '') || '').toLowerCase();
     const iAmCreator = msg.creator === myUser;
     const iAmJoiner  = msg.joiner  === myUser;
     if (!iAmCreator && !iAmJoiner) return;
@@ -839,7 +839,7 @@
       return;
     }
 
-    const _dcMyUser = (typeof currentUser === 'function' ? currentUser().username : '') || '';
+    const _dcMyUser = ((typeof currentUser === 'function' ? currentUser().username : '') || '').toLowerCase();
     DICE_MATCHES.forEach((g, idx) => {
       // Use real wagered items for display if available; else stable random pets
       if (!g.pets) {

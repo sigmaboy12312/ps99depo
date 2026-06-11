@@ -1307,7 +1307,7 @@
   };
 
   function _handleServerGames(games) {
-    const u = (typeof currentUser === 'function' ? currentUser() : {}).username || '';
+    const u = ((typeof currentUser === 'function' ? currentUser() : {}).username || '').toLowerCase();
     // Show ALL coinflip games including creator's own (so game is always visible)
     _serverGames = games.filter(g => g.gameType !== 'dice');
 
@@ -1335,7 +1335,7 @@
 
   window._wsPageHandler = function(msg) {
     if (msg.type !== 'game_matched' || msg.gameType !== 'coinflip') return;
-    const myUser = (typeof currentUser === 'function' ? currentUser().username : '') || '';
+    const myUser = ((typeof currentUser === 'function' ? currentUser().username : '') || '').toLowerCase();
     const iAmCreator = msg.creator === myUser;
     const iAmJoiner  = msg.joiner  === myUser;
     if (!iAmCreator && !iAmJoiner) return;
@@ -2211,7 +2211,7 @@
     const list = document.getElementById('active-game-list');
     list.innerHTML = '';
 
-    const _cfMyUser = (typeof currentUser === 'function' ? currentUser().username : '') || '';
+    const _cfMyUser = ((typeof currentUser === 'function' ? currentUser().username : '') || '').toLowerCase();
     // Show waiting card only while server hasn't confirmed the game yet
     if (inGame && pendingBet && _currentGameId && !_serverGames.find(g => g.player === _cfMyUser)) {
       const myName = _cfMyUser || 'You';

@@ -2982,3 +2982,167 @@ body::before {
   letter-spacing: -.02em;
 }
 
+/* ============================================
+   MOBILE RESPONSIVE (≤ 700px)
+============================================ */
+@media (max-width: 700px) {
+
+  /* --- NAV --- */
+  :root { --nav-h: 50px; }
+  .topnav { padding: 0 8px; gap: 2px; }
+
+  /* Logo: hide text, keep icon */
+  .nav-logo .logo-text { display: none; }
+  .nav-logo { margin-right: 2px; }
+  .nav-logo .logo-gem-wrap { width: 30px; height: 30px; }
+  .nav-logo .logo-gem-wrap svg { width: 16px; height: 16px; }
+
+  /* Nav game buttons: icon-only (font-size:0 hides text nodes, SVG keeps its own size) */
+  .nav-btn { font-size: 0 !important; padding: 6px 8px !important; gap: 0 !important; }
+  .nav-btn svg { width: 18px !important; height: 18px !important; }
+  .nav-divider { display: none; }
+
+  /* Hide lesser-used pages on small screens */
+  a.nav-btn[href="leaderboard.html"],
+  a.nav-btn[href="values.html"] { display: none; }
+
+  /* Wallet button: icon + shrunk balance */
+  #wallet-btn {
+    padding: 5px 8px !important;
+    font-size: 0 !important;
+    gap: 0 !important;
+  }
+  #wallet-btn svg { display: block; }
+  [data-bal-nav] { display: none !important; }
+
+  /* Login/auth button */
+  .auth-login-btn { padding: 5px 11px !important; font-size: .73rem !important; }
+  #auth-wrap { margin-left: 2px !important; }
+
+  /* Hide online badge in nav */
+  .topnav .online-badge { display: none !important; }
+
+  /* --- MAIN CONTENT LAYOUT --- */
+
+  /* Stack game lobby and chat vertically */
+  .content { flex-direction: column !important; }
+
+  /* Inner lobby wrapper (first child of .content) */
+  .content > div:first-child {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 8px !important;
+    gap: 8px !important;
+  }
+
+  /* Chat panel moves to bottom strip */
+  .chat-panel {
+    width: 100% !important;
+    height: 200px !important;
+    min-height: 200px !important;
+    flex-shrink: 0 !important;
+    border-left: none !important;
+    border-top: 2px solid var(--border) !important;
+  }
+
+  /* --- CARDS --- */
+  .card { padding: 10px 12px; }
+
+  /* Lobby actions bar */
+  .lobby-actions-bar { gap: 6px; flex-wrap: wrap; }
+  .lobby-sort-btn { font-size: .72rem !important; padding: 7px 10px !important; }
+
+  /* Lobby stats bar: horizontal scroll */
+  .lobby-stats-bar {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .lobby-stats-bar::-webkit-scrollbar { display: none; }
+
+  /* --- COIN FLIP GAME ROWS --- */
+  .cf-entry { padding: 10px 12px; gap: 10px; }
+  .cf-entry .ce-avatar { width: 34px; height: 34px; }
+  .cf-entry .ce-name { font-size: .82rem; }
+  .cf-entry .ce-gems { font-size: .88rem; }
+  .ce-items-bar { gap: 4px !important; }
+
+  /* --- DICE MATCH ROWS --- */
+  .dm-row { padding: 10px 12px !important; gap: 10px !important; }
+
+  /* --- ARENA (coinflip in-game) --- */
+  .arena-inner { padding: 14px 10px; gap: 10px; }
+  .arena-stage { gap: 10px; }
+  .arena-pet-frame { width: 56px; height: 56px; border-radius: 10px; }
+  .arena-pet-name { font-size: .58rem; max-width: 70px; }
+  .arena-player-name { font-size: .64rem; }
+
+  /* --- DICE ARENA --- */
+  .dice-arena { padding: 24px 12px; gap: 20px; min-height: 320px; }
+  .dice-face { width: 100px; height: 100px; border-radius: 16px; }
+  .dice-face .df-dots { padding: 12px; }
+  .dice-face .df-dots span { width: 12px; height: 12px; }
+  .dice-row { gap: 18px; }
+
+  /* --- JACKPOT --- */
+  .jp-layout { grid-template-columns: 1fr !important; }
+  .jp-pot-val { font-size: 1.8rem; }
+
+  /* --- MODALS --- */
+  .modal-box {
+    padding: 18px 14px;
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+  /* Join/create modal boxes */
+  .join-box, .join-overlay .join-box {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: 90vh !important;
+    padding: 16px 14px !important;
+  }
+  /* Deposit/profile card */
+  .dep-card { max-height: 88vh; width: calc(100vw - 20px) !important; }
+  .prof-card { width: calc(100vw - 20px) !important; }
+
+  /* Dice view overlay modal */
+  .dv-overlay .dv-box,
+  [id*="dv-overlay"] > div:first-child {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    padding: 16px 14px !important;
+  }
+
+  /* --- TOAST --- */
+  .toast-wrap { top: 8px; right: 8px; left: 8px; }
+  .toast { max-width: 100%; font-size: .78rem; }
+
+  /* --- STAT CARDS (home/leaderboard) --- */
+  .stat-card { min-width: 130px; padding: 10px 12px; }
+  .stat-card .sc-icon { width: 32px; height: 32px; }
+  .stat-card .sc-info .sc-val { font-size: .95rem; }
+
+  /* --- CV VALUES GRID --- */
+  .cv-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .cv-card { padding: 12px 10px; }
+  .cv-card img { width: 52px; height: 52px; }
+
+  /* --- ROULETTE --- */
+  .rl-bet-opts { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .rl-opt { padding: 12px 6px; }
+
+  /* --- PREVENT HOVER TRANSFORMS ON TOUCH (avoid stuck states) --- */
+  .cf-entry:hover { transform: none; }
+  .nav-btn:hover { transform: none; }
+  .btn-join:hover { transform: none; }
+  .cv-card:hover { transform: none; }
+  .stat-card:hover { transform: none; }
+  .btn-create:hover { transform: none; }
+  .btn-primary:hover { transform: none; }
+  .side-pick:hover { transform: none; }
+}
+
