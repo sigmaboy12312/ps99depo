@@ -928,7 +928,7 @@
     const cm = document.getElementById('dice-create-modal');
     cm.classList.remove('open'); cm.style.display = 'none';
   }
-  function confirmDiceCreate() {
+  function confirmDiceCreate() { try {
     if (_diceInGame) return showToast('Finish current game first', 'info');
     const selPets=[..._dcCreateSelInv.values()];
     const itemsTotal=selPets.reduce((s,i)=>s+(Number(i.value)||0),0);
@@ -962,16 +962,16 @@
       return showToast('Connection lost — items restored, please try again','info');
     }
     showToast('Match created! Waiting for an opponent...', 'info');
-  }
+  } catch(err) { showToast('Error: ' + (err?.message || 'unknown error'), 'lose'); console.error('[confirmDiceCreate]', err); } }
   document.getElementById('dice-create-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeDiceCreate(); });
 
   //  JOIN MATCH (redesigned) 
   let _djCtx = null;
-  let _djSelInv = new Set(); // selected item indices
+  let _djSelInv = new Map(); // id → item snapshot
 
   function openDiceJoin(g, pet) {
     _djCtx = { g, pet };
-    _djSelInv = new Set();
+    _djSelInv = new Map();
     const min = Math.floor(g.amount * .9), max = Math.ceil(g.amount * 1.05);
     document.getElementById('dj-creator-info').textContent = `vs ${g.player}`;
     document.getElementById('dj-creator-bet').textContent = fmtPSG(g.amount);
@@ -991,7 +991,7 @@
       empty.style.display = 'block'; grid.style.display = 'none';
     } else {
       empty.style.display = 'none'; grid.style.display = 'grid';
-      inv.forEach((item, idx) => {
+      inv.forEach((item) => {
         const short = (item.name||'').replace(/^(Huge|Titanic|Gargantuan)\s/,'');
         const d = document.createElement('div');
         d.style.cssText = 'background:var(--bg-card2);border:1.5px solid var(--border);border-radius:10px;padding:7px 5px;cursor:pointer;text-align:center;transition:all .14s;';
@@ -1000,8 +1000,8 @@
         const _vl = document.createElement('div'); _vl.style.cssText = 'font-size:.58rem;color:var(--purple-b);font-weight:800;'; _vl.textContent = fmtPSG(item.value);
         d.appendChild(_img); d.appendChild(_nm); d.appendChild(_vl);
         d.onclick = () => {
-          if (_djSelInv.has(idx)) { _djSelInv.delete(idx); d.style.borderColor='var(--border)'; d.style.background='var(--bg-card2)'; }
-          else { _djSelInv.add(idx); d.style.borderColor='var(--purple)'; d.style.background='rgba(124,77,232,.14)'; }
+          if (_djSelInv.has(item.id)) { _djSelInv.delete(item.id); d.style.borderColor='var(--border)'; d.style.background='var(--bg-card2)'; }
+          else { _djSelInv.set(item.id, item); d.style.borderColor='var(--purple)'; d.style.background='rgba(124,77,232,.14)'; }
           _djUpdateTotal();
         };
         grid.appendChild(d);
@@ -1012,8 +1012,7 @@
 
   function _djUpdateTotal() {
     if (!_djCtx) return;
-    const inv   = (typeof getInventory === 'function' ? getInventory() : []).filter(i => !i.gem);
-    const total = [..._djSelInv].reduce((s,i) => s + (inv[i]?.value||0), 0);
+    const total = [..._djSelInv.values()].reduce((s,i) => s + (Number(i.value)||0), 0);
     const { g }  = _djCtx;
     const min    = Math.floor(g.amount * .9), max = Math.ceil(g.amount * 1.05);
     const totalEl = document.getElementById('dj-total-val');
@@ -1046,23 +1045,34 @@
 
   function confirmDiceJoin() {
     if (!_djCtx) return;
-    const inv    = (typeof getInventory === 'function' ? getInventory() : []).filter(i => !i.gem);
-    const selected = [..._djSelInv].map(i => inv[i]).filter(Boolean);
-    const total  = selected.reduce((s,i) => s + (i.value||0), 0);
+    const selected = [..._djSelInv.values()];
+    const total  = selected.reduce((s,i) => s + (Number(i.value)||0), 0);
     const { g }  = _djCtx;
     const min    = Math.floor(g.amount * .9), max = Math.ceil(g.amount * 1.05);
     if (total < min) { document.getElementById('dj-err').textContent = `Need at least ${fmtPSG(min)}`; return; }
     document.getElementById('dj-err').textContent = '';
     const proceed = () => {
-      // Items are not balance — just remove from inventory, no deductBal needed
+      if (typeof _wsConn === 'undefined' || _wsConn?.readyState !== WebSocket.OPEN) {
+        return showToast('Not connected — wait a moment and try again', 'info');
+      }
       const itemIds = selected.map(i => i.id);
       _popFromInvSilent(itemIds);
+      if (total > 0) setBalance(Math.max(0, _bal - total));
       closeDiceJoin();
       const topPet = selected.reduce((a,b) => (b.value||0) > (a.value||0) ? b : a, selected[0]);
-      if (g.gameId && typeof _wsConn !== 'undefined' && _wsConn?.readyState === WebSocket.OPEN) {
+      if (g.gameId) {
         _dicePendingJoin = { bet: total, g, youItems: selected };
-        _wsConn.send(JSON.stringify({ type: 'game_join', gameId: g.gameId, amount: total, itemIds, balanceAmount: 0 }));
-        showToast('Joining match…', 'info');
+        try {
+          _wsConn.send(JSON.stringify({ type: 'game_join', gameId: g.gameId, amount: total, itemIds, balanceAmount: 0 }));
+          showToast('Joining match…', 'info');
+        } catch(e) {
+          _dicePendingJoin = null;
+          const cur = getInventory();
+          selected.forEach(item => { if (!cur.find(i => i.id === item.id)) cur.unshift(item); });
+          _saveInv(cur);
+          setBalance(_bal + total);
+          showToast('Connection lost — items restored, please try again', 'info');
+        }
       } else {
         runDiceGame('You', total, g.player, g.amount, g.pet || null, topPet, selected, null);
       }
