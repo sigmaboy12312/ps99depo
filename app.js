@@ -375,12 +375,9 @@ function _connectWS() {
         // After that, use max to preserve in-session wins until server catches up.
         const _srvBal = typeof msg.balance === 'number' && msg.balance >= 0 ? msg.balance : 0;
         window._rawSrvBal = _srvBal; // track pure server cash for balance-wager sections
-        if (!window._balInitialized) {
-          window._balInitialized = true;
-          _bal = Math.max(_srvBal, _invTotal());
-        } else {
-          _bal = Math.max(_bal, _srvBal, _invTotal());
-        }
+        // Always use max of localStorage, server cash, and inventory value
+        _bal = Math.max(_bal, _srvBal, _invTotal());
+        if (!window._balInitialized) window._balInitialized = true;
         try { localStorage.setItem(BAL_KEY, _bal); } catch {}
         _updateNavInvBadge();
         refreshBal();

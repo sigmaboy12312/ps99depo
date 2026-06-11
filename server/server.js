@@ -54,7 +54,7 @@ const REDIS_KEY = 'ps99db';
 // _db.users    = { [username]: { balance, createdAt } }
 // _db.inventory= { [username]: [{ id, name, img, tier, variant, value, depositedAt }] }
 
-let _db = { users: {}, inventory: {} };
+let _db = { users: {}, inventory: {}, activeGames: {} };
 let _redisClient = null;
 let _saveTimer = null;
 
@@ -164,8 +164,20 @@ const pendingWithdrawals = new Map();
 // ── ACTIVE COINFLIP GAMES ─────────────────────────────
 const activeGames = new Map(); // gameId → { gameId, player, side, amount, createdAt }
 
+function saveActiveGames() {
+  const db = loadDB();
+  db.activeGames = {};
+  for (const [id, g] of activeGames.entries()) {
+    // Don't persist timer handle — it's a runtime object
+    const { _cancelTimer, ...rest } = g;
+    db.activeGames[id] = rest;
+  }
+  saveDB(db);
+}
+
 function broadcastGames() {
   broadcastAll({ type: 'games_update', games: [...activeGames.values()] });
+  saveActiveGames();
 }
 
 function pushToUser(username, payload) {
@@ -882,6 +894,31 @@ app.post('/api/withdraw/complete', (req, res) => {
 
 // ── START ────────────────────────────────────────────
 initDB().then(() => {
+  // Restore active games that survived the restart
+  const db = loadDB();
+  if (db.activeGames) {
+    const now = Date.now();
+    for (const [id, g] of Object.entries(db.activeGames)) {
+      const age = now - (g.createdAt || now);
+      if (age < 5 * 60 * 1000) { // only restore games less than 5 minutes old
+        activeGames.set(id, g);
+        // Start cancel timer for games without a connected creator
+        g._cancelTimer = setTimeout(() => {
+          if (activeGames.has(id)) {
+            (g.wageredItems || []).forEach(item => addInventoryItem(g.player, item));
+            activeGames.delete(id);
+            broadcastGames();
+            console.log(`[Game] Auto-cancelled restored game ${id}`);
+          }
+        }, 5 * 60 * 1000 - age);
+        console.log(`[Game] Restored game ${id} for ${g.player}`);
+      } else {
+        // Game too old — restore wagered items
+        (g.wageredItems || []).forEach(item => addInventoryItem(g.player, item));
+        console.log(`[Game] Expired game ${id} — items restored to ${g.player}`);
+      }
+    }
+  }
   server.listen(PORT, () => {
     console.log(`\n  PS99Gems server running on http://localhost:${PORT}`);
     console.log(`  Serving site from:   ${path.join(__dirname, '..')}`);
