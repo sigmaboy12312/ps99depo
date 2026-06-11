@@ -664,6 +664,15 @@
   let _dicePendingItems = [];
   let _dicePendingJoin = null; // { bet, g, youItems }
 
+  window._restorePendingGame = function(pg) {
+    if (!pg || pg.gameType !== 'dice') return;
+    if (_diceInGame) return;
+    _diceInGame = true;
+    _dicePendingBet = pg.amount || 0;
+    _diceGameId = pg.gameId || null;
+    buildDiceList();
+  };
+
   function generateDiceGameId() {
     const c = '0123456789abcdef'; let s = '';
     for (let i = 0; i < 32; i++) s += c[Math.floor(Math.random() * 16)];
@@ -745,7 +754,7 @@
     const inv = getInventory();
     const owned = inv.filter(i => i.gem && i.name === _gemNames[key]).length;
     _dcGems[key] = Math.max(0, Math.min(owned, _dcGems[key] + delta));
-    const itemsTotal = [..._dcCreateSelInv].reduce((s,i) => s+(inv[i]?.value||0), 0);
+    const itemsTotal = [..._dcCreateSelInv.values()].reduce((s,i) => s+(Number(i.value)||0), 0);
     const labels = { b:'1B', h:'100M', t:'10M', o:'1M' };
     Object.keys(_dcGems).forEach(k => {
       const el = document.getElementById('dc-gem-'+k+'-count');
@@ -784,8 +793,11 @@
     }
 
     DICE_MATCHES.forEach((g, idx) => {
-      // Assign pets once and keep them stable across rebuilds
-      if (!g.pets) g.pets = [randomOpponentPet(), randomOpponentPet()].filter(Boolean);
+      // Use real wagered items for display if available; else stable random pets
+      if (!g.pets) {
+        if (g.wageredItems && g.wageredItems.length > 0) g.pets = g.wageredItems;
+        else g.pets = [randomOpponentPet(), randomOpponentPet()].filter(Boolean);
+      }
       const pets = g.pets;
       const min = Math.floor(g.amount * 0.95), max = Math.ceil(g.amount * 1.05);
       const potWin = Math.floor(g.amount * 2 * 0.985);

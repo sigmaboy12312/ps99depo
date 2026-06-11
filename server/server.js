@@ -289,7 +289,17 @@ wss.on('connection', (ws) => {
         wsClients.get(wsId).username = u;
         const balance = getBalance(u);
         const inventory = getInventory(u);
-        ws.send(JSON.stringify({ type: 'session_data', balance, inventory }));
+        // Clear any pending auto-cancel timer if creator reconnects in time
+        const pendingGame = [...activeGames.values()].find(g => g.player === u);
+        if (pendingGame?._cancelTimer) {
+          clearTimeout(pendingGame._cancelTimer);
+          delete pendingGame._cancelTimer;
+        }
+        // Include pending game info so client can restore waiting state
+        const pendingInfo = pendingGame
+          ? { gameId: pendingGame.gameId, amount: pendingGame.amount, side: pendingGame.side, gameType: pendingGame.gameType }
+          : null;
+        ws.send(JSON.stringify({ type: 'session_data', balance, inventory, pendingGame: pendingInfo }));
         ws.send(JSON.stringify({ type: 'jackpot_state', round: _jpPub() }));
         ws.send(JSON.stringify({ type: 'games_update', games: [...activeGames.values()] }));
         console.log(`[WS] ${u} identified — balance: ${balance}`);
@@ -383,6 +393,8 @@ wss.on('connection', (ws) => {
           createdAt:     Date.now(),
         });
         broadcastGames();
+        // Push updated inventory back to creator (items now removed from server inv)
+        pushToUser(player, { type: 'session_data', balance: getBalance(player), inventory: getInventory(player), pendingGame: { gameId: msg.gameId, amount: msg.amount, side: msg.side || 'heads', gameType: msg.gameType || 'coinflip' } });
         console.log(`[Game] ${player} created game ${msg.gameId} for ${msg.amount} (balance: ${msg.balanceAmount ?? msg.amount})`);
       }
 
@@ -390,11 +402,10 @@ wss.on('connection', (ws) => {
         const game = activeGames.get(msg.gameId);
         const client = wsClients.get(wsId);
         if (game && game.player === (client?.username || '')) {
-          // Restore wagered items to creator's inventory
+          if (game._cancelTimer) { clearTimeout(game._cancelTimer); delete game._cancelTimer; }
           (game.wageredItems || []).forEach(item => addInventoryItem(game.player, item));
           activeGames.delete(msg.gameId);
           broadcastGames();
-          // Push fresh session_data so client inventory/balance syncs
           pushToUser(game.player, { type: 'session_data', balance: getBalance(game.player), inventory: getInventory(game.player) });
         }
       }
@@ -406,6 +417,7 @@ wss.on('connection', (ws) => {
         const joiner = joinerClient?.username;
         if (!joiner || joiner === game.player) return;
 
+        if (game._cancelTimer) { clearTimeout(game._cancelTimer); delete game._cancelTimer; }
         activeGames.delete(msg.gameId);
         broadcastGames();
 
@@ -604,17 +616,22 @@ wss.on('connection', (ws) => {
     for (const [code, s] of depositSessions.entries()) {
       if (s.wsId === wsId) depositSessions.delete(code);
     }
-    // Remove any games this player had open and restore their wagered items
+    // Give creator 5 minutes to reconnect before cancelling their pending games.
+    // This prevents items being restored to inventory just because the user
+    // navigated to a different page — they can't double-bet wagered items.
     if (closedUsername) {
-      let changed = false;
       for (const [gid, g] of activeGames.entries()) {
-        if (g.player === closedUsername) {
-          (g.wageredItems || []).forEach(item => addInventoryItem(g.player, item));
-          activeGames.delete(gid);
-          changed = true;
+        if (g.player === closedUsername && !g._cancelTimer) {
+          g._cancelTimer = setTimeout(() => {
+            if (activeGames.has(gid)) {
+              (g.wageredItems || []).forEach(item => addInventoryItem(g.player, item));
+              activeGames.delete(gid);
+              broadcastGames();
+              console.log(`[Game] Auto-cancelled ${gid} — ${g.player} disconnected for 5 min`);
+            }
+          }, 5 * 60 * 1000);
         }
       }
-      if (changed) broadcastGames();
     }
     broadcastOnlineCount();
   });

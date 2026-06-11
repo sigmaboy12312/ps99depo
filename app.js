@@ -384,6 +384,10 @@ function _connectWS() {
         try { localStorage.setItem(BAL_KEY, _bal); } catch {}
         _updateNavInvBadge();
         refreshBal();
+        // Restore pending game state so waiting card shows after page navigation
+        if (msg.pendingGame && typeof window._restorePendingGame === 'function') {
+          window._restorePendingGame(msg.pendingGame);
+        }
 
       } else if (msg.type === 'deposit_complete') {
         // Add only the delta so game-session wins are preserved
